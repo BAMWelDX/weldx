@@ -3,7 +3,9 @@
 from typing import Any
 
 import numpy as np
+import pint
 
+from weldx.constants import Q_
 from weldx.transformations import LocalCoordinateSystem, WXRotation
 
 
@@ -46,7 +48,9 @@ def rotated_coordinate_system(
 
     rotated_orientation = np.matmul(r_tot, orientation)
 
-    return LocalCoordinateSystem(rotated_orientation, np.array(coordinates))
+    if not isinstance(coordinates, Q_):
+        coordinates = np.array(coordinates)
+    return LocalCoordinateSystem(rotated_orientation, coordinates)
 
 
 def are_all_columns_unique(matrix, decimals=3):
@@ -107,8 +111,10 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
         True or False
 
     """
-    mat_a = np.array(mat_a, dtype=float)
-    mat_b = np.array(mat_b, dtype=float)
+    if not isinstance(mat_a, pint.Quantity):
+        mat_a = np.array(mat_a, dtype=float)
+    if not isinstance(mat_b, pint.Quantity):
+        mat_b = np.array(mat_b, dtype=float)
 
     if mat_a.shape != mat_b.shape:
         return False

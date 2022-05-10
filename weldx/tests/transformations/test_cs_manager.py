@@ -27,11 +27,11 @@ from ._util import check_coordinate_system, check_cs_close, r_mat_x, r_mat_y, r_
 def csm_fix():
     """Create default coordinate system fixture."""
     csm_default = CSM("root")
-    lcs_1 = LCS(coordinates=[0, 1, 2])
-    lcs_2 = LCS(coordinates=[0, -1, -2])
-    lcs_3 = LCS(coordinates=[-1, -2, -3])
-    lcs_4 = LCS(r_mat_y(1 / 2), [1, 2, 3])
-    lcs_5 = LCS(r_mat_y(3 / 2), [2, 3, 1])
+    lcs_1 = LCS(coordinates=Q_([0, 1, 2], "mm"))
+    lcs_2 = LCS(coordinates=Q_([0, -1, -2], "mm"))
+    lcs_3 = LCS(coordinates=Q_([-1, -2, -3], "mm"))
+    lcs_4 = LCS(r_mat_y(1 / 2), Q_([1, 2, 3], "mm"))
+    lcs_5 = LCS(r_mat_y(3 / 2), Q_([2, 3, 1], "mm"))
     csm_default.add_cs("lcs1", "root", lcs_1)
     csm_default.add_cs("lcs2", "root", lcs_2)
     csm_default.add_cs("lcs3", "lcs1", lcs_3)
@@ -44,7 +44,7 @@ def csm_fix():
 @pytest.fixture()
 def list_of_csm_and_lcs_instances():
     """Get a list of LCS and CSM instances."""
-    lcs = [LCS(coordinates=[i, 0, 0]) for i in range(11)]
+    lcs = [LCS(coordinates=Q_([i, 0, 0], "mm")) for i in range(11)]
 
     csm_0 = CSM("lcs0", "csm0")
     csm_0.add_cs("lcs1", "lcs0", lcs[1])
@@ -94,19 +94,24 @@ def test_init():
 def test_add_cs():
     """Test the 'add_cs' function."""
     csm = CSM("r")
-    ts = TimeSeries(MathematicalExpression("a*t", dict(a=Q_("1/s"))))
+    ts = TimeSeries(MathematicalExpression("a*t", dict(a=Q_("m/s"))))
 
     lcs_data = [
-        ("a", "r", LCS(coordinates=[0, 1, 2]), True),
-        ("b", "r", LCS(coordinates=[0, -1, -2]), False),
-        ("b", "r", LCS(coordinates=[[0, -1, -2], [8, 2, 7]], time=["1s", "2s"]), False),
-        ("c", "b", LCS(r_mat_y(1 / 2), [1, 2, 3]), True),
-        ("c", "b", LCS(coordinates=[-1, -2, -3]), True),
-        ("b", "c", LCS(coordinates=[-1, -2, -3]), False),
-        ("b", "c", LCS(coordinates=[-1, -2, -3]), True),
-        ("d", "b", LCS(coordinates=[0, 1, 2]), True),
-        ("d", "b", LCS(r_mat_y(1 / 2), [1, 2, 3]), True),
-        ("e", "a", LCS(r_mat_y(3 / 2), [2, 3, 1]), True),
+        ("a", "r", LCS(coordinates=Q_([0, 1, 2], "mm")), True),
+        ("b", "r", LCS(coordinates=Q_([0, -1, -2], "mm")), False),
+        (
+            "b",
+            "r",
+            LCS(coordinates=Q_([[0, -1, -2], [8, 2, 7]], "mm"), time=["1s", "2s"]),
+            False,
+        ),
+        ("c", "b", LCS(r_mat_y(1 / 2), Q_([1, 2, 3], "mm")), True),
+        ("c", "b", LCS(coordinates=Q_([-1, -2, -3], "mm")), True),
+        ("b", "c", LCS(coordinates=Q_([-1, -2, -3], "mm")), False),
+        ("b", "c", LCS(coordinates=Q_([-1, -2, -3], "mm")), True),
+        ("d", "b", LCS(coordinates=Q_([0, 1, 2], "mm")), True),
+        ("d", "b", LCS(r_mat_y(1 / 2), Q_([1, 2, 3], "mm")), True),
+        ("e", "a", LCS(r_mat_y(3 / 2), Q_([2, 3, 1], "mm")), True),
         ("e", "a", LCS(coordinates=ts), True),
     ]
     exp_num_cs = 1
@@ -184,12 +189,12 @@ def test_add_cs_reference_time(
         timestamp_lcs_2 = pd.Timestamp("2000-01-03")
     csm = tf.CoordinateSystemManager("root", time_ref=timestamp_csm)
     lcs_1 = tf.LocalCoordinateSystem(
-        coordinates=[[1, 2, 3], [3, 2, 1]],
+        coordinates=Q_([[1, 2, 3], [3, 2, 1]], "mm"),
         time=pd.TimedeltaIndex([1, 2]),
         time_ref=timestamp_lcs_1,
     )
     lcs_2 = tf.LocalCoordinateSystem(
-        coordinates=[[1, 5, 3], [3, 5, 1]],
+        coordinates=Q_([[1, 5, 3], [3, 5, 1]], "mm"),
         time=pd.TimedeltaIndex([0, 2]),
         time_ref=timestamp_lcs_2,
     )
@@ -209,7 +214,7 @@ def test_add_cs_reference_time(
 def test_add_coordinate_system_timeseries():
     """Test if adding an LCS with a `TimeSeries` as coordinates is possible."""
     csm = CSM("r")
-    me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+    me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "m/s")))
     ts = TimeSeries(me)
     lcs = LCS(coordinates=ts)
 
@@ -256,7 +261,7 @@ def test_create_cs_from_axis_vectors(
     angles = [[30, 45, 60], [40, 35, 80], [1, 33, 7], [90, 180, 270]]
 
     o = WXRotation.from_euler("xyz", angles, degrees=True).as_matrix()
-    c = [[-1, 3, 2], [4, 2, 4], [5, 1, 2], [3, 3, 3]]
+    c = Q_([[-1, 3, 2], [4, 2, 4], [5, 1, 2], [3, 3, 3]], "mm")
 
     if not time_dep_orient:
         o = o[0]
@@ -560,7 +565,7 @@ def test_delete_coordinate_system_exceptions(
             [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
             [(1, 0), (2, 0)],
             [],
-            [(1, (1, ("cs_3", "cs_1", None, [1, 0, 0])))],
+            [(1, (1, ("cs_3", "cs_1", None, Q_([1, 0, 0], "mm"))))],
             [],
             [False, False, True],
         ),
@@ -642,7 +647,7 @@ def test_delete_coordinate_system_exceptions(
             [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
             [(2, 1), (1, 0)],
             [],
-            [(2, (2, ("cs_1", "cs_2", None, [1, 0, 0])))],
+            [(2, (2, ("cs_1", "cs_2", None, Q_([1, 0, 0], "mm"))))],
             [],
             [False, False, False],
         ),
@@ -847,9 +852,9 @@ def test_time_union(
     lcs = []
     for i, _ in enumerate(lcs_times):
         if isinstance(lcs_times[i], pd.TimedeltaIndex):
-            coordinates = [[j, j, j] for j in range(len(lcs_times[i]))]
+            coordinates = Q_([[j, j, j] for j in range(len(lcs_times[i]))], "mm")
         else:
-            coordinates = [1, 2, 3]
+            coordinates = Q_([1, 2, 3], "mm")
         lcs += [
             tf.LocalCoordinateSystem(
                 None,
@@ -935,11 +940,14 @@ def test_time_union_time_series_coords(
         lcs_ts_time = Q_([1, 2], "s")
 
     csm = CSM("base")
-    csm.create_cs("st", "base", coordinates=[2, 2, 2])
+    csm.create_cs("st", "base", coordinates=Q_([2, 2, 2], "mm"))
     csm.create_cs("ts", "base", lcs_ts_orientation, ts, lcs_ts_time)
     if add_discrete_lcs:
         csm.create_cs(
-            "tdp", "base", coordinates=[[2, 4, 5], [2, 2, 2]], time=Q_([2, 3], "s")
+            "tdp",
+            "base",
+            coordinates=Q_([[2, 4, 5], [2, 2, 2]], "mm"),
+            time=Q_([2, 3], "s"),
         )
 
     if exp_time is not None:
@@ -953,13 +961,13 @@ def test_time_union_time_series_coords(
 @pytest.mark.parametrize(
     "system_name, reference_name, exp_orientation, exp_coordinates",
     [
-        ("lcs_1", None, r_mat_z(0.5), [1, 2, 3]),
-        ("lcs_2", None, r_mat_y(0.5), [3, -3, 1]),
-        ("lcs_3", None, r_mat_x(0.5), [1, -1, 3]),
-        ("lcs_3", "root", [[0, 1, 0], [0, 0, -1], [-1, 0, 0]], [6, -4, 0]),
-        ("root", "lcs_3", [[0, 0, -1], [1, 0, 0], [0, -1, 0]], [0, -6, -4]),
-        ("lcs_3", "lcs_1", [[0, 0, -1], [0, -1, 0], [-1, 0, 0]], [-6, -5, -3]),
-        ("lcs_1", "lcs_3", [[0, 0, -1], [0, -1, 0], [-1, 0, 0]], [-3, -5, -6]),
+        ("lcs_1", None, r_mat_z(0.5), Q_([1, 2, 3], "m")),
+        ("lcs_2", None, r_mat_y(0.5), Q_([3, -3, 1], "m")),
+        ("lcs_3", None, r_mat_x(0.5), Q_([1, -1, 3], "m")),
+        ("lcs_3", "root", [[0, 1, 0], [0, 0, -1], [-1, 0, 0]], Q_([6, -4, 0], "m")),
+        ("root", "lcs_3", [[0, 0, -1], [1, 0, 0], [0, -1, 0]], Q_([0, -6, -4], "m")),
+        ("lcs_3", "lcs_1", [[0, 0, -1], [0, -1, 0], [-1, 0, 0]], Q_([-6, -5, -3], "m")),
+        ("lcs_1", "lcs_3", [[0, 0, -1], [0, -1, 0], [-1, 0, 0]], Q_([-3, -5, -6], "m")),
     ],
 )
 def test_get_local_coordinate_system_no_time_dep(
@@ -984,9 +992,9 @@ def test_get_local_coordinate_system_no_time_dep(
     """
     # setup
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
-    csm.create_cs("lcs_1", "root", r_mat_z(0.5), [1, 2, 3])
-    csm.create_cs("lcs_2", "root", r_mat_y(0.5), [3, -3, 1])
-    csm.create_cs("lcs_3", "lcs_2", r_mat_x(0.5), [1, -1, 3])
+    csm.create_cs("lcs_1", "root", r_mat_z(0.5), Q_([1, 2, 3], "m"))
+    csm.create_cs("lcs_2", "root", r_mat_y(0.5), Q_([3, -3, 1], "m"))
+    csm.create_cs("lcs_3", "lcs_2", r_mat_x(0.5), Q_([1, -1, 3], "m"))
 
     check_coordinate_system(
         csm.get_cs(system_name, reference_name),
@@ -1360,6 +1368,9 @@ def test_get_local_coordinate_system_time_dep(
         error
 
     """
+    if exp_coordinates is not None:
+        exp_coordinates = Q_(exp_coordinates, "mm")
+
     # setup -------------------------------------------
     # set reference times
     time_refs = [t if t is None else pd.Timestamp(t) for t in time_refs]
@@ -1368,25 +1379,25 @@ def test_get_local_coordinate_system_time_dep(
     time_1 = TDI([0, 3, 12], "D")
     time_ref_1 = time_refs[1]
     orientation_1 = None
-    coordinates_1 = [[i, 0, 0] for i in [0, 0.25, 1]]
+    coordinates_1 = Q_([[i, 0, 0] for i in [0, 0.25, 1]], "mm")
 
     # moves in negative x-direction and rotates positively around the x-axis
     time_2 = TDI([0, 4, 8, 12], "D")
     time_ref_2 = time_refs[2]
-    coordinates_2 = [[-i, 0, 0] for i in [0, 1 / 3, 2 / 3, 1]]
+    coordinates_2 = Q_([[-i, 0, 0] for i in [0, 1 / 3, 2 / 3, 1]], "mm")
     orientation_2 = r_mat_x([0, 2 / 3, 4 / 3, 2])
 
     # rotates negatively around the x-axis
     time_3 = TDI([0, 3, 6, 9, 12], "D")
     time_ref_3 = time_refs[3]
-    coordinates_3 = [1, 0, 0]
+    coordinates_3 = Q_([1, 0, 0], "mm")
     orientation_3 = r_mat_x([0, -0.5, -1, -1.5, -2])
 
     # static
     time_4 = None
     time_ref_4 = None
     orientation_4 = None
-    coordinates_4 = [0, 1, 0]
+    coordinates_4 = Q_([0, 1, 0], "mm")
 
     csm = tf.CoordinateSystemManager("root", "CSM", time_refs[0])
     csm.create_cs("cs_1", "root", orientation_1, coordinates_1, time_1, time_ref_1)
@@ -1431,8 +1442,9 @@ def test_get_local_coordinate_system_time_dep(
         ("trl", "r", [[1, 1, 1], [-2, 1, 1], [-3, 2, 1]], [1, 2, 3], [0, 90, 90]),
     ],
 )
+@pytest.mark.parametrize("units", ["inch", "mm"])
 def test_get_local_coordinate_system_timeseries(
-    lcs, in_lcs, exp_coords, exp_time, exp_angles
+    lcs, in_lcs, exp_coords, exp_time, exp_angles, units
 ):
     """Test the get_cs method with one lcs having a `TimeSeries` as coordinates.
 
@@ -1450,21 +1462,29 @@ def test_get_local_coordinate_system_timeseries(
         The expected rotation angles around the z-axis
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
+    me_units = f"{units}/s" if units else "1/s"
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], me_units)})
     ts = TimeSeries(me)
     rotation = WXRotation.from_euler("z", [0, 90], degrees=True).as_matrix()
-    translation = [[1, 0, 0], [2, 0, 0]]
+    translation = Q_([[1, 0, 0], [2, 0, 0]], units)
     exp_orient = WXRotation.from_euler("z", exp_angles, degrees=True).as_matrix()
+    coords_1 = [0, 0, 1]
+    coords_2 = [1, 0, 0]
+
+    translation = Q_(translation, units)
+    exp_coords = Q_(exp_coords, units)
+    coords_1 = Q_(coords_1, units)
+    coords_2 = Q_(coords_2, units)
 
     csm = CSM("r")
-    csm.create_cs("rot", "r", rotation, [0, 0, 1], time=Q_([1, 2], "s"))
+    csm.create_cs("rot", "r", rotation, coords_1, time=Q_([1, 2], "s"))
     csm.create_cs("ts", "rot", coordinates=ts)
-    csm.create_cs("s", "ts", coordinates=[1, 0, 0])
+    csm.create_cs("s", "ts", coordinates=coords_2)
     csm.create_cs("trl", "ts", coordinates=translation, time=Q_([2, 3], "s"))
 
     result = csm.get_cs(lcs, in_lcs)
     assert np.allclose(result.orientation, exp_orient)
-    assert np.allclose(result.coordinates, exp_coords)
+    assert np.allclose(result.coordinates.data, exp_coords)
     assert np.allclose(result.time.as_quantity().m, exp_time)
 
 
@@ -1505,11 +1525,11 @@ def test_get_local_coordinate_system_exceptions(
     time_2 = TDI([4, 7], "D")
 
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
-    csm.create_cs("cs_1", "root", r_mat_z(0.5), [1, 2, 3])
-    csm.create_cs("cs_2", "root", r_mat_y(0.5), [3, -3, 1])
-    csm.create_cs("cs_3", "cs_2", r_mat_x(0.5), [1, -1, 3])
-    csm.create_cs("cs_4", "cs_2", r_mat_x([0, 1]), [2, -1, 2], time=time_1)
-    csm.create_cs("cs_5", "root", r_mat_y([0, 1]), [1, -7, 3], time=time_2)
+    csm.create_cs("cs_1", "root", r_mat_z(0.5), Q_([1, 2, 3], "mm"))
+    csm.create_cs("cs_2", "root", r_mat_y(0.5), Q_([3, -3, 1], "mm"))
+    csm.create_cs("cs_3", "cs_2", r_mat_x(0.5), Q_([1, -1, 3], "mm"))
+    csm.create_cs("cs_4", "cs_2", r_mat_x([0, 1]), Q_([2, -1, 2], "mm"), time=time_1)
+    csm.create_cs("cs_5", "root", r_mat_y([0, 1]), Q_([1, -7, 3], "mm"), time=time_2)
 
     # test
     with pytest.raises(exception_type):
@@ -1534,7 +1554,8 @@ def test_get_local_coordinate_system_exceptions(
         ("r", "s", False),
     ],
 )
-def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
+@pytest.mark.parametrize("units", ["inch", "mm"])
+def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception, units):
     """Test exceptions of get_cs method if 1 lcs has a `TimeSeries` as coordinates.
 
     Parameters
@@ -1545,16 +1566,20 @@ def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
         The target lcs
     exp_exception :
         Set to `True` if the transformation should raise
+    units :
+        The length unit that should be used
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
+    me_units = f"{units}/s" if units else "1/s"
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], me_units)})
     ts = TimeSeries(me)
-    translation = [[1, 0, 0], [2, 0, 0]]
+    translation = Q_([[1, 0, 0], [2, 0, 0]], units)
+    coords_1 = Q_([1, 0, 0], units)
 
     csm = CSM("r")
     csm.create_cs("trl1", "r", coordinates=translation, time=Q_([1, 2], "s"))
     csm.create_cs("ts", "trl1", coordinates=ts)
-    csm.create_cs("s", "ts", coordinates=[1, 0, 0])
+    csm.create_cs("s", "ts", coordinates=coords_1)
     csm.create_cs("trl2", "ts", coordinates=translation, time=Q_([2, 3], "s"))
     if exp_exception:
         with pytest.raises(Exception):
@@ -1662,9 +1687,9 @@ def test_merge_reference_times(
 
     """
     # setup
-    lcs_static = tf.LocalCoordinateSystem(coordinates=[1, 1, 1])
+    lcs_static = tf.LocalCoordinateSystem(coordinates=Q_([1, 1, 1], "mm"))
     lcs_dynamic = tf.LocalCoordinateSystem(
-        coordinates=[[0, 4, 2], [7, 2, 4]], time=TDI([4, 8], "D")
+        coordinates=Q_([[0, 4, 2], [7, 2, 4]], "mm"), time=TDI([4, 8], "D")
     )
     time_ref_parent = None
     if time_ref_day_parent is not None:
@@ -1849,7 +1874,7 @@ def test_unmerge_merged_serially(list_of_csm_and_lcs_instances, additional_cs):
 
     count = 0
     for parent_cs, target_csm in additional_cs.items():
-        lcs = LCS(coordinates=[count, count + 1, count + 2])
+        lcs = LCS(coordinates=Q_([count, count + 1, count + 2], "mm"))
         csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
         csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
         count += 1
@@ -1910,7 +1935,7 @@ def test_unmerge_merged_nested(list_of_csm_and_lcs_instances, additional_cs):
     count = 0
     exp_orphan_node_warning = False
     for parent_cs, target_csm in additional_cs.items():
-        lcs = LCS(coordinates=[count, count + 1, count + 2])
+        lcs = LCS(coordinates=Q_([count, count + 1, count + 2], "mm"))
         csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
         if target_csm == 0:
             csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
@@ -1993,7 +2018,7 @@ def test_delete_cs_with_serially_merged_subsystems(
     # add some additional coordinate systems
     target_system_index = [0, 2, 5, 7, 10]
     for i, _ in enumerate(target_system_index):
-        lcs = LCS(coordinates=[i, 2 * i, -i])
+        lcs = LCS(coordinates=Q_([i, 2 * i, -i], "mm"))
         csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
 
     # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
@@ -2045,10 +2070,10 @@ def test_delete_cs_with_nested_subsystems(
     csm_mg = deepcopy(csm[0])
 
     csm_n3 = deepcopy(csm[3])
-    csm_n3.add_cs("nes0", "lcs8", LCS(coordinates=[1, 2, 3]))
+    csm_n3.add_cs("nes0", "lcs8", LCS(coordinates=Q_([1, 2, 3], "mm")))
     csm_n3.merge(csm[5])
     csm_n2 = deepcopy(csm[2])
-    csm_n2.add_cs("nes1", "lcs5", LCS(coordinates=[-1, -2, -3]))
+    csm_n2.add_cs("nes1", "lcs5", LCS(coordinates=Q_([-1, -2, -3], "mm")))
     csm_n2.merge(csm_n3)
     csm_mg.merge(csm[1])
     csm_mg.merge(csm[4])
@@ -2057,7 +2082,7 @@ def test_delete_cs_with_nested_subsystems(
     # add some additional coordinate systems
     target_system_indices = [0, 2, 5, 7, 10]
     for i, target_system_index in enumerate(target_system_indices):
-        lcs = LCS(coordinates=[i, 2 * i, -i])
+        lcs = LCS(coordinates=Q_([i, 2 * i, -i], "mm"))
         csm_mg.add_cs(f"add{i}", f"lcs{target_system_index}", lcs)
 
     # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
@@ -2080,20 +2105,20 @@ def test_delete_cs_with_nested_subsystems(
 def test_plot():
     """Test if the plot function runs without problems. Output is not checked."""
     csm_global = CSM("root", "global coordinate systems")
-    csm_global.create_cs("specimen", "root", coordinates=[1, 2, 3])
-    csm_global.create_cs("robot head", "root", coordinates=[4, 5, 6])
+    csm_global.create_cs("specimen", "root", coordinates=Q_([1, 2, 3], "m"))
+    csm_global.create_cs("robot head", "root", coordinates=Q_([4, 5, 6], "m"))
 
     csm_specimen = CSM("specimen", "specimen coordinate systems")
-    csm_specimen.create_cs("thermocouple 1", "specimen", coordinates=[1, 1, 0])
-    csm_specimen.create_cs("thermocouple 2", "specimen", coordinates=[1, 4, 0])
+    csm_specimen.create_cs("thermocouple 1", "specimen", coordinates=Q_([1, 1, 0], "m"))
+    csm_specimen.create_cs("thermocouple 2", "specimen", coordinates=Q_([1, 4, 0], "m"))
 
     csm_robot = CSM("robot head", "robot coordinate systems")
-    csm_robot.create_cs("torch", "robot head", coordinates=[0, 0, -2])
-    csm_robot.create_cs("mount point 1", "robot head", coordinates=[0, 1, -1])
-    csm_robot.create_cs("mount point 2", "robot head", coordinates=[0, -1, -1])
+    csm_robot.create_cs("torch", "robot head", coordinates=Q_([0, 0, -2], "m"))
+    csm_robot.create_cs("mount point 1", "robot head", coordinates=Q_([0, 1, -1], "m"))
+    csm_robot.create_cs("mount point 2", "robot head", coordinates=Q_([0, -1, -1], "m"))
 
     csm_scanner = CSM("scanner", "scanner coordinate systems")
-    csm_scanner.create_cs("mount point 1", "scanner", coordinates=[0, 0, 2])
+    csm_scanner.create_cs("mount point 1", "scanner", coordinates=Q_([0, 0, 2], "m"))
 
     csm_robot.merge(csm_scanner)
     csm_global.merge(csm_robot)
@@ -2116,10 +2141,10 @@ def setup_csm_test_assign_data() -> tf.CoordinateSystemManager:
     """
     # test setup
     lcs1_in_root = tf.LocalCoordinateSystem(
-        tf.WXRotation.from_euler("z", np.pi / 2).as_matrix(), [1, 2, 3]
+        tf.WXRotation.from_euler("z", np.pi / 2).as_matrix(), Q_([1, 2, 3], "mm")
     )
-    lcs2_in_root = tf.LocalCoordinateSystem(r_mat_y(0.5), [3, -3, 1])
-    lcs3_in_lcs2 = tf.LocalCoordinateSystem(r_mat_x(0.5), [1, -1, 3])
+    lcs2_in_root = tf.LocalCoordinateSystem(r_mat_y(0.5), Q_([3, -3, 1], "mm"))
+    lcs3_in_lcs2 = tf.LocalCoordinateSystem(r_mat_x(0.5), Q_([1, -1, 3], "mm"))
 
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
     csm.add_cs("lcs_1", "root", lcs1_in_root)
@@ -2149,27 +2174,27 @@ def setup_csm_test_assign_data() -> tf.CoordinateSystemManager:
         (
             "lcs_3",
             "my_data",
-            [[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
+            Q_([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]], "mm"),
             "lcs_1",
-            [[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
+            Q_([[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]], "mm"),
         ),
         (
             "lcs_3",
             "my_data",
-            SpatialData([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]]),
+            SpatialData(Q_([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]], "mm")),
             "lcs_1",
-            [[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
+            Q_([[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]], "mm"),
         ),
         (
             "lcs_3",
             "my_data",
             xr.DataArray(
-                data=[[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
+                data=Q_([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]], "mm"),
                 dims=["n", "c"],
                 coords={"c": ["x", "y", "z"]},
             ),
             "lcs_1",
-            [[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
+            Q_([[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]], "mm"),
         ),
     ],
 )
@@ -2498,8 +2523,8 @@ def _coordinates_from_value(val, clip_min=None, clip_max=None):
     if clip_min is not None and clip_max is not None:
         val = np.clip(val, clip_min, clip_max)
     if len(val) > 1:
-        return [[v, 2 * v, -v] for v in val]
-    return [val[0], 2 * val[0], -val[0]]
+        return Q_([[v, 2 * v, -v] for v in val], "mm")
+    return Q_([val[0], 2 * val[0], -val[0]], "mm")
 
 
 @pytest.mark.parametrize(
@@ -2573,7 +2598,7 @@ def test_interp_time(
         )
 
     lcs_3 = tf.LocalCoordinateSystem(
-        WXRotation.from_euler("y", 1).as_matrix(), [4, 2, 0]
+        WXRotation.from_euler("y", 1).as_matrix(), Q_([4, 2, 0], "mm")
     )
     csm.add_cs("lcs_3", "lcs_2", lcs_3)
 
@@ -2642,7 +2667,7 @@ def test_issue_289_interp_outside_time_range(
     """
     angles = [45, 135] if time_dep_orient else 135
     orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
-    coordinates = [[0, 0, 0], [1, 1, 1]] if time_dep_coords else [1, 1, 1]
+    coordinates = Q_([[0, 0, 0], [1, 1, 1]] if time_dep_coords else [1, 1, 1], "mm")
     if time_dep_coords or time_dep_orient:
         time = ["5s", "6s"] if all_less else ["0s", "1s"]
     else:
@@ -2658,12 +2683,12 @@ def test_issue_289_interp_outside_time_range(
 
     exp_angle = 45 if time_dep_orient and all_less else 135
     exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
-    exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
+    exp_coords = Q_([0, 0, 0] if time_dep_coords and all_less else [1, 1, 1], "mm")
 
     assert cs_br.is_time_dependent is False
     assert cs_br.time is None
-    assert cs_br.coordinates.values.shape == (3,)
-    assert cs_br.orientation.values.shape == (3, 3)
+    assert cs_br.coordinates.data.shape == (3,)
+    assert cs_br.orientation.data.shape == (3, 3)
     assert np.all(cs_br.coordinates.data == exp_coords)
     assert np.all(cs_br.orientation.data == exp_orient)
 
@@ -2720,7 +2745,7 @@ def test_coordinate_system_manager_create_coordinate_system():
 
     time = TDI([0, 6, 12, 18], "H")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
-    coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
+    coords = Q_([[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]], "mm")
 
     csm = tf.CoordinateSystemManager("root")
     lcs_default = tf.LocalCoordinateSystem()
@@ -2730,7 +2755,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     check_coordinate_system(
         csm.get_cs("lcs_init_default"),
         lcs_default.orientation,
-        lcs_default.coordinates,
+        lcs_default.coordinates.data,
         True,
     )
 
@@ -2748,7 +2773,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     check_coordinate_system(
         csm.get_cs("lcs_euler_default"),
         orientations[0],
-        lcs_default.coordinates,
+        lcs_default.coordinates.data,
         True,
     )
 
@@ -2768,25 +2793,24 @@ def test_coordinate_system_manager_transform_data():
     """Test the coordinate system managers transform_data function."""
     # define some coordinate systems
     # TODO: test more unique rotations - not 90°
-    lcs1_in_root = tf.LocalCoordinateSystem(r_mat_z(0.5), [1, 2, 3])
-    lcs2_in_root = tf.LocalCoordinateSystem(r_mat_y(0.5), [3, -3, 1])
-    lcs3_in_lcs2 = tf.LocalCoordinateSystem(r_mat_x(0.5), [1, -1, 3])
+    lcs1_in_root = tf.LocalCoordinateSystem(r_mat_z(0.5), Q_([1, 2, 3], "mm"))
+    lcs2_in_root = tf.LocalCoordinateSystem(r_mat_y(0.5), Q_([3, -3, 1], "mm"))
+    lcs3_in_lcs2 = tf.LocalCoordinateSystem(r_mat_x(0.5), Q_([1, -1, 3], "mm"))
 
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
     csm.add_cs("lcs_1", "root", lcs1_in_root)
     csm.add_cs("lcs_2", "root", lcs2_in_root)
     csm.add_cs("lcs_3", "lcs_2", lcs3_in_lcs2)
 
-    data_list = [[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]]
-    data_exp = np.array([[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]])
+    data_list = Q_([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]], "mm")
+    data_exp = Q_([[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]], "mm")
 
     # input list
-    data_list_transformed = csm.transform_data(data_list, "lcs_3", "lcs_1")
+    data_list_transformed = csm.transform_data(data_list, "lcs_3", "lcs_1").data
     assert matrix_is_close(data_list_transformed, data_exp)
 
     # input numpy array
-    data_np = np.array(data_list)
-    data_numpy_transformed = csm.transform_data(data_np, "lcs_3", "lcs_1")
+    data_numpy_transformed = csm.transform_data(data_list, "lcs_3", "lcs_1").data
     assert matrix_is_close(data_numpy_transformed, data_exp)
 
     # input single numpy vector
@@ -2794,7 +2818,9 @@ def test_coordinate_system_manager_transform_data():
     # assert ut.vector_is_close(data_numpy_transformed, data_exp[0, :])
 
     # input xarray
-    data_xr = xr.DataArray(data=data_np, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
+    data_xr = xr.DataArray(
+        data=data_list, dims=["n", "c"], coords={"c": ["x", "y", "z"]}
+    )
     data_xr_transformed = csm.transform_data(data_xr, "lcs_3", "lcs_1")
     assert matrix_is_close(data_xr_transformed.data, data_exp)
 

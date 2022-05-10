@@ -1,4 +1,5 @@
 from weldx.asdf.types import WeldxConverter
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
 from weldx.tags.core.common_types import Variable
 from weldx.transformations import LocalCoordinateSystem
@@ -7,8 +8,10 @@ from weldx.transformations import LocalCoordinateSystem
 class LocalCoordinateSystemConverter(WeldxConverter):
     """Serialization class for weldx.transformations.LocalCoordinateSystem"""
 
-    name = "core/transformations/local_coordinate_system"
-    version = "0.1.0"
+    tags = [
+        "asdf://weldx.bam.de/weldx/tags/"
+        "core/transformations/local_coordinate_system-0.1.*"
+    ]
     types = [LocalCoordinateSystem]
 
     def to_yaml_tree(self, obj: LocalCoordinateSystem, tag: str, ctx) -> dict:
@@ -57,6 +60,12 @@ class LocalCoordinateSystemConverter(WeldxConverter):
         coordinates = node.get("coordinates")
         if coordinates is not None and not isinstance(coordinates, TimeSeries):
             coordinates = node["coordinates"].data
+
+            if (
+                tag == "asdf://weldx.bam.de/weldx/tags/core/transformations"
+                "/local_coordinate_system-0.1.0"
+            ):  # legacy
+                coordinates = Q_(coordinates, _DEFAULT_LEN_UNIT)
 
         return LocalCoordinateSystem(
             orientation=orientations,

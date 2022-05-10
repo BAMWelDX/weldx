@@ -18,7 +18,8 @@ dependencies:
   - ipywidgets
   # documentation
   - sphinx>=4.1.1
-  - jinja2
+  - jinja2=3.0
+  - k3d>=2.12
   - sphinxcontrib-napoleon
   - nbsphinx
   - sphinx-copybutton
@@ -31,5 +32,4 @@ dependencies:
   # pip packages
   - pip
   - pip:
-    - k3d>=2.12 # not yet on conda
     - -e ../

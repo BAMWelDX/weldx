@@ -17,11 +17,15 @@ class SpatialDataConverter(WeldxConverter):
         """Serialize into tree."""
         tree = copy(obj.__dict__)  # shallow copy so we dont change original object
         if tree["coordinates"].ndim <= 2:
-            tree["coordinates"] = tree["coordinates"].values
+            tree["coordinates"] = tree["coordinates"].data
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx) -> SpatialData:
         """Reconstruct from yaml node."""
+        from weldx.constants import Q_
+
+        if tag == "asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.0":
+            node["coordinates"] = Q_(node["coordinates"], "mm")  # legacy
         return SpatialData(**node)
 
     def select_tag(self, obj, tags, ctx) -> str:

@@ -110,7 +110,7 @@ the creation and conversion of units and dimensions.
 **************
 
 The WelDX package can be installed using conda or mamba package manager
-from the :code:``conda-forge`` channel. These managers originate from
+from the `Conda-Forge channel <https://conda-forge.org/#about>`__. These managers originate from
 the freely available `Anaconda Python stack
 <https://docs.conda.io/en/latest/miniconda.html>`__. If you do not have
 Anaconda or Miniconda installed yet, we ask you to install

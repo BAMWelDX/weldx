@@ -19,7 +19,9 @@ py:class npt.ArrayLike
 
 # matplotlib
 py:class matplotlib.axes.Axes
+py:obj matplotlib.axes.Axes
 py:class matplotlib.axes._axes.Axes
+py:class matplotlib.figure.Figure
 
 # pandas
 py:class pandas._libs.tslibs.timedeltas.Timedelta
@@ -102,3 +104,4 @@ py:class iterable of asdf.extension.Compressor instances
 py:class iterable of asdf.extension.Compressor
 py:class See the class docstring for details on keyword
 py:class iterable of str
+py:class asdf_standard.resource.DirectoryResourceMapping

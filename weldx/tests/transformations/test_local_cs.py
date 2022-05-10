@@ -5,11 +5,13 @@ from copy import deepcopy
 
 import numpy as np
 import pandas as pd
+import pint
 import pytest
 import xarray as xr
 from pandas import TimedeltaIndex as TDI  # noqa
 from pandas import Timestamp as TS  # noqa
 from pandas import date_range
+from pint import DimensionalityError
 
 import weldx.transformations as tf
 import weldx.util as ut
@@ -21,6 +23,35 @@ from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
 from ._util import check_coordinate_system, check_cs_close, r_mat_y, r_mat_z
+
+# test_init ----------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "orient, coords, time, time_ref, exception",
+    [
+        (None, [1, 2, 3], None, None, None),
+        (None, Q_([1, 2, 3], "m"), None, None, None),
+        (None, np.zeros((2, 3)), Q_([1, 2], "s"), None, None),
+        (None, [[1, 2, 3], [4, 5, 6]], Q_([1, 2], "s"), None, None),
+        (None, Q_([1, 2, 3], "s"), None, None, DimensionalityError),
+    ],
+)
+@pytest.mark.parametrize("data_array_coords", [True, False])
+def test_init(orient, coords, time, time_ref, exception, data_array_coords):
+    """Test the ´__init__´ method."""
+    if not isinstance(coords, pint.Quantity):
+        coords = Q_(coords, "mm")
+    if data_array_coords:
+        coords = ut.xr_3d_vector(coords, time)
+
+    if exception:
+        with pytest.raises(exception):
+            LCS(orient, coords, time, time_ref)
+        return
+
+    LCS(orient, coords, time, time_ref)
+
 
 # test_init_time_formats ---------------------------------------------------------------
 
@@ -63,7 +94,7 @@ def test_init_time_formats(time, time_ref, time_exp, time_ref_exp):
     """
     # setup
     orientation = r_mat_z([0.5, 1.0, 1.5])
-    coordinates = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    coordinates = Q_([[1, 2, 3], [4, 5, 6], [7, 8, 9]], "mm")
     lcs = tf.LocalCoordinateSystem(orientation, coordinates, time, time_ref=time_ref)
 
     # check results
@@ -78,9 +109,9 @@ def test_init_time_formats(time, time_ref, time_exp, time_ref_exp):
 @pytest.mark.parametrize(
     "coordinates, orientation, time, warning",
     [
-        (np.zeros(3), np.eye(3, 3), TDI([0, 2], "s"), UserWarning),
-        (np.zeros((2, 3)), np.eye(3, 3), TDI([0, 2], "s"), None),
-        (np.zeros(3), np.eye(3, 3), None, None),
+        (Q_(np.zeros(3), "mm"), np.eye(3, 3), TDI([0, 2], "s"), UserWarning),
+        (Q_(np.zeros((2, 3)), "mm"), np.eye(3, 3), TDI([0, 2], "s"), None),
+        (Q_(np.zeros(3), "mm"), np.eye(3, 3), None, None),
     ],
 )
 def test_time_warning(coordinates, orientation, time, warning):
@@ -133,7 +164,7 @@ def test_init_time_dsx(time_o, time_c, time_exp, time_ref):
 
     """
     orientations = WXRotation.from_euler("z", range(len(time_o))).as_matrix()
-    coordinates = [[i, i, i] for i in range(len(time_o))]
+    coordinates = Q_([[i, i, i] for i in range(len(time_o))], "mm")
 
     dax_o = ut.xr_3d_matrix(orientations, time_o)
     dax_c = ut.xr_3d_vector(coordinates, time_c)
@@ -174,7 +205,8 @@ def test_init_expr_time_series_as_coord(time, time_ref, angles):
 
     """
     coordinates = MathematicalExpression(
-        expression="a*t+b", parameters=dict(a=Q_([1, 0, 0], "1/s"), b=[1, 2, 3])
+        expression="a*t+b",
+        parameters=dict(a=Q_([1, 0, 0], "m/s"), b=Q_([1, 2, 3], "m")),
     )
 
     ts_coord = TimeSeries(data=coordinates)
@@ -216,11 +248,12 @@ def test_init_discrete_time_series_as_coord(data, time, conversion_factor):
     ts_coords = TimeSeries(data, time)
     lcs = LCS(coordinates=ts_coords)
 
-    assert np.allclose(lcs.coordinates, data.m * conversion_factor)
+    assert np.allclose(lcs.coordinates.data, data)
     if len(time) == 1:
         assert lcs.time is None
     else:
         assert np.all(lcs.time.as_quantity() == time)
+    print(lcs.coordinates.data)
 
 
 # test_from_axis_vectors ---------------------------------------------------------------
@@ -240,7 +273,7 @@ def test_from_axis_vectors(
     time_ref = "2011-07-22" if has_time_ref else None
     angles = [[30, 45, 60], [40, 35, 80], [1, 33, 7], [90, 180, 270]]
     o = WXRotation.from_euler("xyz", angles, degrees=True).as_matrix()
-    c = [[-1, 3, 2], [4, 2, 4], [5, 1, 2], [3, 3, 3]]
+    c = Q_([[-1, 3, 2], [4, 2, 4], [5, 1, 2], [3, 3, 3]], "mm")
 
     if not time_dep_orient:
         o = o[0]
@@ -319,7 +352,7 @@ def test_reset_reference_time(time, time_ref, time_ref_new, time_exp):
 
     """
     orientation = WXRotation.from_euler("z", [1, 2, 3]).as_matrix()
-    coordinates = [[i, i, i] for i in range(3)]
+    coordinates = Q_([[i, i, i] for i in range(3)], "mm")
     lcs = tf.LocalCoordinateSystem(orientation, coordinates, time, time_ref=time_ref)
 
     lcs.reset_reference_time(time_ref_new)
@@ -358,7 +391,7 @@ def test_reset_reference_time_exceptions(
 
     """
     orientation = WXRotation.from_euler("z", [1, 2, 3]).as_matrix()
-    coordinates = [[i, i, i] for i in range(3)]
+    coordinates = Q_([[i, i, i] for i in range(3)], "mm")
     time = TDI([1, 2, 3], "D")
 
     lcs = tf.LocalCoordinateSystem(orientation, coordinates, time, time_ref=time_ref)
@@ -436,10 +469,11 @@ def test_interp_time_discrete(
         Expected coordinates of the result
 
     """
+    coordinates_exp = Q_(coordinates_exp, "mm")
     # setup
     lcs = tf.LocalCoordinateSystem(
         orientation=r_mat_z([0, 0.5, 1, 0.5]),
-        coordinates=np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]]),
+        coordinates=Q_([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]], "mm"),
         time=TDI([10, 14, 18, 22], "D"),
         time_ref=time_ref_lcs,
     )
@@ -483,7 +517,7 @@ def test_issue_289_interp_outside_time_range(
     """
     angles = [45, 135] if time_dep_orient else 135
     orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
-    coordinates = [[0, 0, 0], [1, 1, 1]] if time_dep_coords else [1, 1, 1]
+    coordinates = Q_([[0, 0, 0], [1, 1, 1]] if time_dep_coords else [1, 1, 1], "mm")
     if time_dep_coords or time_dep_orient:
         time = ["5s", "6s"] if all_less else ["0s", "1s"]
     else:
@@ -494,12 +528,12 @@ def test_issue_289_interp_outside_time_range(
 
     exp_angle = 45 if time_dep_orient and all_less else 135
     exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
-    exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
+    exp_coords = Q_([0, 0, 0] if time_dep_coords and all_less else [1, 1, 1], "mm")
 
     assert lcs_interp.is_time_dependent is False
     assert lcs_interp.time is None
-    assert lcs_interp.coordinates.values.shape == (3,)
-    assert lcs_interp.orientation.values.shape == (3, 3)
+    assert lcs_interp.coordinates.data.shape == (3,)
+    assert lcs_interp.orientation.data.shape == (3, 3)
     assert np.all(lcs_interp.coordinates.data == exp_coords)
     assert np.all(lcs_interp.orientation.data == exp_orient)
 
@@ -510,18 +544,18 @@ def test_issue_289_interp_outside_time_range(
 def test_interp_time_discrete_single_time():
     """Test that single value interpolation results in a static system."""
     orientation = WXRotation.from_euler("x", [45, 135], degrees=True).as_matrix()
-    coordinates = [[0, 0, 0], [2, 2, 2]]
+    coordinates = Q_([[0, 0, 0], [2, 2, 2]], "mm")
     time = ["1s", "3s"]
     lcs = LCS(orientation, coordinates, time)
 
-    exp_coords = [1, 1, 1]
+    exp_coords = Q_([1, 1, 1], "mm")
     exp_orient = WXRotation.from_euler("x", 90, degrees=True).as_matrix()
 
     lcs_interp = lcs.interp_time("2s")
     assert lcs_interp.is_time_dependent is False
     assert lcs_interp.time.equals(Time("2s"))
-    assert lcs_interp.coordinates.values.shape == (3,)
-    assert lcs_interp.orientation.values.shape == (3, 3)
+    assert lcs_interp.coordinates.data.shape == (3,)
+    assert lcs_interp.orientation.data.shape == (3, 3)
     assert np.all(lcs_interp.coordinates.data == exp_coords)
     assert np.allclose(lcs_interp.orientation.data, exp_orient)
 
@@ -538,7 +572,7 @@ def test_interp_time_discrete_outside_value_range_both_sides():
 
     """
     orientation = WXRotation.from_euler("x", [45, 135], degrees=True).as_matrix()
-    coordinates = [[0, 0, 0], [2, 2, 2]]
+    coordinates = Q_([[0, 0, 0], [2, 2, 2]], "mm")
     time = ["2s", "3s"]
     lcs = LCS(orientation, coordinates, time)
 
@@ -637,9 +671,9 @@ def test_interp_time_timeseries_as_coords(
     assert np.all(lcs_interp.time == Time(time, ref_time))
 
     # check coordinates
-    exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
+    exp_vals = Q_([[s + time_offset + 1, 1, 1] for s in seconds], "mm")
     assert isinstance(lcs_interp.coordinates, xr.DataArray)
-    assert np.allclose(lcs_interp.coordinates, exp_vals)
+    assert np.allclose(lcs_interp.coordinates.data, exp_vals)
 
     # check orientation
     seconds_offset = np.array(seconds) + time_offset
@@ -692,7 +726,7 @@ def test_interp_time_exceptions(
 
     """
     orientation = r_mat_z([1, 2, 3])
-    coordinates = [[i, i, i] for i in range(3)]
+    coordinates = Q_([[i, i, i] for i in range(3)], "mm")
     time_lcs = TDI([1, 2, 3], "D")
 
     lcs = tf.LocalCoordinateSystem(
@@ -710,8 +744,8 @@ def test_interp_time_exceptions(
     "lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp",
     [
         (  # 1 - both static
-            LCS(r_mat_y(0.5), [1, 4, 2]),
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_y(0.5), Q_([1, 4, 2], "mm")),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             [[0, -1, 0], [0, 0, 1], [-1, 0, 0]],
             [-1, 8, 3],
             None,
@@ -720,11 +754,11 @@ def test_interp_time_exceptions(
         (  # 2 - left system orientation time dependent
             LCS(
                 r_mat_z([0, 0.5, 1]),
-                [1, 4, 2],
+                Q_([1, 4, 2], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             r_mat_z([0.5, 1, 1.5]),
             [[-1, 8, 3], [-1, 8, 3], [-1, 8, 3]],
             TDI([1, 3, 5], "D"),
@@ -733,21 +767,21 @@ def test_interp_time_exceptions(
         (  # 3 - left system coordinates time dependent
             LCS(
                 r_mat_y(0.5),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             [[[0, -1, 0], [0, 0, 1], [-1, 0, 0]] for _ in range(3)],
             [[-4, 10, 2], [5, 11, 9], [0, 2, 0]],
             TDI([1, 3, 5], "D"),
             TS("2020-02-02"),
         ),
         (  # 4 - right system orientation time dependent
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             LCS(
                 r_mat_z([0, 0.5, 1]),
-                [1, 4, 2],
+                Q_([1, 4, 2], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -757,10 +791,10 @@ def test_interp_time_exceptions(
             TS("2020-02-02"),
         ),
         (  # 5 - right system coordinates time dependent
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             LCS(
                 r_mat_z(0.5),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -770,10 +804,10 @@ def test_interp_time_exceptions(
             TS("2020-02-02"),
         ),
         (  # 6 - right system fully time dependent
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             LCS(
                 r_mat_z([0, 0.5, 1]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -785,13 +819,13 @@ def test_interp_time_exceptions(
         (  # 7 - both fully time dependent - same time and reference time
             LCS(
                 r_mat_z([1, 0, 0]),
-                [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                Q_([[4, 2, 5], [3, -3, 2], [1, 7, -9]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
             LCS(
                 r_mat_z([0, 0.5, 1]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -803,13 +837,13 @@ def test_interp_time_exceptions(
         (  # 8 - both fully time dependent - different time but same reference time
             LCS(
                 r_mat_z([1.5, 1.0, 0.75]),
-                [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                Q_([[4, 2, 5], [3, -3, 2], [1, 7, -9]], "mm"),
                 TDI([2, 4, 6], "D"),
                 TS("2020-02-02"),
             ),
             LCS(
                 r_mat_z([0.75, 1.25, 0.75]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -821,13 +855,13 @@ def test_interp_time_exceptions(
         (  # 9 - both fully time dependent - different time and reference time #1
             LCS(
                 r_mat_z([1.5, 1.0, 0.75]),
-                [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                Q_([[4, 2, 5], [3, -3, 2], [1, 7, -9]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-03"),
             ),
             LCS(
                 r_mat_z([0.75, 1.25, 0.75]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -839,13 +873,13 @@ def test_interp_time_exceptions(
         (  # 10 - both fully time dependent - different time and reference time #2
             LCS(
                 r_mat_z([1.5, 1.0, 0.75]),
-                [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                Q_([[4, 2, 5], [3, -3, 2], [1, 7, -9]], "mm"),
                 TDI([3, 5, 7], "D"),
                 TS("2020-02-01"),
             ),
             LCS(
                 r_mat_z([0.75, 1.25, 0.75]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -877,6 +911,7 @@ def test_addition(
         Expected reference time of the resulting coordinate system
 
     """
+    coordinates_exp = Q_(coordinates_exp, "mm")
     check_coordinate_system(
         lcs_lhs + lcs_rhs,
         orientation_exp,
@@ -894,8 +929,8 @@ def test_addition(
     "lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp",
     [
         (  # 1 - both static
-            LCS([[0, -1, 0], [0, 0, 1], [-1, 0, 0]], [-1, 8, 3]),
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS([[0, -1, 0], [0, 0, 1], [-1, 0, 0]], Q_([-1, 8, 3], "mm")),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             r_mat_y(0.5),
             [1, 4, 2],
             None,
@@ -904,11 +939,11 @@ def test_addition(
         (  # 2 - left system orientation time dependent
             LCS(
                 r_mat_z([0.5, 1, 1.5]),
-                [-1, 8, 3],
+                Q_([-1, 8, 3], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             r_mat_z([0, 0.5, 1]),
             [[1, 4, 2], [1, 4, 2], [1, 4, 2]],
             TDI([1, 3, 5], "D"),
@@ -917,21 +952,21 @@ def test_addition(
         (  # 3 - left system coordinates time dependent
             LCS(
                 [[0, -1, 0], [0, 0, 1], [-1, 0, 0]],
-                [[-4, 10, 2], [5, 11, 9], [0, 2, 0]],
+                Q_([[-4, 10, 2], [5, 11, 9], [0, 2, 0]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             r_mat_y([0.5, 0.5, 0.5]),
             [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
             TDI([1, 3, 5], "D"),
             TS("2020-02-02"),
         ),
         (  # 4 - right system orientation time dependent
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             LCS(
                 r_mat_z([0, 0.5, 1]),
-                [1, 4, 2],
+                Q_([1, 4, 2], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -941,10 +976,10 @@ def test_addition(
             TS("2020-02-02"),
         ),
         (  # 5 - right system coordinates time dependent
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             LCS(
                 r_mat_z(0.5),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -954,10 +989,10 @@ def test_addition(
             TS("2020-02-02"),
         ),
         (  # 6 - right system fully time dependent
-            LCS(r_mat_z(0.5), [3, 7, 1]),
+            LCS(r_mat_z(0.5), Q_([3, 7, 1], "mm")),
             LCS(
                 r_mat_z([0, 0.5, 1]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -969,13 +1004,13 @@ def test_addition(
         (  # 7 - both fully time dependent - same time and reference time
             LCS(
                 r_mat_z([1, 0.5, 1]),
-                [[7, 9, 6], [7, 1, 10], [-6, -4, -10]],
+                Q_([[7, 9, 6], [7, 1, 10], [-6, -4, -10]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
             LCS(
                 r_mat_z([0, 0.5, 1]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -987,13 +1022,13 @@ def test_addition(
         (  # 8 - both fully time dependent - different time but same reference time
             LCS(
                 r_mat_z([1.5, 1.0, 0.75]),
-                [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                Q_([[4, 2, 5], [3, -3, 2], [1, 7, -9]], "mm"),
                 TDI([2, 4, 6], "D"),
                 TS("2020-02-02"),
             ),
             LCS(
                 r_mat_z([1, 1.5, 1]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -1005,13 +1040,13 @@ def test_addition(
         (  # 9 - both fully time dependent - different time and reference time #1
             LCS(
                 r_mat_z([1.5, 1.0, 0.75]),
-                [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                Q_([[4, 2, 5], [3, -3, 2], [1, 7, -9]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-03"),
             ),
             LCS(
                 r_mat_z([1, 1.5, 1]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -1023,13 +1058,13 @@ def test_addition(
         (  # 10 - both fully time dependent - different time and reference time #2
             LCS(
                 r_mat_z([1.5, 1.0, 0.75]),
-                [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                Q_([[4, 2, 5], [3, -3, 2], [1, 7, -9]], "mm"),
                 TDI([3, 5, 7], "D"),
                 TS("2020-02-01"),
             ),
             LCS(
                 r_mat_z([1, 1.5, 1]),
-                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm"),
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
@@ -1061,6 +1096,7 @@ def test_subtraction(
         Expected reference time of the resulting coordinate system
 
     """
+    coordinates_exp = Q_(coordinates_exp, "mm")
     check_coordinate_system(
         lcs_lhs - lcs_rhs,
         orientation_exp,
@@ -1079,7 +1115,7 @@ def test_subtraction(
     [
         ({}, {}, {}, True),
         (dict(expression="2*a*t"), {}, {}, False),
-        (dict(parameters=dict(a=Q_([[2, 0, 0]], "1/s"))), {}, {}, False),
+        (dict(parameters=dict(a=Q_([[2, 0, 0]], "m/s"))), {}, {}, False),
         ({}, dict(data=Q_(np.ones((2, 3)), "mm"), time=Q_([1, 2], "s")), {}, False),
         ({}, {}, dict(orientation=[[0, -1, 0], [1, 0, 0], [0, 0, 1]]), False),
         ({}, {}, dict(time_ref=TS("11:12")), False),
@@ -1110,7 +1146,7 @@ def test_comparison_coords_timeseries(
         Expected result of the comparison
 
     """
-    me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+    me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "m/s")))
     ts = TimeSeries(data=me)
     lcs = LCS(coordinates=ts)
 
@@ -1144,8 +1180,8 @@ def test_coordinate_system_init():
 
     orientation_fix = r_mat_z(1)
     orientation_tdp = r_mat_z([0, 0.25, 0.5])
-    coordinates_fix = np.array([3, 7, 1], dtype=float)
-    coordinates_tdp = np.array([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], dtype=float)
+    coordinates_fix = Q_([3, 7, 1], "mm")
+    coordinates_tdp = Q_([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], "mm")
 
     # numpy - no time dependency
     lcs = tf.LocalCoordinateSystem(
@@ -1217,7 +1253,7 @@ def test_coordinate_system_init():
     )
 
     time_exp = TDI([1, 2, 3, 4, 5, 6], "s")
-    coordinates_exp = np.array(
+    coordinates_exp = Q_(
         [
             [3, 7, 1],
             [3, 7, 1],
@@ -1226,7 +1262,7 @@ def test_coordinate_system_init():
             [-0.5, 0.5, 3.5],
             [-5, 3, -1],
         ],
-        dtype=float,
+        "mm",
     )
     orientation_exp = r_mat_z([0, 0.125, 0.25, 0.375, 0.5, 0.5])
     check_coordinate_system(lcs, orientation_exp, coordinates_exp, True, time_exp)
@@ -1295,7 +1331,7 @@ def test_coordinate_system_factories_no_time_dependency():
 
     # setup -----------------------------------------------
     angles = [np.pi / 3, np.pi / 4, np.pi / 5]
-    coordinates = [4, -2, 6]
+    coordinates = Q_([4, -2, 6], "mm")
     orientation_pos = WXRotation.from_euler("xyz", angles).as_matrix()
 
     # construction with euler -----------------------------
@@ -1323,7 +1359,7 @@ def test_coordinate_system_factories_time_dependent():
 
     time = TDI([0, 6, 12, 18], "H")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
-    coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
+    coords = Q_([[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]], "mm")
 
     # construction with euler -----------------------------
 
@@ -1347,25 +1383,25 @@ def test_coordinate_system_invert():
     """
     # fix ---------------------------------------
     lcs0_in_lcs1 = tf.LocalCoordinateSystem.from_axis_vectors(
-        x=[1, 1, 0], y=[-1, 1, 0], coordinates=[2, 0, 2]
+        x=[1, 1, 0], y=[-1, 1, 0], coordinates=Q_([2, 0, 2], "mm")
     )
     lcs1_in_lcs0 = lcs0_in_lcs1.invert()
 
     exp_orientation = r_mat_z(-1 / 4)
-    exp_coordinates = [-np.sqrt(2), np.sqrt(2), -2]
+    exp_coordinates = Q_([-np.sqrt(2), np.sqrt(2), -2], "mm")
 
     check_coordinate_system(lcs1_in_lcs0, exp_orientation, exp_coordinates, True)
 
     lcs0_in_lcs1_2 = lcs1_in_lcs0.invert()
 
     check_coordinate_system(
-        lcs0_in_lcs1_2, lcs0_in_lcs1.orientation, lcs0_in_lcs1.coordinates, True
+        lcs0_in_lcs1_2, lcs0_in_lcs1.orientation, lcs0_in_lcs1.coordinates.data, True
     )
 
     # time dependent ----------------------------
     time = TDI([1, 2, 3, 4], "s")
     orientation = r_mat_z([0, 0.5, 1, 0.5])
-    coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
+    coordinates = Q_([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]], "mm")
 
     lcs0_in_lcs1 = tf.LocalCoordinateSystem(
         orientation=orientation, coordinates=coordinates, time=time
@@ -1373,14 +1409,18 @@ def test_coordinate_system_invert():
 
     lcs1_in_lcs0 = lcs0_in_lcs1.invert()
     orientation_exp = r_mat_z([0, 1.5, 1, 1.5])
-    coordinates_exp = np.array([[-2, -8, -7], [-9, 4, -2], [0, 2, -1], [-1, 3, -2]])
+    coordinates_exp = Q_([[-2, -8, -7], [-9, 4, -2], [0, 2, -1], [-1, 3, -2]], "mm")
 
     check_coordinate_system(lcs1_in_lcs0, orientation_exp, coordinates_exp, True, time)
 
     lcs0_in_lcs1_2 = lcs1_in_lcs0.invert()
 
     check_coordinate_system(
-        lcs0_in_lcs1_2, lcs0_in_lcs1.orientation, lcs0_in_lcs1.coordinates, True, time
+        lcs0_in_lcs1_2,
+        lcs0_in_lcs1.orientation,
+        lcs0_in_lcs1.coordinates.data,
+        True,
+        time,
     )
 
 
@@ -1420,7 +1460,7 @@ def test_coordinate_system_time_interpolation():
     """Test the local coordinate systems interp_time and interp_like functions."""
     time_0 = TDI([10, 14, 18, 22], "D")
     orientation = r_mat_z([0, 0.5, 1, 0.5])
-    coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
+    coordinates = Q_([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]], "mm")
 
     lcs = tf.LocalCoordinateSystem(
         orientation=orientation, coordinates=coordinates, time=time_0

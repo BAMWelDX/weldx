@@ -7,13 +7,18 @@ on:
     - cron: '0 6 * * 1'
   workflow_dispatch:
 
+# execute commands with conda aware shell by default:
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   event_file:
     name: "Upload PR Event File"
     runs-on: ubuntu-latest
     steps:
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Event File
           path: ${{ github.event_path }}
@@ -25,34 +30,42 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        py: ['3.8', '3.9']
+        py: ['3.8', '3.9', '3.10']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
-      - uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.py }}
 
-      - uses: actions/cache@v2
+      - uses: CagtayFabry/pydeps2env@main
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          channels: 'conda-forge defaults'
+          extras: 'test'
+          setup_requires: 'include'
+
+      - uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: ./environment.yml
+          environment-name: weldx
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.py }}
+            wheel
+            pip
+
+      - name: activate env
+        run: micromamba activate weldx
 
       - name: pip installs
         run: |
-          pip install wheel
-          pip install -e .[test]
+          python -m pip install -e .
 
       - name: run pytest
         run: |
           pytest -n 2 --runslow --junit-xml pytest.xml
 
       - name: Upload Test Results
-        if: always() && (matrix.py == '3.9')
-        uses: actions/upload-artifact@v2
+        if: always() && (matrix.py == '3.10')
+        uses: actions/upload-artifact@v3
         with:
           name: Unit Test Results
           path: pytest.xml
@@ -73,7 +86,7 @@ jobs:
 
       - name: codecov.io
         if: matrix.py == '3.8'
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v3.1.0
 
   compat:
     name: pytest
@@ -86,43 +99,40 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
-        py: ['3.8']
+        py: ['3.9']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
-      - uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.py }}
 
-      - uses: actions/cache@v2
-        if: startsWith(runner.os, 'macOS')
+      - uses: CagtayFabry/pydeps2env@main
         with:
-          path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          channels: 'conda-forge defaults'
+          extras: 'test'
+          setup_requires: 'include'
 
-      - uses: actions/cache@v2
-        if: startsWith(runner.os, 'Windows')
+      - uses: mamba-org/provision-with-micromamba@main
         with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          environment-file: ./environment.yml
+          environment-name: weldx
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.py }}
+            wheel
+            pip
+
+      - name: activate env
+        run: micromamba activate weldx
 
       - name: pip installs
         run: |
-          pip install wheel
-          pip install -e .[test]
+          python -m pip install -e .
 
       - name: setup matplotlib
         if: startsWith(runner.os, 'Windows')
         run: |
           if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
           echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
-          python -c "import matplotlib as m; print(m.matplotlib_fname())"
-          python -c "import matplotlib as m; print(m.rc_params()['backend'])"
         shell: cmd
 
       - name: run pytest

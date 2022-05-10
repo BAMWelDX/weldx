@@ -3,11 +3,32 @@
 ###############
 
 ********************
- 0.6.0 (unreleased)
+ 0.6.0 (29.04.2022)
 ********************
+
+This release includes major changes to the handling and support of units in the API and ASDF schemas.
+All classes now support and require quantities where appropriate. Plain numbers without units are no longer supported
+and will raise an exception. If the number is truly dimensionless, you still have to wrap it with
+the quantity class `weldx.Q_` like this:
+
+.. code-block:: python
+
+    my_number = 42.0
+    my_number_wrapped = weldx.Q_(my_number, "meter")
+
+Furthermore, a new class called `GenericSeries` was added. It provides a common interface to describe coordinate-based
+data either by discrete values or mathematical expressions. A built-in mechanism lets you derive specialized series with
+specific requirements. For more information, have a look
+`at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0_a/tutorials/generic_series.html>`__ .
 
 added
 =====
+
+-  `DynamicShapeSegment` [:pull:`713`]
+
+-  `SpatialSeries` and `DynamicTraceSegment` [:pull:`699`]
+
+-  first draft of the ``multi_pass_weld`` schema for WelDX files [:pull:`667`]
 
 -  add `GenericSeries` as base class supporting arrays and equations [:pull:`618`]
 
@@ -21,17 +42,28 @@ added
 removed
 =======
 
+-  removed access to ``WeldxFile.data`` [:pull:`744`]
+
 changes
 =======
 
-- The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
+-  The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
    When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
 
-- Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
-  now only works if the `Time` instance is on the left-hand side. [:pull:`684`]
+-  Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
+   now only works if the `Time` instance is on the left-hand side. [:pull:`684`]
 
-- Renamed show_asdf_header of `WeldxFile` to `WeldxFile.header`. [:pull:`694`]
+-  `LocalCoordinateSystem` and `CoordinateSystemManager` now support `pint.Quantity` as coordinates.
+   Types without units are still supported but are deprecated. [:pull:`683`]
 
+-  Renamed show_asdf_header of `WeldxFile` to `WeldxFile.header`. [:pull:`694`]
+
+-  `WeldxFile.custom_schema` now accepts an optional tuple with the first element being a schema to validate upon read,
+   the second upon writing the data. [:pull:`697`]
+
+-  Reshape `SpatialData` coordinates to ``(-1, 3)`` before exporting with ``meshio`` for compatibility. [:pull:`723`]
+
+-  `SpatialData`, `LocalCoordinateSystem` and `CoordinateSystemManager` now require units [:pull:`731`]
 
 fixes
 =====
@@ -58,11 +90,21 @@ ASDF
 
 -  update ``core/time_series`` schema to use ``time/time`` [:pull:`677`]
 
+-  update ``core/variable`` schema to allow single string as data [:pull:`707`]
+
+-  update the default sorting order of ``select_tag`` for ``WeldxConverter`` [:pull:`733`]
+
+-  add custom validation behavior to ``wx_unit`` [:pull:`739`]
+
 deprecations
 ============
 
+-  Coordinates without units for `LocalCoordinateSystem` and `CoordinateSystemManager`
+
 dependencies
 ============
+
+-  ``weldx`` now works with Python-3.10. [:pull:`696`]
 
 -  bump to ``asdf >=2.8.2`` [:pull:`668`]
 
@@ -75,6 +117,8 @@ dependencies
 -  bump to ``xarray >=0.19`` for array creation compatibility [:pull:`618`]
 
 -  add ``bidict`` dependency [:pull:`618`]
+
+-  set ``networkx !=2.7`` for plotting compatibility (for now) [:pull:`714`, :pull:`722`]
 
 ********************
  0.5.2 (18.11.2021)

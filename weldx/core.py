@@ -10,6 +10,7 @@ from warnings import warn
 import numpy as np
 import pandas as pd
 import pint
+import sympy
 import xarray as xr
 from bidict import bidict
 
@@ -19,12 +20,11 @@ from weldx.time import Time, TimeDependent, types_time_like
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot
-    import sympy
     from xarray.core.coordinates import DataArrayCoordinates
 
     from weldx.types import UnitLike
 
-__all__ = ["GenericSeries", "MathematicalExpression", "TimeSeries"]
+__all__ = ["GenericSeries", "MathematicalExpression", "TimeSeries", "SpatialSeries"]
 
 _me_parameter_types = Union[pint.Quantity, str, Tuple[pint.Quantity, str], xr.DataArray]
 
@@ -48,8 +48,6 @@ class MathematicalExpression:
             expression.
 
         """
-        import sympy
-
         if not isinstance(expression, sympy.Expr):
             expression = sympy.sympify(expression)
         self._expression = expression
@@ -276,7 +274,6 @@ class MathematicalExpression:
             k: v if isinstance(v, xr.DataArray) else xr.DataArray(v)
             for k, v in self._parameters.items()
         }
-
         return self.function(**variables, **parameters)
 
 
@@ -779,9 +776,6 @@ class SeriesParameter:
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
             self.values = Q_(self.values)
 
-        if self.symbol is not None and len(self.symbol) > 1:
-            raise ValueError(f"Cannot use symbol {self.symbol}")
-
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
             raise ValueError(f"Cannot set parameter as {self.values}")
 
@@ -823,22 +817,62 @@ class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
 
     _allowed_variables: list[str] = []
-    """Allowed variable names"""
+    """A list of allowed variable names. (only expression)
+
+    If the expression contains any other variable name that is not part of the list,
+    an exception is raised. It is not required that an expression includes all these
+    variables. Additionally, the expression can contain other symbols if they are used
+    as parameters.
+    """
     _required_variables: list[str] = []
-    """Required variable names"""
+    """A list of required variable names. (only expression)
+
+    If one or more variables are missing in the expression, an exceptions is raised.
+    Note that the required symbols must be variables of the expression. Using one or
+    more as a parameter will also trigger an exception.
+    """
 
     _evaluation_preprocessor: dict[str, Callable] = {}
-    """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
+    """Mapping of variable names to functions that are applied prior to evaluation.
+
+    When calling `GenericSeries.evaluate`, the passed keyword arguments are checked
+    against the dictionaries keys. If a match is found, the corresponding preprocessor
+    function is called with the variables value and returns the updated value. As an
+    example, this can be used to support multiple time formats. The key might be ``t``
+    and the preprocessor function would turn the original time data into an equivalent
+    `xarray.DataArray`.
+    """
 
     _required_dimensions: list[str] = []
-    """Required dimensions"""
+    """A list of required dimension names.
+
+    Explicit `GenericSeries` need all of the listed dimensions. Otherwise an exception
+    is raised. If the series is based on an expression, the dimension can either be
+    represented by a variable or be part of one of the expressions parameters.
+    """
+
     _required_dimension_units: dict[str, pint.Unit] = {}
-    """Required units of a dimension"""
+    """A dictionary that maps a required unit dimensionality to a dimension.
+
+    If a dimension matches one of the keys of this dictionary, its dimensionality
+    is checked against the listed requirement.
+    """
     _required_dimension_coordinates: dict[str, list] = {}
-    """Required coordinates of a dimension."""
+    """A dictionary that maps required coordinate values to a dimension.
+
+    If a dimension matches one of the keys of this dictionary, it is checked if it has
+    the specified coordinate values. An example use-case would be a 3d-space where the
+    coordinates "x", "y" and "z" are required for a spatial dimension.
+    """
 
     _required_unit_dimensionality: pint.Unit = None
-    """Required unit dimensionality of the evaluated expression/data"""
+    """Required unit dimensionality of the evaluated expression/data.
+
+    If the defined unit does not result from the evaluation of the series, an exception
+    is raised. Note that this already checked during construction. If `None`, no
+    specific unit is required. A unit-less series can be enforced by setting this
+    setup variable to ``""``.
+    """
 
     # do it later
 
@@ -981,7 +1015,7 @@ class GenericSeries:
             if dims is not None and not isinstance(dims, list):
                 raise ValueError(f"Argument 'dims' must be list of strings, not {dims}")
             self._init_discrete(obj, dims, coords)
-        elif isinstance(obj, (MathematicalExpression, str)):
+        elif isinstance(obj, (MathematicalExpression, str, sympy.Expr)):
             if dims is not None and not isinstance(dims, dict):
                 raise ValueError(f"Argument 'dims' must be dict, not {dims}")
             self._init_expression(obj, dims, parameters, units)
@@ -1026,7 +1060,6 @@ class GenericSeries:
         else:
             # todo check data structure
             pass
-
         # check the constraints of derived types
         self._check_constraints_discrete(data)
         self._obj = data
@@ -1254,9 +1287,14 @@ class GenericSeries:
     def _evaluate_expr(self, coords: list[SeriesParameter]) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(coords) == self._obj.num_variables:
-            eval_args = {v.symbol: v.data_array for v in coords}
-            data = self._obj.evaluate(**eval_args)
-            return self.__class__(data)
+            eval_args = {
+                v.symbol: v.data_array.assign_coords(
+                    {v.dim: v.data_array.pint.dequantify()}
+                )
+                for v in coords
+            }
+            da = self._obj.evaluate(**eval_args)
+            return self.__class__(da)
 
         # turn passed coords into parameters of the expression
         new_series = deepcopy(self)
@@ -1430,7 +1468,6 @@ class GenericSeries:
                 ref[k]["dimensionality"] = _units[k]
             if k in _vals:
                 ref[k]["values"] = _vals[k]
-
         ut.xr_check_coords(data_array, ref)
 
     @classmethod
@@ -1546,3 +1583,82 @@ class GenericSeries:
 
         """
         return NotImplemented
+
+
+# --------------------------------------------------------------------------------------
+# SpatialSeries
+# --------------------------------------------------------------------------------------
+
+
+class SpatialSeries(GenericSeries):
+    """Describes a line in 3d space depending on the positional coordinate ``s``."""
+
+    _position_dim_name = "s"
+
+    _required_variables: list[str] = [_position_dim_name]
+    """Required variable names"""
+
+    _required_dimensions: list[str] = [_position_dim_name, "c"]
+    """Required dimensions"""
+    _required_dimension_units: dict[str, pint.Unit] = {_position_dim_name: ""}
+    """Required units of a dimension"""
+    _required_dimension_coordinates: dict[str, list] = {"c": ["x", "y", "z"]}
+    """Required coordinates of a dimension."""
+
+    def __init__(
+        self,
+        obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
+        dims: Union[list[str], dict[str, str]] = None,
+        coords: dict[str, pint.Quantity] = None,
+        units: dict[str, Union[str, pint.Unit]] = None,
+        interpolation: str = None,
+        parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
+    ):
+        if isinstance(obj, Q_):
+            obj = self._process_quantity(obj, dims, coords)
+            dims = None
+            coords = None
+        if parameters is not None:
+            parameters = self._process_parameters(parameters)
+        super().__init__(obj, dims, coords, units, interpolation, parameters)
+
+    @classmethod
+    def _process_quantity(
+        cls,
+        obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
+        dims: Union[list[str], dict[str, str]],
+        coords: dict[str, pint.Quantity],
+    ) -> xr.DataArray:
+        """Turn a quantity into a a correctly formatted data array."""
+        if isinstance(coords, dict):
+            s = coords[cls._position_dim_name]
+        else:
+            s = coords
+            coords = {cls._position_dim_name: s}
+
+        if not isinstance(s, xr.DataArray):
+            if not isinstance(s, Q_):
+                s = Q_(s, "")
+            s = xr.DataArray(s, dims=[cls._position_dim_name]).pint.dequantify()
+            coords[cls._position_dim_name] = s
+
+        if "c" not in coords:
+            coords["c"] = ["x", "y", "z"]
+
+        if dims is None:
+            dims = [cls._position_dim_name, "c"]
+
+        return xr.DataArray(obj, dims=dims, coords=coords)
+
+    @staticmethod
+    def _process_parameters(params):
+        """Turn quantity parameters into the correctly formatted data arrays."""
+        for k, v in params.items():
+            if isinstance(v, Q_) and v.size == 3:
+                params[k] = xr.DataArray(v, dims=["c"], coords=dict(c=["x", "y", "z"]))
+        return params
+
+    @property
+    def position_dim_name(self):
+        """Return the name of the dimension that determines the position on the line."""
+        return self._position_dim_name

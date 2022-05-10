@@ -13,6 +13,7 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
 from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.transformations.types import types_coordinates, types_orientation
@@ -283,16 +284,35 @@ class LocalCoordinateSystem(TimeDependent):
         """Create xarray coordinates from different formats and time-inputs."""
         if isinstance(coordinates, TimeSeries):
             if coordinates.is_expression:
+                if not coordinates.units.is_compatible_with(_DEFAULT_LEN_UNIT):
+                    raise pint.DimensionalityError(
+                        coordinates.units,
+                        _DEFAULT_LEN_UNIT,
+                        extra_msg="\nThe units resulting from the expression must "
+                        "represent a length.",
+                    )
                 return coordinates
             coordinates = cls._coords_from_discrete_time_series(coordinates)
 
         if coordinates is None:
-            coordinates = np.zeros(3)
+            coordinates = Q_(np.zeros(3), _DEFAULT_LEN_UNIT)
 
         if not isinstance(coordinates, xr.DataArray):
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                 coordinates = np.array(coordinates)
+
             coordinates = ut.xr_3d_vector(coordinates, time)
+
+        c_data = coordinates.data
+        if not isinstance(c_data, pint.Quantity) or not c_data.is_compatible_with(
+            _DEFAULT_LEN_UNIT
+        ):
+            unit = c_data.u if isinstance(c_data, pint.Quantity) else None
+            raise pint.DimensionalityError(
+                unit,
+                _DEFAULT_LEN_UNIT,
+                extra_msg="\nThe coordinates require units representing a length.",
+            )
 
         # make sure we have correct "time" format
         coordinates = coordinates.weldx.time_ref_restore()
@@ -363,11 +383,6 @@ class LocalCoordinateSystem(TimeDependent):
                 f"{time_series.shape}"
             )
         coordinates = time_series.data_array
-        # This is a workaround to remove the warning about stripped units. This line
-        # should be removed once we add/require units in the lcs
-        # Additionally, the correct unit should be checked for TimeSeries
-        # (also expressions)
-        coordinates.data = coordinates.data.to("mm").m
 
         c_dict = dict(c=["x", "y", "z"])
         if coordinates.data.shape[0] == 1:

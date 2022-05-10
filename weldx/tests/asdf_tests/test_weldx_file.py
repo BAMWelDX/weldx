@@ -14,10 +14,10 @@ from jsonschema import ValidationError
 
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.file import _PROTECTED_KEYS, DEFAULT_ARRAY_INLINE_THRESHOLD, WeldxFile
-from weldx.asdf.util import get_schema_path
+from weldx.asdf.util import get_schema_path, write_buffer
 from weldx.constants import META_ATTR
 from weldx.types import SupportsFileReadWrite
-from weldx.util import WeldxDeprecationWarning, compare_nested
+from weldx.util import compare_nested
 
 SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 
@@ -339,6 +339,77 @@ class TestWeldXFile:
             WeldxFile(custom_schema="no")
 
     @staticmethod
+    def _get_schema_file(arg, mismatch: bool, tmp_path) -> (str, np.ndarray):
+        data = np.arange(6)
+        if not arg or not isinstance(arg, (list, tuple)):
+            return None, data
+        result = [None, None]
+        shape = (1, -1)
+        schema = """
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/debug/test_shape_validator-0.1.0"
+
+title: test
+type: object
+properties:
+  prop1:
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape: [{shape}]
+        """
+
+        if isinstance(arg, (list, tuple)):
+            a, b = arg
+
+            def _create_schema(shape_, name):
+                file_name = tmp_path / name
+                shape_s = ",".join(str(s) for s in shape_)
+                with open(file_name, "w+") as fh:
+                    fh.write(schema.format(shape=shape_s))
+                return file_name
+
+            if a is not None:
+                shape = [2, 3]
+                result[0] = _create_schema(shape, name="a")
+            if b is not None:
+                shape = [3, 2]
+                result[1] = _create_schema(shape, name="b")
+
+            return result, data.reshape(shape) if not mismatch else data
+
+    @pytest.mark.parametrize(
+        ("custom_schema", "mismatch"),
+        (
+            (None, False),  # no validation (default)
+            ("A", False),  # validate against A on read and write (pre 0.6 behavior)
+            (("A", "B"), True),  # validate with A on read, validate with B on write
+            (("A", "B"), False),  # validate with A on read, validate with B on write
+            ((None, "A"), True),  # no validation on read, validate with B on write
+            ((None, "A"), False),  # no validation on read, validate with B on write
+            (("A", None), False),  # validate with A on read, no validation on write
+        ),
+    )
+    def test_custom_schema_modes(self, custom_schema, mismatch, tmp_path):
+        """Checks we can have separate read/write arguments for custom_schema."""
+        schema_resolved, data = self._get_schema_file(custom_schema, mismatch, tmp_path)
+        tree = {"prop1": data}
+
+        if mismatch:
+            if (
+                len(custom_schema) == 2
+                and custom_schema[0] == "A"
+                and custom_schema[1] == "B"
+            ):
+                buff = write_buffer(tree)
+            else:
+                buff = None
+            with pytest.raises(ValidationError):
+                WeldxFile(buff, tree=tree, mode="rw", custom_schema=schema_resolved)
+        else:
+            WeldxFile(tree=tree, mode="rw", custom_schema=schema_resolved)
+
+    @staticmethod
     def test_show_header_file_pos_unchanged():
         """Check displaying the header."""
         file = WeldxFile(tree={"sensor": "HKS_sensor"}, mode="rw")
@@ -522,9 +593,6 @@ class TestWeldXFile:
         """Ensure we cannot manipulate protected keys."""
         expected_match = "manipulate an ASDF internal structure"
         warning_type = UserWarning
-        # try to obtain key from underlying dict.
-        with pytest.raises(KeyError), pytest.warns(WeldxDeprecationWarning):
-            _ = self.fh.data[protected_key]
 
         with pytest.warns(warning_type, match=expected_match):
             self.fh.update({protected_key: None})

@@ -12,7 +12,7 @@ exclude: '.*.weldx$|.*.wx$|.*.asdf$'
 repos:
   # ----- general formatting -----
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
+    rev: v4.2.0
     hooks:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
@@ -20,7 +20,7 @@ repos:
       - id: check-yaml
         exclude: devtools/conda.recipe/meta.yaml  # doesn't play nice with jinja
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.13
+    rev: 0.7.14
     hooks:
       - id: mdformat
         additional_dependencies:
@@ -29,12 +29,12 @@ repos:
           - mdformat-config
   # ----- Python formatting -----
   - repo: https://github.com/sondrelg/pep585-upgrade
-    rev: v1.0.1
+    rev: v1.0
     hooks:
     - id: upgrade-type-hints
       args: [ '--futures=true' ]
   - repo: https://github.com/psf/black
-    rev: 22.1.0
+    rev: 22.3.0
     hooks:
       - id: black
   - repo: https://github.com/pycqa/isort
@@ -69,7 +69,7 @@ repos:
           - --convention=numpy
   # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.2.3
+    rev: 1.3.1
     hooks:
       - id: nbqa-black
       - id: nbqa-isort

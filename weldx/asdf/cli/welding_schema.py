@@ -98,7 +98,7 @@ def single_pass_weld_example(
 
     rot = WXRotation.from_euler(seq="x", angles=180, degrees=True)
 
-    coords = [tcp_start_point.magnitude, tcp_end_point.magnitude]
+    coords = Q_([tcp_start_point.magnitude, tcp_end_point.magnitude], "mm")
 
     tcp_wire = lcs(coordinates=coords, orientation=rot, time=[t_start, t_end])
 
@@ -109,7 +109,7 @@ def single_pass_weld_example(
         lcs=tcp_wire,
     )
 
-    tcp_contact = lcs(coordinates=[0, 0, -10])
+    tcp_contact = lcs(coordinates=Q_([0, 0, -10], "mm"))
 
     # add the workpiece coordinate system
     csm.add_cs(

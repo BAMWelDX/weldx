@@ -14,18 +14,20 @@ examples:
     - A simple `SpatialData` with triangulation
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.1>
-        coordinates: !core/ndarray-1.0.0
-          data:
-          - [0.0, 0.0, 0.0]
-          - [1.0, 0.0, 0.0]
-          - [1.0, 1.0, 0.0]
-          - [0.0, 1.0, 0.0]
-          datatype: float64
-          shape: [4, 3]
+        coordinates: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0>
+          value: !core/ndarray-1.0.0
+            data:
+            - [0.0, 0.0, 0.0]
+            - [1.0, 0.0, 0.0]
+            - [1.0, 1.0, 0.0]
+            - [0.0, 1.0, 0.0]
+            datatype: float64
+            shape: [4, 3]
+          units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
         triangles: !core/ndarray-1.0.0
           data:
-          - [0, 1, 2]
-          - [2, 3, 0]
+          - [0, 1, 0]
+          - [1, 0, 0]
           datatype: uint32
           shape: [2, 3]
   -
@@ -47,6 +49,7 @@ examples:
             name: data
             dimensions: [p, n, c]
             dtype: <f8
+            units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
             data: !core/ndarray-1.0.0
               data:
               - - [0.0, 0.0, 0.0]
@@ -55,6 +58,7 @@ examples:
                 - [0.0, 1.0, 1.0]
               datatype: float64
               shape: [2, 2, 3]
+            units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> inch
 
 type: object
 properties:
@@ -62,14 +66,12 @@ properties:
     description: |
       The coordinates of the data points.
     oneOf:
-      - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-        properties:
-          datatype:
-            type: string
-            enum: [float32, float64]
-        wx_shape: [(~), 3]
       - tag: "asdf://weldx.bam.de/weldx/tags/core/data_array-0.1.*"
         wx_shape: [..., 3]
+        wx_unit: "m"
+      - tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.*"
+        wx_shape: [(~), 3]
+        wx_unit: "m"
   attributes:
     description: |
       An arbitrary set of attributes. For example, normals, colors or measured point data can be stored using this
