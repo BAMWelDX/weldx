@@ -18,7 +18,7 @@ try:
         plot_spatial_data_matplotlib,
     )
 except ModuleNotFoundError as mnf:
-    msg = mnf.args[0]
+    msg = mnf.args
     if "k3d" in msg:
         from unittest.mock import MagicMock as _MagickMock
 

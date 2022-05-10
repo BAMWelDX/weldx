@@ -23,6 +23,7 @@ from weldx.types import QuantityLike
 from weldx.util.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
+    import matplotlib.axes
     import numpy.typing as npt
 
     import weldx.visualization.types as vs_types

@@ -20,6 +20,7 @@ from weldx.time import Time, TimeDependent, types_time_like
 from weldx.util.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
+    import matplotlib.axes
     from xarray.core.coordinates import DataArrayCoordinates
 
     from weldx.types import UnitLike

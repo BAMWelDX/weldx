@@ -14,6 +14,7 @@ from weldx.core import MathematicalExpression, TimeSeries
 from weldx.util.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
+    import matplotlib.axes
     from pandas import TimedeltaIndex
     from pint import Quantity, Unit
 
