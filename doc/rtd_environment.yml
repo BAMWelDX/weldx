@@ -16,6 +16,7 @@ dependencies:
   # notebook execution
   - ipykernel
   - ipywidgets
+  - weldx_widgets >=0.2.1
   # documentation
   - sphinx>=4.1.1
   - jinja2=3.0

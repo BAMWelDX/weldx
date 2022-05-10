@@ -11,7 +11,7 @@ from networkx import draw, draw_networkx_edge_labels
 
 from weldx.constants import Q_, U_
 from weldx.core import MathematicalExpression, TimeSeries
-from weldx.util.util import check_matplotlib_available
+from weldx.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes

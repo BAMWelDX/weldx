@@ -32,7 +32,7 @@ except ModuleNotFoundError as mnf:
         CoordinateSystemManagerVisualizerK3D = _Hint()
         SpatialDataVisualizer = _Hint()
     elif "matplotlib" in msg:
-        from weldx.util.util import check_matplotlib_available as _mpl_avail
+        from weldx.util import check_matplotlib_available as _mpl_avail
 
         @_mpl_avail
         def _dummy(*args, **kwargs):

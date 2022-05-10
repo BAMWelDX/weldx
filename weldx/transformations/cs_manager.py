@@ -15,13 +15,14 @@ from weldx import util
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
-from weldx.util.util import check_matplotlib_available, dataclass_nested_eq
+from weldx.util import check_matplotlib_available, dataclass_nested_eq
 
 from .local_cs import LocalCoordinateSystem
 from .types import types_coordinates, types_orientation
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
+    import matplotlib
     import networkx as nx
 
 

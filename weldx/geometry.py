@@ -12,6 +12,7 @@ import pint
 import sympy
 from xarray import DataArray
 
+import weldx
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
@@ -20,13 +21,13 @@ from weldx.core import MathematicalExpression, SpatialSeries
 from weldx.types import QuantityLike
 
 # only import heavy-weight packages on type checking
-from weldx.util.util import check_matplotlib_available
+from weldx.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
     import numpy.typing as npt
 
-    import weldx.visualization.types as vs_types
+    # from weldx_widgets.visualization import types as vs_types
     import weldx.welding.groove.iso_9692_1 as iso
 
 # helper -------------------------------------------------------------------------------
@@ -2504,13 +2505,13 @@ class Geometry:
         self,
         profile_raster_width: QuantityLike = "1mm",
         trace_raster_width: QuantityLike = "50mm",
-        axes: "matplotlib.axes.Axes" = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
-        limits: vs_types.types_limits = None,
+        limits: "weldx.visualization.types.types_limits" = None,
         show_wireframe: bool = True,
         backend: str = "mpl",
-    ) -> "matplotlib.axes.Axes":
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the geometry.
 
         Parameters
@@ -2867,13 +2868,13 @@ class SpatialData:
 
     def plot(
         self,
-        axes: "matplotlib.axes.Axes" = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-        limits: vs_types.types_limits = None,
+        limits: "weldx.visualization.types.types_limits" = None,
         backend: str = "mpl",
-    ) -> "matplotlib.axes.Axes":
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the spatial data.
 
         Parameters

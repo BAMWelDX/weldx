@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import typing
 import warnings
 from copy import deepcopy
 from typing import Any, Union
@@ -21,7 +22,8 @@ from weldx.transformations.util import normalize
 
 __all__ = ("LocalCoordinateSystem",)
 
-from weldx.util.util import check_matplotlib_available
+if typing.TYPE_CHECKING:
+    import matplotlib
 
 
 class LocalCoordinateSystem(TimeDependent):
@@ -787,7 +789,6 @@ class LocalCoordinateSystem(TimeDependent):
             orientation, coordinates, self.time, self.reference_time
         )
 
-    @check_matplotlib_available
     def plot(
         self,
         axes: "matplotlib.axes.Axes" = None,  # noqa: F821

@@ -17,7 +17,7 @@ from bidict import bidict
 import weldx.util as ut
 from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time, TimeDependent, types_time_like
-from weldx.util.util import check_matplotlib_available
+from weldx.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
