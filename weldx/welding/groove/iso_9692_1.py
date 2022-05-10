@@ -76,7 +76,7 @@ def _compute_cross_sect_shape_points(
 
     bounding_box = Polygon((x1, y1), (x2, y1), (x2, y2), (x1, y2), evaluate=False)
 
-    return Q_(float(bounding_box.area - area_workpiece), "mm²")
+    return Q_(float(bounding_box.area - area_workpiece), f"{_DEFAULT_LEN_UNIT}**2")
 
 
 class IsoBaseGroove(metaclass=abc.ABCMeta):
@@ -84,7 +84,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
 
     _mapping: dict[str, str] = None
 
-    _AREA_RASTER_WIDTH: pint.Quantity = Q_("0.1mm")
+    _AREA_RASTER_WIDTH: pint.Quantity = Q_(0.1, _DEFAULT_LEN_UNIT)
     """steers the area approximation of the groove in ~cross_sect_area."""
 
     def __post_init__(self):
@@ -1598,7 +1598,7 @@ class FFGroove(IsoBaseGroove):
         raise NotImplementedError("Cannot determine FFGroove cross sectional area")
 
 
-def _helperfunction(segment, array) -> geo.Shape:
+def _helperfunction(segment: list[str], array: np.ndarray) -> geo.Shape:
     """Calculate a shape from input.
 
     Input segment of successive segments as strings.
