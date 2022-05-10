@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: '0 6 * * 1'
 
+# execute commands with conda aware shell by default:
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -25,11 +30,22 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: CagtayFabry/pydeps2env@main
         with:
-          python-version: '3.9'
-      - name: pip installs
+          channels: 'conda-forge defaults'
+          extras: 'test'
+          setup_requires: 'include'
+
+      - uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: ./environment.yml
+          environment-name: weldx
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.py }}
+            wheel
+            pip
+      - name: pip installs  # use mypy from pypy, as the conda-forge pkg lacks behind.
         run: pip install mypy
       - name: run mypy
         run: |
