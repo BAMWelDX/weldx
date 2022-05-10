@@ -27,7 +27,6 @@ if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
     import numpy.typing as npt
 
-    # from weldx_widgets.visualization import types as vs_types
     import weldx.welding.groove.iso_9692_1 as iso
 
 # helper -------------------------------------------------------------------------------
