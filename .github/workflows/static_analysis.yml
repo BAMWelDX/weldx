@@ -42,7 +42,7 @@ jobs:
           environment-name: weldx
           cache-env: true
           extra-specs: |
-            python=${{ matrix.py }}
+            python=3.9
             wheel
             pip
       - name: pip installs  # use mypy from pypy, as the conda-forge pkg lacks behind.
