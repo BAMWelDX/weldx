@@ -12,7 +12,7 @@ import pint
 from sympy import Point2D, Polygon
 
 import weldx.geometry as geo
-from weldx.constants import Q_, U_
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.util import inherit_docstrings, ureg_check_class
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -34,9 +34,6 @@ __all__ = [
     "FFGroove",
     "get_groove",
 ]
-
-
-_DEFAULT_LEN_UNIT = U_("mm")
 
 
 def _set_default_heights(groove):
@@ -79,7 +76,7 @@ def _compute_cross_sect_shape_points(
 
     bounding_box = Polygon((x1, y1), (x2, y1), (x2, y2), (x1, y2), evaluate=False)
 
-    return Q_(float(bounding_box.area - area_workpiece), "mm²")
+    return Q_(float(bounding_box.area - area_workpiece), f"{_DEFAULT_LEN_UNIT}**2")
 
 
 class IsoBaseGroove(metaclass=abc.ABCMeta):
@@ -87,7 +84,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
 
     _mapping: dict[str, str] = None
 
-    _AREA_RASTER_WIDTH = Q_("0.1mm")
+    _AREA_RASTER_WIDTH: pint.Quantity = Q_(0.1, _DEFAULT_LEN_UNIT)
     """steers the area approximation of the groove in ~cross_sect_area."""
 
     def __post_init__(self):
@@ -141,7 +138,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         ax :
              Axis to plot to
         show_area
-            Calculate and show the groove cross section area in the plot title.
+            Calculate and show the groove cross-section area in the plot title.
 
         """
         if raster_width is None:
@@ -153,7 +150,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         if show_area:
             try:
                 ca = self.cross_sect_area
-                title = title + f" ({np.around(ca,1):~.3P})"
+                title = title + f" ({np.around(ca, 1):~.3P})"
             except NotImplementedError:
                 pass
             except Exception as ex:
@@ -222,6 +219,16 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
 
         return _compute_cross_sect_shape_points(points)
 
+    @staticmethod
+    def _translate_reflect(b, segment_list, x_value, y_value):
+        shape = _helperfunction(segment_list, (x_value, y_value))
+        shape = shape.translate(Q_(np.append(-b / 2, 0), _DEFAULT_LEN_UNIT))
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
+        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+
 
 @ureg_check_class("[length]", "[length]", None)
 @inherit_docstrings
@@ -268,15 +275,7 @@ class IGroove(IsoBaseGroove):
         y_value = np.stack((0, 0, t, t))
         segment_list = ["line", "line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -363,15 +362,7 @@ class VGroove(IsoBaseGroove):
         y_value = np.append(y_value, t)
         segment_list.append("line")
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis is mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -463,15 +454,7 @@ class VVGroove(IsoBaseGroove):
         y_value = np.append(y_value, (h + c, t, t))
         segment_list += ["line", "line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -570,15 +553,7 @@ class UVGroove(IsoBaseGroove):
         y_value = np.stack((0, 0, h, y_m, y_arc, t, t))
         segment_list = ["line", "line", "arc", "line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -694,15 +669,7 @@ class UGroove(IsoBaseGroove):
         y_value = np.append(y_value, t)
         segment_list.append("line")
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -1017,14 +984,7 @@ class DVGroove(IsoBaseGroove):
         y_value = np.append(y_value, (t, t))
         segment_list += ["line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -1159,14 +1119,7 @@ class DUGroove(IsoBaseGroove):
         y_value = np.append(y_value, (h2 + c + R, t - (h1 - (R - y_upper)), t, t))
         segment_list += ["arc", "line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -1645,7 +1598,7 @@ class FFGroove(IsoBaseGroove):
         raise NotImplementedError("Cannot determine FFGroove cross sectional area")
 
 
-def _helperfunction(segment, array) -> geo.Shape:
+def _helperfunction(segment: list[str], array: np.ndarray) -> geo.Shape:
     """Calculate a shape from input.
 
     Input segment of successive segments as strings.
@@ -1667,22 +1620,28 @@ def _helperfunction(segment, array) -> geo.Shape:
         geo.Shape
 
     """
-    segment_list = []
+    segment_list: list[Union[geo.LineSegment, geo.ArcSegment]] = []
     counter = 0
     for elem in segment:
         if elem == "line":
             seg = geo.LineSegment(
-                np.vstack(
-                    [array[0][counter : counter + 2], array[1][counter : counter + 2]]
+                Q_(
+                    np.vstack(
+                        [
+                            array[0][counter : counter + 2],
+                            array[1][counter : counter + 2],
+                        ]
+                    ),
+                    _DEFAULT_LEN_UNIT,
                 )
             )
             segment_list.append(seg)
             counter += 1
-        if elem == "arc":
+        elif elem == "arc":
             arr0 = array[0][[counter, counter + 2, counter + 1]]
             arr1 = array[1][[counter, counter + 2, counter + 1]]
             arr = np.vstack((arr0, arr1))
-            seg = geo.ArcSegment(arr, False)
+            seg = geo.ArcSegment(Q_(arr, _DEFAULT_LEN_UNIT), False)
             segment_list.append(seg)
             counter += 2
 
