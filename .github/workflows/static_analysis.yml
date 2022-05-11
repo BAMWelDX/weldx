@@ -55,6 +55,9 @@ jobs:
       - name: pip installs  # use mypy from pypy, as the conda-forge pkg lacks behind.
         run: pip install mypy
 
+      - name: Add mypy annotator
+        uses: pr-annotators/mypy-pr-annotator@v1.0.0
+
       - name: run mypy
         run: |
           mypy --install-types --non-interactive .
