@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import functools
-import json
 import re
 import sys
 import warnings
 from collections.abc import Callable, Sequence, Set
 from functools import wraps
 from inspect import getmembers, isfunction
-from pathlib import Path
 from typing import ClassVar, Collection, Hashable, Mapping, Union
 
 import numpy as np
@@ -138,32 +136,6 @@ def ureg_check_class(*args):
         return original_class
 
     return _inner_decorator
-
-
-def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
-    """Clean ID metadata, output and execution count from jupyter notebook cells.
-
-    This function overrides the existing notebook file, use with caution!
-
-    Parameters
-    ----------
-    file :
-        The jupyter notebook filename to clean.
-
-    """
-    with open(file, encoding="utf-8") as f:
-        data = json.load(f)
-
-    for cell in data["cells"]:
-        cell.pop("id", None)
-        if "outputs" in cell:
-            cell["outputs"] = []
-        if "execution_count" in cell:
-            cell["execution_count"] = None
-
-    with open(file, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=1, ensure_ascii=False)
-        f.write("\n")
 
 
 def inherit_docstrings(cls):
