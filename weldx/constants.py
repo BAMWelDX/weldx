@@ -33,7 +33,7 @@ WELDX_UNIT_REGISTRY.default_format = "~"
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 Q_ = WELDX_QUANTITY
 Q_.__name__ = "Q_"
-Q_.__module_ = "pint.quantity"  # skipcq: PYL-W0212
+Q_.__module__ = "pint.quantity"  # skipcq: PYL-W0212
 Q_.__doc__ = """Create a quantity from a scalar or array.
 
 The quantity class supports lots of physical units and will combine them during
@@ -70,8 +70,8 @@ U_.__doc__ = """For details on working with quantities and units, please see the
 """
 
 # set default units
-_DEFAULT_LEN_UNIT = WELDX_UNIT_REGISTRY.millimeters
-_DEFAULT_ANG_UNIT = WELDX_UNIT_REGISTRY.rad
+_DEFAULT_LEN_UNIT: pint.Unit = WELDX_UNIT_REGISTRY.millimeters
+_DEFAULT_ANG_UNIT: pint.Unit = WELDX_UNIT_REGISTRY.rad
 
 # set default unit registry for pint-xarray
 pint.set_application_registry(WELDX_UNIT_REGISTRY)
