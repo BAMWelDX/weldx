@@ -30,10 +30,14 @@ jobs:
     strategy:
       fail-fast: false
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
       - uses: CagtayFabry/pydeps2env@main
         with:
           channels: 'conda-forge defaults'
-          extras: 'test'
+          extras: ''
           setup_requires: 'include'
 
       - uses: mamba-org/provision-with-micromamba@main
@@ -45,8 +49,12 @@ jobs:
             python=3.9
             wheel
             pip
+      - name: activate env
+        run: micromamba activate weldx
+
       - name: pip installs  # use mypy from pypy, as the conda-forge pkg lacks behind.
         run: pip install mypy
+
       - name: run mypy
         run: |
           mypy --install-types --non-interactive .
