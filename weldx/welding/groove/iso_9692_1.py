@@ -12,10 +12,8 @@ import pint
 from sympy import Point2D, Polygon
 
 import weldx.geometry as geo
-
-from weldx.constants import Q_, U_, _DEFAULT_LEN_UNIT
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.util import check_matplotlib_available, inherit_docstrings, ureg_check_class
-
 
 if TYPE_CHECKING:  # pragma: no cover
     from weldx.types import QuantityLike
