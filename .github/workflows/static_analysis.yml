@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: pip installs
-        run: pip install mypy matplotlib
+        run: pip install mypy
       - name: run mypy
         run: |
           mypy --install-types --non-interactive .
