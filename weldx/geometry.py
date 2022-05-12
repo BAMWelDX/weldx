@@ -12,7 +12,8 @@ import pint
 import sympy
 from xarray import DataArray
 
-import weldx  # skipcq: PY-W2000  # note: this is used to resolve visualization.types
+# note: this is used to resolve visualization.types
+import weldx  # skipcq: PY-W2000  pylint: disable=unused-import
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
