@@ -1,4 +1,4 @@
-# clean up jupyter notebooks in main directory
+"""Clean up jupyter notebooks in main directory"""
 from __future__ import annotations
 
 import json
@@ -16,7 +16,7 @@ def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
         The jupyter notebook filename to clean.
 
     """
-    with open(file, encoding="utf-8") as f:
+    with open(file, encoding="utf-8") as f:  # skipcq: PTC-W6004
         data = json.load(f)
 
     for cell in data["cells"]:
