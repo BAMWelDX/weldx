@@ -45,7 +45,6 @@ def has_cw_ordering(points: np.ndarray):
     return True
 
 
-# todo: Note that this is a copy of the weldx.tests._helpers.py function.
 def _vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
     """Check if a vector is close or equal to another vector.
 
