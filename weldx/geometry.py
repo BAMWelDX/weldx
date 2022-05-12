@@ -12,21 +12,20 @@ import pint
 import sympy
 from xarray import DataArray
 
+import weldx
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, SpatialSeries
 from weldx.types import QuantityLike
-
-# only import heavy-weight packages on type checking
 from weldx.util import check_matplotlib_available
 
+# only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
     import numpy.typing as npt
 
-    import weldx.visualization.types.types_limits
     import weldx.welding.groove.iso_9692_1 as iso
 
 # helper -------------------------------------------------------------------------------
@@ -249,7 +248,7 @@ class DynamicBaseSegment:
 class DynamicShapeSegment(DynamicBaseSegment):
     """Shape segment class to define arbitrary 2d shapes."""
 
-    @property  # type: ignore
+    @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_start(self) -> pint.Quantity:
         """Get the starting point of the segment."""
