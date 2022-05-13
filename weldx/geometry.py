@@ -12,19 +12,21 @@ import pint
 import sympy
 from xarray import DataArray
 
+# note: this is used to resolve visualization.types
+import weldx  # skipcq: PY-W2000  pylint: disable=unused-import
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, SpatialSeries
 from weldx.types import QuantityLike
+from weldx.util import check_matplotlib_available
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
     import numpy.typing as npt
 
-    import weldx.visualization.types as vs_types
     import weldx.welding.groove.iso_9692_1 as iso
 
 # helper -------------------------------------------------------------------------------
@@ -44,7 +46,6 @@ def has_cw_ordering(points: np.ndarray):
     return True
 
 
-# todo: Note that this is a copy of the weldx.tests._helpers.py function.
 def _vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
     """Check if a vector is close or equal to another vector.
 
@@ -1387,6 +1388,7 @@ class Profile:
         return [Q_(item, _DEFAULT_LEN_UNIT) for item in raster_data]
 
     @UREG.check(None, None, "[length]", None, None, None, None, None, None, None)
+    @check_matplotlib_available
     def plot(
         self,
         title: str = None,
@@ -2501,13 +2503,13 @@ class Geometry:
         self,
         profile_raster_width: QuantityLike = "1mm",
         trace_raster_width: QuantityLike = "50mm",
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
-        limits: vs_types.types_limits = None,
+        limits: "weldx.visualization.types.types_limits" = None,
         show_wireframe: bool = True,
         backend: str = "mpl",
-    ) -> matplotlib.axes.Axes:
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the geometry.
 
         Parameters
@@ -2864,13 +2866,13 @@ class SpatialData:
 
     def plot(
         self,
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-        limits: vs_types.types_limits = None,
+        limits: "weldx.visualization.types.types_limits" = None,
         backend: str = "mpl",
-    ) -> matplotlib.axes.Axes:
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the spatial data.
 
         Parameters

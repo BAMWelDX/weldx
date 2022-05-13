@@ -17,9 +17,10 @@ from bidict import bidict
 import weldx.util as ut
 from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time, TimeDependent, types_time_like
+from weldx.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.pyplot
+    import matplotlib.axes
     from xarray.core.coordinates import DataArrayCoordinates
 
     from weldx.types import UnitLike
@@ -633,14 +634,15 @@ class TimeSeries(TimeDependent):
         ts._interp_counter = self._interp_counter + 1
         return ts
 
+    @check_matplotlib_available
     def plot(
         self,
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
-        axes: matplotlib.pyplot.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         data_name: str = "values",
         time_unit: UnitLike = None,
         **mpl_kwargs,
-    ) -> matplotlib.pyplot.Axes:
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the `TimeSeries`.
 
         Parameters
@@ -660,7 +662,7 @@ class TimeSeries(TimeDependent):
 
         Returns
         -------
-        matplotlib.axes._axes.Axes :
+         matplotlib.axes.Axes :
             The matplotlib axes object that was used for the plot
 
         """
