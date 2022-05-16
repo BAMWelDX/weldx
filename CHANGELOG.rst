@@ -18,6 +18,8 @@ changes
 fixes
 =====
 
+-  Fix interactive ``view_tree`` display [:pull:`756`].
+
 documentation
 =============
 
