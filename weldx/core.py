@@ -51,7 +51,9 @@ class MathematicalExpression:
         """
         if not isinstance(expression, sympy.Expr):
             expression = sympy.sympify(expression)
-        self._expression = expression
+        if not isinstance(expression, sympy.Expr):
+            raise TypeError("'expression' can't be converted to a sympy expression")
+        self._expression: sympy.Expr = expression
 
         self.function = sympy.lambdify(
             tuple(self._expression.free_symbols), self._expression, "numpy"
