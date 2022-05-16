@@ -654,8 +654,13 @@ class Time:
         """Build a time-like pandas.Index from pint.Quantity."""
         time_ref = getattr(time, "time_ref", None)
         base = "s"  # using low base unit could cause rounding errors
+
         if not np.iterable(time):  # catch zero-dim arrays
-            time = np.expand_dims(time, 0)
+            # The mypy error in the next line is ignored. `np.expand_dims` only expects
+            # `ndarray` types and does not know about quantities, but pint provides the
+            # necessary interfaces so that the function works as expected
+            time = np.expand_dims(time, 0)  # type: ignore
+
         delta = pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
         if time_ref is not None:
             delta = delta + time_ref
