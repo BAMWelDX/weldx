@@ -348,7 +348,7 @@ def view_tree(file: types_path_and_file_like, path: tuple = None, **kwargs):
         root = "/"
 
     yaml_dict = get_yaml_header(file, parse=True)
-    yaml_dict = remap(yaml_dict, _visit)
+    yaml_dict = dict(remap(yaml_dict, _visit))
     if path:
         root = root + "/".join(path)
         yaml_dict = get_path(yaml_dict, path)
