@@ -99,11 +99,10 @@ jobs:
 
       - name: pip dist install
         run: |
-          pip install ${{ env.SDIST_FILE }}
+          pip install ${{ env.SDIST_FILE }}[test]
 
       - name: run pytest
         run: |
-          pip install pytest pytest-cov pytest-xdist
           cd /tmp
           pytest -n2 --dist=loadfile --pyargs weldx
           cd -

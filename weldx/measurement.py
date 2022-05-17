@@ -11,9 +11,10 @@ from networkx import draw, draw_networkx_edge_labels
 
 from weldx.constants import Q_, U_
 from weldx.core import MathematicalExpression, TimeSeries
+from weldx.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.pyplot as plt
+    import matplotlib.axes
     from pandas import TimedeltaIndex
     from pint import Quantity, Unit
 
@@ -47,11 +48,11 @@ class Signal:
     def plot(
         self,
         time: Union[TimedeltaIndex, Quantity] = None,
-        axes: plt.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         data_name: str = "values",
         time_unit: Union[str, Unit] = None,
         **mpl_kwargs,
-    ) -> plt.Axes:
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the time dependent data of the `Signal`.
 
         Parameters
@@ -71,7 +72,7 @@ class Signal:
 
         Returns
         -------
-        matplotlib.axes._axes.Axes :
+         matplotlib.axes.Axes :
             The matplotlib axes object that was used for the plot
 
         """
@@ -928,6 +929,7 @@ class MeasurementChain:
 
         raise KeyError(f"No transformation with name '{name}' found")
 
+    @check_matplotlib_available
     def plot(self, axes=None):
         """Plot the measurement chain.
 

@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
 
       - name: Setup Conda Environment
         uses: mamba-org/provision-with-micromamba@main
@@ -60,7 +62,7 @@ jobs:
         run: echo "nbsphinx_execute=${{ github.event.inputs.nbsphinx_execute }}" >> $GITHUB_ENV
 
       - name: Build docs
-        run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -j auto -D nbsphinx_execute=${{ env.nbsphinx_execute }}
+        run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -j 2 -D nbsphinx_execute=${{ env.nbsphinx_execute }}
 
       - uses: actions/upload-artifact@v3
         if: |

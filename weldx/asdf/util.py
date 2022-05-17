@@ -12,7 +12,7 @@ import pint
 from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
 from asdf.extension import Extension
-from asdf.tagged import TaggedDict
+from asdf.tagged import TaggedDict, TaggedList, TaggedString
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
 from packaging.version import Version
@@ -332,12 +332,23 @@ def view_tree(file: types_path_and_file_like, path: tuple = None, **kwargs):
     """
     from IPython.display import JSON
 
+    def _visit(p, k, v):
+        """Convert tagged types to base types."""
+        if isinstance(v, TaggedDict):
+            return k, dict(v)
+        if isinstance(v, TaggedList):
+            return k, list(v)
+        if isinstance(v, TaggedString):
+            return k, str(v)
+        return k, v
+
     if isinstance(file, str):
         root = file + "/"
     else:
         root = "/"
 
     yaml_dict = get_yaml_header(file, parse=True)
+    yaml_dict = dict(remap(yaml_dict, _visit))
     if path:
         root = root + "/".join(path)
         yaml_dict = get_path(yaml_dict, path)

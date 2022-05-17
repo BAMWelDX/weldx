@@ -3,6 +3,40 @@
 ###############
 
 ********************
+ 0.6.1 (tba)
+********************
+
+added
+=====
+
+removed
+=======
+
+changes
+=======
+
+fixes
+=====
+
+-  Fix interactive ``view_tree`` display [:pull:`756`].
+
+documentation
+=============
+
+ASDF
+====
+
+deprecations
+============
+
+
+dependencies
+============
+
+-  Weldx now (optionally) requires weldx_widgets to visualize coordinate systems/manager [:pull:`749`].
+-  NumPy is not required as a build time dependency anymore, as Bottleneck now provides binaries on PyPI [:pull:`749`].
+
+********************
  0.6.0 (29.04.2022)
 ********************
 
@@ -20,6 +54,7 @@ Furthermore, a new class called `GenericSeries` was added. It provides a common 
 data either by discrete values or mathematical expressions. A built-in mechanism lets you derive specialized series with
 specific requirements. For more information, have a look
 `at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0_a/tutorials/generic_series.html>`__ .
+
 
 added
 =====

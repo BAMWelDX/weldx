@@ -34,12 +34,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Fetch all history for all tags and branches
+          fetch-depth: '0' # Fetch all history for all tags and branches
 
       - uses: CagtayFabry/pydeps2env@main
         with:
           channels: 'conda-forge defaults'
-          extras: 'test'
+          extras: 'test vis'
           setup_requires: 'include'
 
       - uses: mamba-org/provision-with-micromamba@main
@@ -103,7 +103,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Fetch all history for all tags and branches
+          fetch-depth: '0' # Fetch all history for all tags and branches
 
       - uses: CagtayFabry/pydeps2env@main
         with:

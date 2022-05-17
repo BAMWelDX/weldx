@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import functools
-import json
 import re
 import sys
 import warnings
 from collections.abc import Callable, Sequence, Set
 from functools import wraps
 from inspect import getmembers, isfunction
-from pathlib import Path
 from typing import ClassVar, Collection, Hashable, Mapping, Union
 
 import numpy as np
@@ -19,6 +17,7 @@ import psutil
 import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
+from decorator import decorator
 
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.time import Time
@@ -34,6 +33,7 @@ __all__ = [
     "is_interactive_session",
     "_patch_mod_all",
     "apply_func_by_mapping",
+    "check_matplotlib_available",
 ]
 
 
@@ -136,32 +136,6 @@ def ureg_check_class(*args):
         return original_class
 
     return _inner_decorator
-
-
-def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
-    """Clean ID metadata, output and execution count from jupyter notebook cells.
-
-    This function overrides the existing notebook file, use with caution!
-
-    Parameters
-    ----------
-    file :
-        The jupyter notebook filename to clean.
-
-    """
-    with open(file, encoding="utf-8") as f:
-        data = json.load(f)
-
-    for cell in data["cells"]:
-        cell.pop("id", None)
-        if "outputs" in cell:
-            cell["outputs"] = []
-        if "execution_count" in cell:
-            cell["execution_count"] = None
-
-    with open(file, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=1, ensure_ascii=False)
-        f.write("\n")
 
 
 def inherit_docstrings(cls):
@@ -422,3 +396,20 @@ def _patch_mod_all(module_name: str):
 def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
     """Transform a dict by running functions mapped by keys over its values."""
     return {k: (func_map[k](v) if k in func_map else v) for k, v in inputs.items()}
+
+
+@decorator
+def check_matplotlib_available(func, *args, **kwargs):
+    """Emit a warning if matplotlib is not available."""
+    try:
+        import matplotlib.pyplot as _  # noqa: F401
+    except ModuleNotFoundError:
+        warnings.warn(
+            "Matplotlib unavailable! Cannot plot. "
+            "Please install matplotlib or weldx_widgets.",
+            stacklevel=2,
+        )
+    else:
+        return func(*args, **kwargs)
+
+    return None
