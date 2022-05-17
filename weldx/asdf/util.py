@@ -576,29 +576,31 @@ def _get_instance_units(
 
 
 class _ProtectedViewDict(MutableMapping):
+    """A mutable mapping which protects given keys from manipulation."""
+
     def __init__(self, protected_keys, data=None):
         super(_ProtectedViewDict, self).__init__()
-        self.__data = data
+        self.__data = data if data is not None else dict()
         self.protected_keys = protected_keys
 
-    @property
-    def _data(self):
-        return self
+    def _wrap_protected_non_existent(self, key, method: str):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            raise KeyError(f"'{key}' is protected.")
+        elif key not in self.__data:
+            raise KeyError(f"'{key}' not contained.")
+
+        method_obj = getattr(self.__data, method)
+        return method_obj(key)
 
     def __len__(self) -> int:
         return len(self.keys())
 
     def __getitem__(self, key):
-        if key in self.protected_keys:
-            self._warn_protected_keys()
-            raise KeyError
-        return self.__data.get(key)
+        return self._wrap_protected_non_existent(key, "__getitem__")
 
     def __delitem__(self, key):
-        if key in self.protected_keys:
-            self._warn_protected_keys()
-            return
-        del self.__data[key]
+        return self._wrap_protected_non_existent(key, "__delitem__")
 
     def __setitem__(self, key, value):
         if key in self.protected_keys:
@@ -632,7 +634,7 @@ class _ProtectedViewDict(MutableMapping):
             if k not in self.protected_keys:
                 return k, self.pop(k)
 
-        raise KeyError
+        raise KeyError("empty")
 
     def clear(self):
         """Clear all data except the protected keys."""

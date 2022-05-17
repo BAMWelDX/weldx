@@ -612,7 +612,7 @@ properties:
             keys.append(key)
         assert keys == [META_ATTR]
 
-    def test_len_proteced_keys(self):
+    def test_len_protected_keys(self):
         """Should only contain key 'wx_metadata'."""
         assert len(self.fh) == 1
 

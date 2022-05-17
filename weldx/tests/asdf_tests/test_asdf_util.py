@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import io
+import unittest
 from dataclasses import dataclass
 
 import numpy as np
@@ -9,6 +10,7 @@ import pytest
 
 from weldx.asdf.file import WeldxFile
 from weldx.asdf.util import (
+    _ProtectedViewDict,
     dataclass_serialization_class,
     get_highest_tag_version,
     get_schema_tree,
@@ -186,3 +188,46 @@ def test_get_highest_tag_version():
 def test_get_schema_tree():
     d = get_schema_tree("single_pass_weld-0.1.0")
     assert isinstance(d, dict)
+
+
+class TestProtectedView(unittest.TestCase):
+    def setUp(self):
+        data = dict(foo="blub", bar=42)
+        self.protected_key = "bar"
+        self.view = _ProtectedViewDict(protected_keys=[self.protected_key], data=data)
+
+    def test_protected_keys_hidden(self):
+        assert self.protected_key not in self.view.keys()
+        assert self.protected_key not in self.view
+        assert (self.protected_key, "bar") not in self.view.items()
+
+    def test_allowed_access(self):
+        assert self.view["foo"] == "blub"
+
+    def test_illegal_access(self):
+        with pytest.raises(KeyError):
+            _ = self.view["bar"]
+
+        with pytest.raises(KeyError):
+            del self.view["bar"]
+
+    def test_access_non_existent(self):
+        with pytest.raises(KeyError):
+            _ = self.view["no"]
+
+    def test_update(self):
+        expected_match = "manipulate an ASDF internal structure"
+        warning_type = UserWarning
+
+        with pytest.warns(warning_type, match=expected_match):
+            self.view.update(dict(bar=None), foo=1)
+        assert self.view["foo"] == 1
+
+    def test_popitem(self):
+        k, v = self.view.popitem()
+        assert k == "foo"
+        assert v == "blub"
+
+    def test_clear(self):
+        self.view.clear()
+        assert len(self.view) == 0
