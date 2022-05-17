@@ -39,7 +39,7 @@ jobs:
       - uses: CagtayFabry/pydeps2env@main
         with:
           channels: 'conda-forge defaults'
-          extras: 'test'
+          extras: 'test vis'
           setup_requires: 'include'
 
       - uses: mamba-org/provision-with-micromamba@main
@@ -57,7 +57,7 @@ jobs:
 
       - name: pip installs
         run: |
-          python -m pip install -e .[vis]
+          python -m pip install -e .
 
       - name: run pytest
         run: |
