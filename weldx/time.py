@@ -659,7 +659,7 @@ class Time:
             # The mypy error in the next line is ignored. `np.expand_dims` only expects
             # `ndarray` types and does not know about quantities, but pint provides the
             # necessary interfaces so that the function works as expected
-            time = np.expand_dims(time, 0)  # type: ignore
+            time = np.expand_dims(time, 0)  # type: ignore[assignment]
 
         delta = pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
         if time_ref is not None:
