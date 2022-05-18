@@ -855,7 +855,7 @@ class GenericSeries:
     represented by a variable or be part of one of the expressions parameters.
     """
 
-    _required_dimension_units: dict[str, Union[str, pint.Unit]] = {}
+    _required_dimension_units: dict[str, pint.Unit] = {}
     """A dictionary that maps a required unit dimensionality to a dimension.
 
     If a dimension matches one of the keys of this dictionary, its dimensionality
@@ -1010,7 +1010,7 @@ class GenericSeries:
 
         """
         self._obj: Union[xr.DataArray, MathematicalExpression] = None
-        self._variable_units: dict[str, Union[str, pint.Unit]] = None
+        self._variable_units: dict[str, pint.Unit] = None
         self._symbol_dims: bidict = bidict({})
         self._units: pint.Unit = None
         self._interpolation = "linear" if interpolation is None else interpolation
@@ -1022,7 +1022,9 @@ class GenericSeries:
         elif isinstance(obj, (MathematicalExpression, str, sympy.Expr)):
             if dims is not None and not isinstance(dims, dict):
                 raise ValueError(f"Argument 'dims' must be dict, not {dims}")
-            self._init_expression(obj, dims, parameters, units)
+            self._init_expression(
+                obj, dims, parameters, {k: U_(v) for k, v in units.items()}  # catch str
+            )
         else:
             raise TypeError(f'The data type "{type(obj)}" is not supported.')
 
@@ -1080,8 +1082,8 @@ class GenericSeries:
     def _init_get_updated_units(
         self,
         expr: MathematicalExpression,
-        units: dict[str, Union[str, pint.Unit]],
-    ) -> dict[str, Union[str, pint.Unit]]:
+        units: dict[str, pint.Unit],
+    ) -> dict[str, pint.Unit]:
         """Cast dimensions and units into the internally used, unified format."""
         if units is None:
             units = {}
@@ -1106,7 +1108,7 @@ class GenericSeries:
         expr: Union[str, MathematicalExpression],
         dims: dict[str, str],
         parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]],
-        units: dict[str, Union[str, pint.Unit]],
+        units: dict[str, pint.Unit],
     ):
         """Initialize the internal data with a mathematical expression."""
         # Check and update expression
@@ -1137,7 +1139,7 @@ class GenericSeries:
         self._symbol_dims = bidict(dims)
 
     @staticmethod
-    def _test_expr(expr, dims, units):
+    def _test_expr(expr, dims, units: dict[str, pint.Unit]) -> pint.Unit:
         """Perform a test evaluation of the expression to determine the resulting units.
 
         This function assures that all of the provided information are compatible
@@ -1187,7 +1189,7 @@ class GenericSeries:
 
     @staticmethod
     def _format_expression_params(
-        parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]]
+        parameters: dict[str, Union[pint.Quantity, xr.DataArray]]
     ) -> dict[str, Union[pint.Quantity, xr.DataArray]]:
         """Create expression parameters as a valid internal type.
 
@@ -1423,7 +1425,7 @@ class GenericSeries:
         return None
 
     @property
-    def variable_units(self) -> dict[str, Union[str, pint.Unit]]:
+    def variable_units(self) -> dict[str, pint.Unit]:
         """Get a dictionary that maps the variable names to their expected units."""
         return self._variable_units
 
@@ -1480,7 +1482,7 @@ class GenericSeries:
         cls,
         expr: MathematicalExpression,
         var_dims: dict[str, str],
-        var_units: dict[str, Union[str, pint.Unit]],
+        var_units: dict[str, pint.Unit],
         expr_units: pint.Unit,
     ):
         """Check if the constraints of an expression based derived type are met."""
@@ -1605,9 +1607,7 @@ class SpatialSeries(GenericSeries):
 
     _required_dimensions: list[str] = [_position_dim_name, "c"]
     """Required dimensions"""
-    _required_dimension_units: dict[str, Union[str, pint.Unit]] = {
-        _position_dim_name: U_("")
-    }
+    _required_dimension_units: dict[str, pint.Unit] = {_position_dim_name: U_("")}
     """Required units of a dimension"""
     _required_dimension_coordinates: dict[str, list] = {"c": ["x", "y", "z"]}
     """Required coordinates of a dimension."""
