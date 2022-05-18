@@ -15,6 +15,10 @@ removed
 changes
 =======
 
+-  `WeldxFile` now raises a `KeyError`, if the user tries to directly read or manipulate a protected ASDF keyword
+   within the file. [:pull:`759`]
+
+
 fixes
 =====
 
