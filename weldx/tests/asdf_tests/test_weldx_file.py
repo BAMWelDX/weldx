@@ -594,10 +594,12 @@ properties:
         expected_match = "manipulate an ASDF internal structure"
         warning_type = UserWarning
 
+        # reading is also forbidden
+        with pytest.raises(KeyError):
+            _ = self.fh[protected_key]
+
         with pytest.warns(warning_type, match=expected_match):
             self.fh.update({protected_key: None})
-        with pytest.warns(warning_type, match=expected_match):
-            del self.fh[protected_key]
         with pytest.warns(warning_type, match=expected_match):
             self.fh.pop(protected_key)
         with pytest.warns(warning_type, match=expected_match):
