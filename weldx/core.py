@@ -1606,7 +1606,7 @@ class SpatialSeries(GenericSeries):
     _required_dimensions: list[str] = [_position_dim_name, "c"]
     """Required dimensions"""
     _required_dimension_units: dict[str, Union[str, pint.Unit]] = {
-        _position_dim_name: ""
+        _position_dim_name: U_("")
     }
     """Required units of a dimension"""
     _required_dimension_coordinates: dict[str, list] = {"c": ["x", "y", "z"]}
