@@ -855,7 +855,7 @@ class GenericSeries:
     represented by a variable or be part of one of the expressions parameters.
     """
 
-    _required_dimension_units: dict[str, pint.Unit] = {}
+    _required_dimension_units: dict[str, Union[str, pint.Unit]] = {}
     """A dictionary that maps a required unit dimensionality to a dimension.
 
     If a dimension matches one of the keys of this dictionary, its dimensionality
@@ -891,7 +891,7 @@ class GenericSeries:
         self,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
         dims: Union[list[str], dict[str, str]] = None,
-        coords: dict[str, pint.Quantity] = None,
+        coords: dict[str, Union[list, pint.Quantity]] = None,
         units: dict[str, Union[str, pint.Unit]] = None,
         interpolation: str = None,
         parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
@@ -1010,7 +1010,7 @@ class GenericSeries:
 
         """
         self._obj: Union[xr.DataArray, MathematicalExpression] = None
-        self._variable_units: dict[str, pint.Unit] = None
+        self._variable_units: dict[str, Union[str, pint.Unit]] = None
         self._symbol_dims: bidict = bidict({})
         self._units: pint.Unit = None
         self._interpolation = "linear" if interpolation is None else interpolation
@@ -1052,7 +1052,7 @@ class GenericSeries:
         self,
         data: Union[pint.Quantity, xr.DataArray],
         dims: list[str],
-        coords: dict[str, pint.Quantity],
+        coords: dict[str, Union[list, pint.Quantity]],
     ):
         """Initialize the internal data with discrete values."""
         if not isinstance(data, xr.DataArray):
@@ -1081,7 +1081,7 @@ class GenericSeries:
         self,
         expr: MathematicalExpression,
         units: dict[str, Union[str, pint.Unit]],
-    ) -> dict[str, pint.Unit]:
+    ) -> dict[str, Union[str, pint.Unit]]:
         """Cast dimensions and units into the internally used, unified format."""
         if units is None:
             units = {}
@@ -1090,7 +1090,7 @@ class GenericSeries:
             for k, v in self._required_dimension_units.items():
                 if k not in units and k not in expr.parameters:
                     units[k] = v
-        for k, v in units.items():
+        for k, v in units.items():  # type: ignore[assignment]
             if k not in expr.get_variable_names():
                 raise KeyError(f"{k} is not a variable of the expression:\n{expr}")
             units[k] = U_(v)
@@ -1423,7 +1423,7 @@ class GenericSeries:
         return None
 
     @property
-    def variable_units(self) -> dict[str, pint.Unit]:
+    def variable_units(self) -> dict[str, Union[str, pint.Unit]]:
         """Get a dictionary that maps the variable names to their expected units."""
         return self._variable_units
 
@@ -1480,7 +1480,7 @@ class GenericSeries:
         cls,
         expr: MathematicalExpression,
         var_dims: dict[str, str],
-        var_units: dict[str, pint.Unit],
+        var_units: dict[str, Union[str, pint.Unit]],
         expr_units: pint.Unit,
     ):
         """Check if the constraints of an expression based derived type are met."""
@@ -1616,7 +1616,7 @@ class SpatialSeries(GenericSeries):
         self,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
         dims: Union[list[str], dict[str, str]] = None,
-        coords: dict[str, pint.Quantity] = None,
+        coords: dict[str, Union[list, pint.Quantity]] = None,
         units: dict[str, Union[str, pint.Unit]] = None,
         interpolation: str = None,
         parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
@@ -1634,7 +1634,7 @@ class SpatialSeries(GenericSeries):
         cls,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
         dims: Union[list[str], dict[str, str]],
-        coords: dict[str, Union[str, pint.Quantity]],
+        coords: dict[str, Union[list, pint.Quantity]],
     ) -> xr.DataArray:
         """Turn a quantity into a a correctly formatted data array."""
         if isinstance(coords, dict):
