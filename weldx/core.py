@@ -1090,10 +1090,10 @@ class GenericSeries:
             for k, v in self._required_dimension_units.items():
                 if k not in units and k not in expr.parameters:
                     units[k] = v
-        for k, v in units.items():
-            if k not in expr.get_variable_names():
-                raise KeyError(f"{k} is not a variable of the expression:\n{expr}")
-            units[k] = U_(v)
+        for k2, v2 in units.items():
+            if k2 not in expr.get_variable_names():
+                raise KeyError(f"{k2} is not a variable of the expression:\n{expr}")
+            units[k2] = U_(v2)
 
         for val in expr.get_variable_names():
             if val not in units:
