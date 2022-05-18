@@ -1009,6 +1009,9 @@ class GenericSeries:
 
 
         """
+        if units is None:
+            units = {}
+
         self._obj: Union[xr.DataArray, MathematicalExpression] = None
         self._variable_units: dict[str, pint.Unit] = None
         self._symbol_dims: bidict = bidict({})
