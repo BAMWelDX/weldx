@@ -518,7 +518,7 @@ class MeasurementChain:
 
     @staticmethod
     def _determine_output_signal_unit(
-        func: MathematicalExpression, input_unit: Union[str, Union]
+        func: MathematicalExpression, input_unit: UnitLike
     ) -> pint.Unit:
         """Determine the unit of a transformations' output signal.
 
