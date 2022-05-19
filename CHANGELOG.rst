@@ -3,14 +3,10 @@
 ###############
 
 ********************
- 0.6.1 (tba)
+ 0.6.1 (19.05.2022)
 ********************
 
-added
-=====
-
-removed
-=======
+Release ``0.6.1`` moves advanced plotting functions over to the ``weldx-widgets`` package and includes minor bugfixes.
 
 changes
 =======
@@ -18,22 +14,11 @@ changes
 -  `WeldxFile` now raises a `KeyError`, if the user tries to directly read or manipulate a protected ASDF keyword
    within the file. [:pull:`759`]
 
-
 fixes
 =====
 
 -  Fix interactive ``view_tree`` display [:pull:`756`].
 -  Increase ``mypy`` coverage and update type hints and GH action [:pull:`753`].
-
-documentation
-=============
-
-ASDF
-====
-
-deprecations
-============
-
 
 dependencies
 ============

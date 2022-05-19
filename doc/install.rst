@@ -16,13 +16,13 @@ installing the WelDX package:
 
 .. code::
 
-   conda create -n weldx -c conda-forge weldx
+   conda create -n weldx -c conda-forge weldx weldx_widgets
 
 The package is also available on pypi and can be installed via *pip*:
 
 .. code::
 
-   pip install weldx
+   pip install weldx weldx-widgets
 
 As weldx currently depends on the package ``bottleneck``, which contains
 C/C++ code, you will need a working C/C++ compiler. The conda package
@@ -112,7 +112,7 @@ using conda:
 
 .. code::
 
-   conda create -n weldx -c conda-forge weldx
+   conda create -n weldx -c conda-forge weldx weldx_widgets
    conda activate weldx
    python -m ipykernel install --user --name weldx --display-name "Python (weldx)"
    conda create -n jlab -c conda-forge jupyterlab k3d
