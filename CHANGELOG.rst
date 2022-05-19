@@ -37,8 +37,9 @@ deprecations
 dependencies
 ============
 
--  Weldx now (optionally) requires weldx_widgets to visualize coordinate systems/manager [:pull:`749`].
+-  ``weldx`` now (optionally) requires ``weldx_widgets`` to visualize coordinate systems/manager [:pull:`749`].
 -  NumPy is not required as a build time dependency anymore, as Bottleneck now provides binaries on PyPI [:pull:`749`].
+-  Set ``networkx<=2.8.0`` to allow Python deepcopy of `CoordinateSystemManager` [:pull:`761`].
 
 ********************
  0.6.0 (29.04.2022)
