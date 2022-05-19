@@ -40,6 +40,13 @@ jobs:
           extras: ''
           setup_requires: 'include'
 
+      - name: Cache mypy cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./.mypy_cache
+          key: ${{ runner.os }}-${{ hashFiles('./environment.yml') }}
+
       - uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: ./environment.yml
