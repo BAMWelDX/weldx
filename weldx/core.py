@@ -51,7 +51,9 @@ class MathematicalExpression:
         """
         if not isinstance(expression, sympy.Expr):
             expression = sympy.sympify(expression)
-        self._expression = expression
+        if not isinstance(expression, sympy.Expr):
+            raise TypeError("'expression' can't be converted to a sympy expression")
+        self._expression: sympy.Expr = expression
 
         self.function = sympy.lambdify(
             tuple(self._expression.free_symbols), self._expression, "numpy"
@@ -490,7 +492,7 @@ class TimeSeries(TimeDependent):
         """Interpolate the time series if its data is a mathematical expression."""
         time_q = time.as_quantity(unit=time_unit)
         if len(time_q.shape) == 0:
-            time_q = np.expand_dims(time_q, 0)
+            time_q = np.expand_dims(time_q, 0)  # type: ignore[assignment]
 
         time_xr = xr.DataArray(time_q, dims=["time"])
 
@@ -729,7 +731,7 @@ class TimeSeries(TimeDependent):
 
 def _quantity_to_coord_tuple(
     v: pint.Quantity, dim
-) -> tuple[str, np.array, dict[str, pint.Unit]]:
+) -> tuple[str, np.ndarray, dict[str, pint.Unit]]:
     return (dim, v.m, {UNITS_KEY: v.u})
 
 
@@ -739,7 +741,7 @@ def _quantity_to_xarray(v: pint.Quantity, dim: str = None) -> xr.DataArray:
 
 
 def _quantities_to_xarray(q_dict: dict[str, pint.Quantity]) -> dict[str, xr.DataArray]:
-    """Convert a str:Quantity mapping into a mapping of xarray Datarrays."""
+    """Convert a str:Quantity mapping into a mapping of `xarray.DataArray`."""
     return {k: _quantity_to_xarray(v, k) for k, v in q_dict.items()}
 
 
@@ -751,7 +753,7 @@ class SeriesParameter:
     (DataArray is stored 'as is', other inputs will be converted to quantities).
 
     In addition, the desired dimension on the Parameter and an optional symbol
-    representation for mathexpressions can be added.
+    representation for math expressions can be added.
 
     The stored value can be converted to different formats available as properties.
     """
@@ -797,7 +799,7 @@ class SeriesParameter:
         values = self.values
         if not values.shape:
             values = np.expand_dims(values, 0)
-        return _quantity_to_xarray(values, self.dim)
+        return _quantity_to_xarray(values, self.dim)  # type: ignore[arg-type]
 
     @property
     def quantity(self) -> pint.Quantity:
@@ -889,7 +891,7 @@ class GenericSeries:
         self,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
         dims: Union[list[str], dict[str, str]] = None,
-        coords: dict[str, pint.Quantity] = None,
+        coords: dict[str, Union[list, pint.Quantity]] = None,
         units: dict[str, Union[str, pint.Unit]] = None,
         interpolation: str = None,
         parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
@@ -1007,6 +1009,9 @@ class GenericSeries:
 
 
         """
+        if units is None:
+            units = {}
+
         self._obj: Union[xr.DataArray, MathematicalExpression] = None
         self._variable_units: dict[str, pint.Unit] = None
         self._symbol_dims: bidict = bidict({})
@@ -1020,7 +1025,9 @@ class GenericSeries:
         elif isinstance(obj, (MathematicalExpression, str, sympy.Expr)):
             if dims is not None and not isinstance(dims, dict):
                 raise ValueError(f"Argument 'dims' must be dict, not {dims}")
-            self._init_expression(obj, dims, parameters, units)
+            self._init_expression(
+                obj, dims, parameters, {k: U_(v) for k, v in units.items()}  # catch str
+            )
         else:
             raise TypeError(f'The data type "{type(obj)}" is not supported.')
 
@@ -1050,13 +1057,14 @@ class GenericSeries:
         self,
         data: Union[pint.Quantity, xr.DataArray],
         dims: list[str],
-        coords: dict[str, pint.Quantity],
+        coords: dict[str, Union[list, pint.Quantity]],
     ):
         """Initialize the internal data with discrete values."""
         if not isinstance(data, xr.DataArray):
             if coords is not None:
                 coords = {
-                    k: SeriesParameter(v, k).coord_tuple for k, v in coords.items()
+                    k: SeriesParameter(v, k).coord_tuple  # type: ignore[misc]
+                    for k, v in coords.items()
                 }
             data = xr.DataArray(data=data, dims=dims, coords=coords).weldx.quantify()
         else:
@@ -1087,14 +1095,14 @@ class GenericSeries:
             for k, v in self._required_dimension_units.items():
                 if k not in units and k not in expr.parameters:
                     units[k] = v
-        for k, v in units.items():
-            if k not in expr.get_variable_names():
-                raise KeyError(f"{k} is not a variable of the expression:\n{expr}")
-            units[k] = U_(v)
+        for k2, v2 in units.items():
+            if k2 not in expr.get_variable_names():
+                raise KeyError(f"{k2} is not a variable of the expression:\n{expr}")
+            units[k2] = U_(v2)
 
-        for v in expr.get_variable_names():
-            if v not in units:
-                units[v] = U_("")
+        for val in expr.get_variable_names():
+            if val not in units:
+                units[val] = U_("")
 
         return units
 
@@ -1134,7 +1142,7 @@ class GenericSeries:
         self._symbol_dims = bidict(dims)
 
     @staticmethod
-    def _test_expr(expr, dims, units):
+    def _test_expr(expr, dims, units: dict[str, pint.Unit]) -> pint.Unit:
         """Perform a test evaluation of the expression to determine the resulting units.
 
         This function assures that all of the provided information are compatible
@@ -1184,7 +1192,7 @@ class GenericSeries:
 
     @staticmethod
     def _format_expression_params(
-        parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]]
+        parameters: dict[str, Union[pint.Quantity, xr.DataArray]]
     ) -> dict[str, Union[pint.Quantity, xr.DataArray]]:
         """Create expression parameters as a valid internal type.
 
@@ -1602,7 +1610,7 @@ class SpatialSeries(GenericSeries):
 
     _required_dimensions: list[str] = [_position_dim_name, "c"]
     """Required dimensions"""
-    _required_dimension_units: dict[str, pint.Unit] = {_position_dim_name: ""}
+    _required_dimension_units: dict[str, pint.Unit] = {_position_dim_name: U_("")}
     """Required units of a dimension"""
     _required_dimension_coordinates: dict[str, list] = {"c": ["x", "y", "z"]}
     """Required coordinates of a dimension."""
@@ -1611,7 +1619,7 @@ class SpatialSeries(GenericSeries):
         self,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
         dims: Union[list[str], dict[str, str]] = None,
-        coords: dict[str, pint.Quantity] = None,
+        coords: dict[str, Union[list, pint.Quantity]] = None,
         units: dict[str, Union[str, pint.Unit]] = None,
         interpolation: str = None,
         parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
@@ -1629,7 +1637,7 @@ class SpatialSeries(GenericSeries):
         cls,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
         dims: Union[list[str], dict[str, str]],
-        coords: dict[str, pint.Quantity],
+        coords: dict[str, Union[list, pint.Quantity]],
     ) -> xr.DataArray:
         """Turn a quantity into a a correctly formatted data array."""
         if isinstance(coords, dict):

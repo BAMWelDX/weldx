@@ -521,7 +521,8 @@ class LocalCoordinateSystem(TimeDependent):
 
         if num_none == 1:
             idx = next(i for i, v in enumerate(mat) if v is None)  # skipcq: PTC-W0063
-            mat[idx] = np.cross(mat[(idx - 2) % 3], mat[(idx - 1) % 3])
+            # type: ignore[arg-type]
+            mat[idx] = np.cross(mat[(idx - 2) % 3], mat[(idx - 1) % 3])  # type: ignore
         elif num_none > 1:
             raise ValueError("You need to specify two or more vectors.")
 

@@ -239,7 +239,7 @@ def _get_coordinate_quantities(da) -> dict[str, pint.Quantity]:
 
 def _coordinates_from_quantities(
     q_dict: dict[str, pint.Quantity]
-) -> dict[str, tuple[str, np.array, dict[str, pint.Unit]]]:
+) -> dict[str, tuple[str, np.ndarray, dict[str, pint.Unit]]]:
     """Create a dict with unit information that can be passed as coords for xarray."""
     return {
         k: (k, v.m, {UNITS_KEY: v.u}) if isinstance(v, pint.Quantity) else v
