@@ -629,7 +629,7 @@ class WeldxFile(_ProtectedViewDict):
         super().update(mapping, **kwargs)
 
     def items(self) -> Set[tuple[Any, Any]]:
-        """Return a set-like object providing a view on this files items.
+        """Return a set-like object providing a view on this file's items.
 
         Returns
         -------
@@ -873,11 +873,6 @@ class WeldxFile(_ProtectedViewDict):
         if isinstance(fd, types_file_like.__args__):
             fd.seek(0)
         return fd
-
-    @property
-    @deprecated(since="0.5.2", removed="0.6", message="Please do not use this anymore.")
-    def data(self):
-        return self._data
 
     def header(
         self,

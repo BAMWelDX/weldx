@@ -3,13 +3,69 @@
 ###############
 
 ********************
- 0.6.0 (unreleased)
+ 0.6.1 (tba)
 ********************
 
 added
 =====
 
-- `DynamicShapeSegment` [:pull:`713`]
+removed
+=======
+
+changes
+=======
+
+-  `WeldxFile` now raises a `KeyError`, if the user tries to directly read or manipulate a protected ASDF keyword
+   within the file. [:pull:`759`]
+
+
+fixes
+=====
+
+-  Fix interactive ``view_tree`` display [:pull:`756`].
+-  Increase ``mypy`` coverage and update type hints and GH action [:pull:`753`].
+
+documentation
+=============
+
+ASDF
+====
+
+deprecations
+============
+
+
+dependencies
+============
+
+-  ``weldx`` now (optionally) requires ``weldx_widgets`` to visualize coordinate systems/manager [:pull:`749`].
+-  NumPy is not required as a build time dependency anymore, as Bottleneck now provides binaries on PyPI [:pull:`749`].
+-  Set ``networkx<=2.8.0`` to allow Python deepcopy of `CoordinateSystemManager` [:pull:`761`].
+
+********************
+ 0.6.0 (29.04.2022)
+********************
+
+This release includes major changes to the handling and support of units in the API and ASDF schemas.
+All classes now support and require quantities where appropriate. Plain numbers without units are no longer supported
+and will raise an exception. If the number is truly dimensionless, you still have to wrap it with
+the quantity class `weldx.Q_` like this:
+
+.. code-block:: python
+
+    my_number = 42.0
+    my_number_wrapped = weldx.Q_(my_number, "meter")
+
+Furthermore, a new class called `GenericSeries` was added. It provides a common interface to describe coordinate-based
+data either by discrete values or mathematical expressions. A built-in mechanism lets you derive specialized series with
+specific requirements. For more information, have a look
+`at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0_a/tutorials/generic_series.html>`__ .
+
+
+added
+=====
+
+-  `DynamicShapeSegment` [:pull:`713`]
 
 -  `SpatialSeries` and `DynamicTraceSegment` [:pull:`699`]
 
@@ -27,10 +83,12 @@ added
 removed
 =======
 
+-  removed access to ``WeldxFile.data`` [:pull:`744`]
+
 changes
 =======
 
-- The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
+-  The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
    When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
 
 -  Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
@@ -45,6 +103,8 @@ changes
    the second upon writing the data. [:pull:`697`]
 
 -  Reshape `SpatialData` coordinates to ``(-1, 3)`` before exporting with ``meshio`` for compatibility. [:pull:`723`]
+
+-  `SpatialData`, `LocalCoordinateSystem` and `CoordinateSystemManager` now require units [:pull:`731`]
 
 fixes
 =====

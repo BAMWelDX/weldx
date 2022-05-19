@@ -20,6 +20,9 @@ on:
 
 jobs:
   conda:
+    defaults:
+      run:
+        shell: bash -l {0}
     if: |
       (github.event.pull_request.draft == false) ||
       (github.event_name == 'workflow_dispatch') ||
@@ -41,19 +44,15 @@ jobs:
           cache-downloads: true
 
       - name: activate build env
-        shell: bash -l {0}
         run: micromamba activate build_env
 
       - name: conda info
-        shell: bash -l {0}
         run: conda info
 
       - name: conda list
-        shell: bash -l {0}
         run: conda list
 
       - name: Build from local conda recipe
-        shell: bash -l {0}
         run: conda mambabuild .
 
   pypi:
@@ -100,11 +99,10 @@ jobs:
 
       - name: pip dist install
         run: |
-          pip install ${{ env.SDIST_FILE }}
+          pip install ${{ env.SDIST_FILE }}[test]
 
       - name: run pytest
         run: |
-          pip install pytest pytest-cov pytest-xdist
           cd /tmp
           pytest -n2 --dist=loadfile --pyargs weldx
           cd -

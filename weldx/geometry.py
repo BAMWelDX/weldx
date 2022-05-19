@@ -12,19 +12,21 @@ import pint
 import sympy
 from xarray import DataArray
 
+# note: this is used to resolve visualization.types
+import weldx  # skipcq: PY-W2000  pylint: disable=unused-import
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, SpatialSeries
 from weldx.types import QuantityLike
+from weldx.util import check_matplotlib_available
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
     import numpy.typing as npt
 
-    import weldx.visualization.types as vs_types
     import weldx.welding.groove.iso_9692_1 as iso
 
 # helper -------------------------------------------------------------------------------
@@ -44,7 +46,6 @@ def has_cw_ordering(points: np.ndarray):
     return True
 
 
-# todo: Note that this is a copy of the weldx.tests._helpers.py function.
 def _vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
     """Check if a vector is close or equal to another vector.
 
@@ -1387,6 +1388,7 @@ class Profile:
         return [Q_(item, _DEFAULT_LEN_UNIT) for item in raster_data]
 
     @UREG.check(None, None, "[length]", None, None, None, None, None, None, None)
+    @check_matplotlib_available
     def plot(
         self,
         title: str = None,
@@ -2501,13 +2503,13 @@ class Geometry:
         self,
         profile_raster_width: QuantityLike = "1mm",
         trace_raster_width: QuantityLike = "50mm",
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
-        limits: vs_types.types_limits = None,
+        limits: "weldx.visualization.types.types_limits" = None,
         show_wireframe: bool = True,
         backend: str = "mpl",
-    ) -> matplotlib.axes.Axes:
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the geometry.
 
         Parameters
@@ -2591,7 +2593,7 @@ class Geometry:
         #       `from_geometry_raster`.
         if isinstance(self._profile, VariableProfile):
             rasterization = self.rasterize(profile_raster_width, trace_raster_width)
-            return SpatialData(np.swapaxes(rasterization.m, 0, 1))
+            return SpatialData(np.swapaxes(rasterization, 0, 1))
 
         rasterization = self.rasterize(
             profile_raster_width, trace_raster_width, stack=False
@@ -2633,6 +2635,7 @@ class Geometry:
             trace_raster_width=trace_raster_width,
             stack=False,
         )
+        raster_data = raster_data * _DEFAULT_LEN_UNIT
 
         SpatialData.from_geometry_raster(raster_data, True).to_file(file_name)
 
@@ -2668,6 +2671,15 @@ class SpatialData:
         # make sure we have correct dimension order
         self.coordinates = self.coordinates.transpose(..., "n", "c")
 
+        if not isinstance(self.coordinates.data, pint.Quantity):
+            raise TypeError("Coordinates need to be quantities")
+        if not self.coordinates.data.u.is_compatible_with(_DEFAULT_LEN_UNIT):
+            raise pint.DimensionalityError(
+                self.coordinates.units,
+                _DEFAULT_LEN_UNIT,
+                extra_msg="\nThe coordinates units must represent a length.",
+            )
+
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
                 self.triangles = np.array(self.triangles, dtype="uint")
@@ -2679,13 +2691,15 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_file(file_name: Union[str, Path]) -> SpatialData:
+    def from_file(file_name: Union[str, Path], units: str = "mm") -> SpatialData:
         """Create an instance from a file.
 
         Parameters
         ----------
         file_name :
             Name of the source file.
+        units :
+            Length unit assigned to data.
 
         Returns
         -------
@@ -2696,7 +2710,7 @@ class SpatialData:
         mesh = meshio.read(file_name)
         triangles = mesh.cells_dict.get("triangle")
 
-        return SpatialData(mesh.points, triangles)
+        return SpatialData(Q_(mesh.points, units), triangles)
 
     @staticmethod
     def _shape_raster_points(
@@ -2852,13 +2866,13 @@ class SpatialData:
 
     def plot(
         self,
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-        limits: vs_types.types_limits = None,
+        limits: "weldx.visualization.types.types_limits" = None,
         backend: str = "mpl",
-    ) -> matplotlib.axes.Axes:
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the spatial data.
 
         Parameters
@@ -2923,7 +2937,7 @@ class SpatialData:
             show_wireframe=show_wireframe,
         )
 
-    def to_file(self, file_name: Union[str, Path]):
+    def to_file(self, file_name: Union[str, Path], units: str = "mm"):
         """Write spatial data into a file.
 
         The extension prescribes the output format.
@@ -2932,10 +2946,12 @@ class SpatialData:
         ----------
         file_name :
             Name of the file
+        units :
+            Conversion target for length unit before export.
 
         """
         mesh = meshio.Mesh(
-            points=self.coordinates.data.reshape(-1, 3),
+            points=self.coordinates.data.to(units).m.reshape(-1, 3),
             cells={"triangle": self.triangles},
         )
         mesh.write(file_name)

@@ -2368,7 +2368,7 @@ def test_trace_local_coordinate_system():
         position_on_segment = linear_segment.length.m * weight
         position = radial_segment.length.m + position_on_segment
 
-        expected_coordinates = np.array([-position_on_segment, 2, 0])
+        expected_coordinates = Q_([-position_on_segment, 2, 0], "mm")
         cs_expected = tf.LocalCoordinateSystem(
             orientation=expected_orientation, coordinates=expected_coordinates
         )
@@ -3033,6 +3033,10 @@ class TestSpatialData:
             Tuple of arguments that are passed to the `__init__` method
 
         """
+        a = list(arguments)
+        a[0] = Q_(a[0], "mm")
+        arguments = tuple(a)
+
         pc = SpatialData(*arguments)
         assert isinstance(pc.coordinates, DataArray)
         assert np.allclose(pc.coordinates.data, arguments[0])
@@ -3064,6 +3068,10 @@ class TestSpatialData:
             A string starting with an `#` that describes the test.
 
         """
+        a = list(arguments)
+        a[0] = Q_(a[0], "mm")
+        arguments = tuple(a)
+
         with pytest.raises(exception_type):
             SpatialData(*arguments)
 
@@ -3103,8 +3111,11 @@ class TestSpatialData:
         """
         from copy import deepcopy
 
+        if "coordinates" in kwargs_mod:
+            kwargs_mod["coordinates"] = Q_(kwargs_mod["coordinates"], "mm")
+
         default_kwargs = dict(
-            coordinates=[[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]],
+            coordinates=Q_([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], "mm"),
             triangles=[[0, 1, 2], [2, 3, 0]],
             attributes=dict(data=[1, 2, 3]),
         )
@@ -3116,7 +3127,7 @@ class TestSpatialData:
 
         assert (reference == other) == expected_result
 
-        assert np.all(reference.limits() == np.array([[0, 0, 0], [1, 1, 0]]))
+        assert np.all(reference.limits() == Q_([[0, 0, 0], [1, 1, 0]], "mm"))
 
     # test_read_write_file -------------------------------------------------------------
 
@@ -3137,7 +3148,7 @@ class TestSpatialData:
             Name of the file
 
         """
-        points = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
+        points = Q_([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], "mm")
         triangles = [[0, 1, 2], [2, 3, 0]]
 
         data = SpatialData(points, triangles)
@@ -3148,22 +3159,22 @@ class TestSpatialData:
             data.to_file(filepath)
             data_read = SpatialData.from_file(filepath)
 
-        assert np.allclose(data.coordinates, data_read.coordinates)
+        assert np.allclose(data.coordinates.data, data_read.coordinates.data)
         assert np.allclose(data.triangles, data_read.triangles)
 
     @staticmethod
     def test_time_dependent_data():
         """Simple test for assigning and transforming time dependent data."""
         time = ["0s", "3s", "6s", "9s"]
-        data = np.array([[[0, 0, 0], [0, 1.0, np.sin(i)], [0, 2, 0]] for i in range(4)])
-        transformed_x = np.repeat([0.0, 3, 6, 9], 3)
+        data = Q_([[[0, 0, 0], [0, 1.0, np.sin(i)], [0, 2, 0]] for i in range(4)], "mm")
+        transformed_x = Q_(np.repeat([0.0, 3, 6, 9], 3), "mm")
 
         sd = SpatialData(coordinates=data, time=time)
         csm = CoordinateSystemManager("specimen")
         csm.create_cs(
             "scanner",
             "specimen",
-            coordinates=[[0, 0, 0], [15, 0, 0]],
+            coordinates=Q_([[0, 0, 0], [15, 0, 0]], "mm"),
             time=["0s", "15s"],
         )
 
@@ -3173,6 +3184,6 @@ class TestSpatialData:
         csm.assign_data(sd, "scan_data2", "scanner", "specimen")
 
         for data_name in ["scan_data", "scan_data2"]:
-            test = csm.get_data(data_name, "specimen").coordinates.values.reshape(-1, 3)
+            test = csm.get_data(data_name, "specimen").coordinates.data.reshape(-1, 3)
             assert np.all(test[:, 1:] == data.reshape(-1, 3)[:, 1:])
             assert np.all(test[:, 0] == transformed_x)

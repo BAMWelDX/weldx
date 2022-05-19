@@ -3,9 +3,19 @@
 from typing import Any
 
 import numpy as np
+import pint
 
 from weldx.constants import Q_
+from weldx.geometry import _vector_is_close as vector_is_close
 from weldx.transformations import LocalCoordinateSystem, WXRotation
+
+__all__ = [
+    "rotated_coordinate_system",
+    "are_all_columns_unique",
+    "get_test_name",
+    "vector_is_close",
+    "matrix_is_close",
+]
 
 
 def rotated_coordinate_system(
@@ -110,35 +120,11 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
         True or False
 
     """
-    mat_a = np.array(mat_a, dtype=float)
-    mat_b = np.array(mat_b, dtype=float)
+    if not isinstance(mat_a, pint.Quantity):
+        mat_a = np.array(mat_a, dtype=float)
+    if not isinstance(mat_b, pint.Quantity):
+        mat_b = np.array(mat_b, dtype=float)
 
     if mat_a.shape != mat_b.shape:
         return False
     return np.all(np.isclose(mat_a, mat_b, atol=abs_tol)).__bool__()
-
-
-def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
-    """Check if a vector is close or equal to another vector.
-
-    Parameters
-    ----------
-    vec_a :
-        First vector
-    vec_b :
-        Second vector
-    abs_tol :
-        Absolute tolerance (Default value = 1e-9)
-
-    Returns
-    -------
-    bool
-        True or False
-
-    """
-    vec_a = np.array(vec_a, dtype=float)
-    vec_b = np.array(vec_b, dtype=float)
-
-    if vec_a.size != vec_b.size:
-        return False
-    return np.all(np.isclose(vec_a, vec_b, atol=abs_tol)).__bool__()
