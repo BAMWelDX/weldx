@@ -594,10 +594,12 @@ properties:
         expected_match = "manipulate an ASDF internal structure"
         warning_type = UserWarning
 
+        # reading is also forbidden
+        with pytest.raises(KeyError):
+            _ = self.fh[protected_key]
+
         with pytest.warns(warning_type, match=expected_match):
             self.fh.update({protected_key: None})
-        with pytest.warns(warning_type, match=expected_match):
-            del self.fh[protected_key]
         with pytest.warns(warning_type, match=expected_match):
             self.fh.pop(protected_key)
         with pytest.warns(warning_type, match=expected_match):
@@ -612,7 +614,7 @@ properties:
             keys.append(key)
         assert keys == [META_ATTR]
 
-    def test_len_proteced_keys(self):
+    def test_len_protected_keys(self):
         """Should only contain key 'wx_metadata'."""
         assert len(self.fh) == 1
 
