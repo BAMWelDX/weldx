@@ -51,7 +51,10 @@ jobs:
             python=${{ matrix.py }}
             wheel
             pip
-            -e .
+
+      - name: pip installs
+        run: |
+          python -m pip install -e .
 
       - name: activate env
         run: micromamba activate weldx
