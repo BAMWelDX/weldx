@@ -19,6 +19,7 @@ fixes
 =====
 
 -  Fix interactive ``view_tree`` display [:pull:`756`].
+-  Increase ``mypy`` coverage and update type hints and GH action [:pull:`753`].
 
 documentation
 =============
