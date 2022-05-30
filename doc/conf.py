@@ -125,7 +125,7 @@ extensions = [
 # allow easy Issue/PR links
 extlinks = {
     "issue": ("https://github.com/BAMWelDX/weldx/issues/%s", "GH %s"),
-    "pull": ("https://github.com/BAMWelDX/weldx/pull/%s", "PR %S"),
+    "pull": ("https://github.com/BAMWelDX/weldx/pull/%s", "PR %s"),
 }
 
 # autosummary --------------------------------------------------------------------------
