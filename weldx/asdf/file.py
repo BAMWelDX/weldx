@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import copy
-import inspect
 import io
 import pathlib
 import warnings
@@ -282,8 +281,7 @@ class WeldxFile(_ProtectedViewDict):
             # the user passed a raw file handle, its their responsibility to close it.
             self._close = False
         else:
-            a = inspect.get_annotations(WeldxFile.__init__)
-            _supported = a["filename_or_file_like"]
+            _supported = WeldxFile.__init__.__annotations__["filename_or_file_like"]
             raise ValueError(
                 f"Unsupported input type '{type(filename_or_file_like)}'."
                 f" Should be one of {_supported}."
