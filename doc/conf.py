@@ -110,7 +110,7 @@ pygments_style = "sphinx"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinxcontrib.napoleon",
+    "sphinx.ext.napoleon",
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
@@ -124,8 +124,8 @@ extensions = [
 
 # allow easy Issue/PR links
 extlinks = {
-    "issue": ("https://github.com/BAMWelDX/weldx/issues/%s", "GH"),
-    "pull": ("https://github.com/BAMWelDX/weldx/pull/%s", "PR"),
+    "issue": ("https://github.com/BAMWelDX/weldx/issues/%s", "GH %s"),
+    "pull": ("https://github.com/BAMWelDX/weldx/pull/%s", "PR %s"),
 }
 
 # autosummary --------------------------------------------------------------------------
