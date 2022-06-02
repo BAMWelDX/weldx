@@ -1454,6 +1454,10 @@ class CoordinateSystemManager:
             from matplotlib import pylab as plt
 
             _, ax = plt.subplots()
+            _axes_created = True
+        else:
+            _axes_created = False
+
         color_map = []
         pos = self._get_tree_positions_for_plot()
 
@@ -1487,6 +1491,9 @@ class CoordinateSystemManager:
         draw_networkx_edges(
             self._graph, pos, edgelist=tdp_edges, ax=ax, edge_color=(0.9, 0.6, 0)
         )
+
+        if _axes_created:
+            plt.subplots_adjust(right=(self.number_of_coordinate_systems / 3))
 
         return ax
 
