@@ -1492,8 +1492,9 @@ class CoordinateSystemManager:
             self._graph, pos, edgelist=tdp_edges, ax=ax, edge_color=(0.9, 0.6, 0)
         )
 
-        if _axes_created:
-            plt.subplots_adjust(right=(self.number_of_coordinate_systems / 3))
+        if _axes_created:  # adjust subplots such, that all system labels are visible.
+            right = (self.number_of_coordinate_systems + 1) / 3
+            plt.subplots_adjust(right=right)
 
         return ax
 
