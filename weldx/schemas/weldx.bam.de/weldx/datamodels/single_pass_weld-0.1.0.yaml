@@ -46,9 +46,6 @@ description: |
 
 type: object
 properties:
-  # TODO: actually it would be nicer to just reference a single "weldment", but without a "weldment" top-key to be backward-compatible
-  # test: $ref: "./terms-0.1.0#/weldment/properties
-  # $ref: "./terms-0.1.0#/weldment/properties  ## wie einrücken???
   process:
     $ref: "./terms-0.1.0#/GMAW_process"
   welding_current:
