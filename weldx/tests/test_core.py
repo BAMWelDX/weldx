@@ -199,6 +199,20 @@ class TestMathematicalExpression:
         with pytest.raises(exception_type):
             ma_def.evaluate(**variables)
 
+    @staticmethod
+    def test_integrate_length_computation():
+        """Ensure we can integrate"""
+        from weldx import DynamicShapeSegment
+
+        class MySegment(DynamicShapeSegment):
+            def __init__(self):
+                f = "x * sin(s) + y * s"
+                p = dict(x=Q_([1, 0, 0], "mm"), y=Q_([0, 1, 0], "mm"))
+                super().__init__(f, parameters=p)
+
+        s = MySegment()
+        assert s.length.u == Q_("mm")
+
 
 # --------------------------------------------------------------------------------------
 # TimeSeries
