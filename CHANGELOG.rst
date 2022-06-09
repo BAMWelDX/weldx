@@ -9,7 +9,7 @@
 fixes
 =====
 
--  `MathematicalExpression` now uses SciPy in numerical function evaluation. This enables it to use
+-  `MathematicalExpression` now uses SciPy and NumPy in numerical function evaluation. This enables it to use
    advanced integration methods and fixes lengths computation of `DynamicShapeSegment` [:pull:`770`].
 
 ********************
