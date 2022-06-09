@@ -201,7 +201,7 @@ class TestMathematicalExpression:
 
     @staticmethod
     def test_integrate_length_computation():
-        """Ensure we can integrate"""
+        """Ensure we can integrate with Sympy during length computation."""
         from weldx import DynamicShapeSegment
 
         class MySegment(DynamicShapeSegment):
@@ -211,7 +211,7 @@ class TestMathematicalExpression:
                 super().__init__(f, parameters=p)
 
         s = MySegment()
-        assert s.length.u == Q_("mm")
+        assert s.get_section_length(1).u == Q_("mm")
 
 
 # --------------------------------------------------------------------------------------
