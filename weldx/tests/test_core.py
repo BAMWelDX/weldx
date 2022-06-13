@@ -199,6 +199,20 @@ class TestMathematicalExpression:
         with pytest.raises(exception_type):
             ma_def.evaluate(**variables)
 
+    @staticmethod
+    def test_integrate_length_computation():
+        """Ensure we can integrate with Sympy during length computation."""
+        from weldx import DynamicShapeSegment
+
+        class MySegment(DynamicShapeSegment):
+            def __init__(self):
+                f = "x * sin(s) + y * s"
+                p = dict(x=Q_([1, 0, 0], "mm"), y=Q_([0, 1, 0], "mm"))
+                super().__init__(f, parameters=p)
+
+        s = MySegment()
+        assert s.get_section_length(1).u == Q_("mm")
+
 
 # --------------------------------------------------------------------------------------
 # TimeSeries
@@ -468,7 +482,7 @@ class TestTimeSeries:
     @pytest.mark.parametrize(
         "time,  exception_type, test_name",
         [
-            # (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),
+            # (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),  # skipcq: PY-W0069
             ("a string", TypeError, "# wrong type #2"),
             ([1, 2, 3], TypeError, "# wrong type #3"),
             (1, TypeError, "# wrong type #4"),

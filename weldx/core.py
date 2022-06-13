@@ -56,7 +56,7 @@ class MathematicalExpression:
         self._expression: sympy.Expr = expression
 
         self.function = sympy.lambdify(
-            tuple(self._expression.free_symbols), self._expression, "numpy"
+            tuple(self._expression.free_symbols), self._expression, ("numpy", "scipy")
         )
 
         self._parameters: dict[str, Union[pint.Quantity, xr.DataArray]] = {}
