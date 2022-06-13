@@ -482,7 +482,7 @@ class TestTimeSeries:
     @pytest.mark.parametrize(
         "time,  exception_type, test_name",
         [
-            # (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),
+            # (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),  # skipcq: PY-W0069
             ("a string", TypeError, "# wrong type #2"),
             ([1, 2, 3], TypeError, "# wrong type #3"),
             (1, TypeError, "# wrong type #4"),
