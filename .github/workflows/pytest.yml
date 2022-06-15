@@ -38,6 +38,7 @@ jobs:
 
       - uses: marscher/pydeps2env@add_pyproject_toml
         with:
+          file: 'pyproject.toml'
           channels: 'conda-forge defaults'
           extras: 'test vis'
           setup_requires: 'include'
