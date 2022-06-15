@@ -2,7 +2,6 @@
 name = "weldx"
 dynamic = [  # see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
     "version",  # version gets derived from git by setuptools_scm.
-    "readme",  # readme is being read from file.
 ]
 authors = [
     {name="Cagtay Fabry", email="cagtay.fabry@bam.de"},
