@@ -93,27 +93,6 @@ where = ["."]
 write_to = "weldx/_version.py"
 write_to_template = '__version__ = "{version}"'
 
-[tool.flake8]
-# References:
-# https://flake8.readthedocs.io/en/latest/user/configuration.html
-# https://flake8.readthedocs.io/en/latest/user/error-codes.html
-
-# Note: there cannot be spaces after comma's here
-ignore = [
-    "W503,W504",  # line break after binary operator
-    "E203",       # E203 whitespace before ':' (not PEP8 compliant anyway)
-    "C408"        # allow dict() over literal {}
-]
-max-line-length = 88
-select = "C,E,F,W,B,B950" # black formatting options
-per-file-ignores = ["aws_setup.py:E501",
-]
-exclude = [
-    "__init__.py",
-    "doc/conf.py",
-]
-no-accept-encodings = "True"
-
 [tool.pydocstyle]
 # convention numpy is currently equivalent to ignoring 'D107', 'D203', 'D212', 'D213', 'D402', 'D413'
 convention = "numpy"
