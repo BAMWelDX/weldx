@@ -127,6 +127,9 @@ default_section = "THIRDPARTY"
 known_first_party = "weldx"
 sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER" # TODO: or list?
 
+[tool.coverage.run]
+source = ["weldx"]
+
 [tool.coverage.report]
 omit = [
     "weldx/_version.py",
