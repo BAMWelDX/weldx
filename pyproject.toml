@@ -98,10 +98,6 @@ where = ["."]
 write_to = "weldx/_version.py"
 write_to_template = '__version__ = "{version}"'
 
-[tool.setuptools.dynamic]
-version = {attr = "weldx.__version__"}
-readme = {file = "README.rst"}
-
 [tool.pydocstyle]
 # convention numpy is currently equivalent to ignoring 'D107', 'D203', 'D212', 'D213', 'D402', 'D413'
 convention = "numpy"
