@@ -1,6 +1,9 @@
 [project]
 name = "weldx"
-dynamic = ["version"]  # version gets derived from git by setuptools_scm
+dynamic = [  # see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
+    "version",  # version gets derived from git by setuptools_scm.
+    "readme",  # readme is being read from file.
+]
 authors = [
     {name="Cagtay Fabry", email="cagtay.fabry@bam.de"},
     {name="Volker Hirthammer", email="volker.hirthammer@bam.de"},
@@ -94,6 +97,10 @@ where = ["."]
 [tool.setuptools_scm]
 write_to = "weldx/_version.py"
 write_to_template = '__version__ = "{version}"'
+
+[tool.setuptools.dynamic]
+version = {attr = "weldx.__version__"}
+readme = {file = "README.rst"}
 
 [tool.pydocstyle]
 # convention numpy is currently equivalent to ignoring 'D107', 'D203', 'D212', 'D213', 'D402', 'D413'
