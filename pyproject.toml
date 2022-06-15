@@ -69,7 +69,6 @@ vis = [
 ]
 
 # ASDF extension entry points.
-# FIXME: this does not work!
 [project.entry-points."asdf.extensions"]
 weldx = "weldx.asdf.extension:get_extensions"
 weldx_validators = "weldx.asdf._extension:WeldxValidatorExtension"
@@ -111,7 +110,7 @@ addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:ski
 testpaths = "weldx"
 # custom test markers, see https://docs.pytest.org/en/latest/example/markers.html#mark-examples
 markers = "slow: marks tests as slow to run (skipped by default, enable with --runslow option)"
-asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"
+asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn't we just use the entry points to resolve this?
 #asdf_schema_tests_enabled = true
 #asdf_schema_skip_tests =
 #    weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml
@@ -121,6 +120,7 @@ filterwarnings = [
     "ignore:Passing method to :FutureWarning:xarray.*:",
     "error::pint.UnitStrippedWarning",
 ]
+
 [tool.isort]
 profile = "black"
 default_section = "THIRDPARTY"
