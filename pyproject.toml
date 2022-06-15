@@ -69,11 +69,12 @@ vis = [
 ]
 
 # ASDF extension entry points.
+# FIXME: this does not work!
 [project.entry-points."asdf.extensions"]
-    weldx = "weldx.asdf.extension:get_extensions"
-    weldx_validators = "weldx.asdf._extension:WeldxValidatorExtension"
+weldx = "weldx.asdf.extension:get_extensions"
+weldx_validators = "weldx.asdf._extension:WeldxValidatorExtension"
 [project.entry-points."asdf.resource_mappings"]
-    weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
+weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
 
 # console scripts
 [project.scripts]
