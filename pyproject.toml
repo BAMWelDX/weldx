@@ -1,6 +1,6 @@
 [project]
 name = "weldx"
-version = "0"  # note: this will be overridden by setuptools_scm!
+dynamic = ["version"]  # version gets derived from git by setuptools_scm
 authors = [
     {name="Cagtay Fabry", email="cagtay.fabry@bam.de"},
     {name="Volker Hirthammer", email="volker.hirthammer@bam.de"},
@@ -12,7 +12,7 @@ license = {file = "LICENSE", name="BSD License"}
 keywords = [
     "welding",
     "weldx",
-    "bam", # TODO: add more keywords here!
+    "bam", # TODO: add more keywords here! think of them as in a journal article.
 ]
 classifiers = [
     "Development Status :: 3 - Alpha", # TODO: we are at least in beta/close to production!
@@ -26,7 +26,6 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Topic :: Scientific/Engineering :: Physics", # TODO: add more topics here!
   ]
-
 # Dependencies
 requires-python = ">=3.8,<3.11"
 dependencies = [
@@ -76,10 +75,7 @@ vis = [
 [project.scripts]
 welding_schema = "weldx.asdf.cli.welding_schema:main"
 
-
-[tool.setuptools.packages.find]
-where = ["."] # TODO: or restrict to ./weldx?
-
+# Build system config, pip creates a temporary env with "requires" pkgs.
 [build-system]
 requires = [
   "wheel",
@@ -89,9 +85,13 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 
-### tool configs
+# Tool configs
+[tool.setuptools.packages.find]
+where = ["."]
+
 [tool.setuptools_scm]
 write_to = "weldx/_version.py"
+write_to_template = '__version__ = "{version}"\n'
 
 [tool.flake8]
 # References:
@@ -160,16 +160,16 @@ exclude_lines = [
 [tool.mypy]
 python_version = "3.9"
 files = "weldx"
-ignore_missing_imports = "True" # TODO: this is bad!
-strict_optional = "False"
-pretty = "True"
-allow_redefinition = "True"
-show_error_context = "True"
-show_error_codes = "True"
-show_column_numbers = "True"
-sqlite_cache = "True"
+ignore_missing_imports = true # TODO: this is bad!
+strict_optional = false
+pretty = true
+allow_redefinition = true
+show_error_context = true
+show_error_codes = true
+show_column_numbers = true
+sqlite_cache = true
 
-# mypy per-module options:
+# MyPy per-module options:
 [[tool.mypy.overrides]]
 module = "weldx.asdf.*"
 ignore_errors = true
@@ -190,7 +190,6 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = "weldx.geometry.*"
 ignore_errors = true
-
 
 # this is a workaround for an xarray related mypy bug
 # see https://github.com/python/mypy/pull/9495
