@@ -27,14 +27,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics", # TODO: add more topics here!
   ]
 
-[project.urls]
-documentation = "https://weldx.readthedocs.io"
-repository = "https://github.com/BAMweldx/weldx"
-bug_tracker = "https://github.com/BAMweldx/weldx/issues"
-changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.rst"
-
-
-
+# Dependencies
 python_requires = ">=3.8,<3.11" # tODO : test!
 dependencies = [
     "numpy >=1.20",
@@ -55,6 +48,12 @@ dependencies = [
     "IPython",
 ]
 
+[project.urls]
+documentation = "https://weldx.readthedocs.io"
+repository = "https://github.com/BAMweldx/weldx"
+bug_tracker = "https://github.com/BAMweldx/weldx/issues"
+changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.rst"
+
 [project.optional-dependencies]
 test = [
     "pytest",
@@ -65,6 +64,18 @@ test = [
 vis = [
     "weldx_widgets >= 0.2",
 ]
+
+# ASDF extension entry points.
+[project.entry-points."asdf.extensions"]
+    weldx = "weldx.asdf.extension:get_extensions"
+    weldx_validators = "weldx.asdf._extension:WeldxValidatorExtension"
+[project.entry-points."asdf.resource_mappings"]
+    weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
+
+# console scripts
+[project.scripts]
+welding_schema = "weldx.asdf.cli.welding_schema:main"
+
 
 [tool.setuptools.packages.find]
 where = ["."] # TODO: or restrict to ./weldx?
@@ -100,7 +111,7 @@ exclude = [
 ]
 no-accept-encodings = "True"
 
-[pydocstyle]
+[tool.pydocstyle]
 # convention numpy is currently equivalent to ignoring 'D107', 'D203', 'D212', 'D213', 'D402', 'D413'
 convention = "numpy"
 match = "(?!__)(?!_version)(?!conftest).*\\.py"
@@ -128,7 +139,7 @@ default_section = "THIRDPARTY"
 known_first_party = "weldx"
 sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER" # TODO: or list?
 
-[coverage.report]
+[tool.coverage.report]
 omit = [
     "weldx/_version.py",
     "weldx/tests/*",
