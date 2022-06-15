@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import warnings
 from dataclasses import InitVar, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
@@ -211,7 +212,14 @@ class DynamicBaseSegment:
 
         """
         if self._series.is_expression:
-            length = self._length_expr.evaluate(max_coord=position).data
+            # ignore unit stripped warning, as it is expected.
+            # Note, that the result still has the unit,
+            # it is stripped during computation (scipy.integrate)
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore", category=pint.errors.UnitStrippedWarning
+                )
+                length = self._length_expr.evaluate(max_coord=position).data
         else:
             length = self._len_section_disc(position=position)
         if length <= 0:

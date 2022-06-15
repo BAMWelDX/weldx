@@ -3,6 +3,16 @@
 ###############
 
 ********************
+ 0.6.2 (tba)
+********************
+
+fixes
+=====
+
+-  `MathematicalExpression` now uses SciPy and NumPy in numerical function evaluation. This enables it to use
+   advanced integration methods and fixes lengths computation of `DynamicShapeSegment` [:pull:`770`].
+
+********************
  0.6.1 (19.05.2022)
 ********************
 
@@ -13,6 +23,7 @@ changes
 
 -  `WeldxFile` now raises a `KeyError`, if the user tries to directly read or manipulate a protected ASDF keyword
    within the file. [:pull:`759`]
+-  Updated the outdated tutorial about the `CoordinateSystemManager` [:pull:`767`]
 
 fixes
 =====
