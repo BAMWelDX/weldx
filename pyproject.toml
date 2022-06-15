@@ -175,7 +175,7 @@ module = "weldx.asdf.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-modules = "weldx.tags.*"
+module = "weldx.tags.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
