@@ -105,7 +105,7 @@ convention = "numpy"
 match = "(?!__)(?!_version)(?!conftest).*\\.py"
 match_dir = "^(?!(tests|tags|asdf)).*"
 
-[tool.pytest]
+[tool.pytest.ini_options]
 addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules"
 #addopts = --tb=short --color=yes -rs -p no:cov
 testpaths = "weldx"
