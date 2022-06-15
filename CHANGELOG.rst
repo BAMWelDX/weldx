@@ -6,6 +6,12 @@
  0.6.2 (tba)
 ********************
 
+changes
+=======
+
+-  ``weldx`` now requires pip to install (previously it could be installed by directly invoking setup.py) [:pull:`774`].
+   From a users perspective nothing changes here, as the package was always recommended to be installed via pip.
+
 fixes
 =====
 
