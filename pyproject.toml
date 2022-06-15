@@ -1,14 +1,14 @@
 [project]
 name = "weldx"
-author = "Cagtay Fabry <cagtay.fabry@bam.de>, Volker Hirthammer <volker.hirthammer@bam.de>, Martin K. Scherer <martin.scherer@bam.de>"
-author_email = "cagtay.fabry@bam.de"
-home_page = "https://www.bam.de/weldx"
+version = "0"  # note: this will be overridden by setuptools_scm!
+authors = [
+    {name="Cagtay Fabry", email="cagtay.fabry@bam.de"},
+    {name="Volker Hirthammer", email="volker.hirthammer@bam.de"},
+    {name="Martin K. Scherer", email="martin.scherer@bam.de"},
+]
 description = "Python API for the WelDX file format and standard"
-long_description = "file: README.rst" # FIXME: does this work??
-long_description_content_type = "text/x-rst"
-license = "BSD License"
-license_file = "LICENSE"
-platform = "any"
+readme = {file = "README.rst", content-type="text/x-rst"}
+license = {file = "LICENSE", name="BSD License"}
 keywords = [
     "welding",
     "weldx",
@@ -28,7 +28,7 @@ classifiers = [
   ]
 
 # Dependencies
-python_requires = ">=3.8,<3.11" # tODO : test!
+requires-python = ">=3.8,<3.11"
 dependencies = [
     "numpy >=1.20",
     "asdf >=2.8.2",
@@ -90,6 +90,9 @@ build-backend = "setuptools.build_meta"
 
 
 ### tool configs
+[tool.setuptools_scm]
+write_to = "weldx/_version.py"
+
 [tool.flake8]
 # References:
 # https://flake8.readthedocs.io/en/latest/user/configuration.html
