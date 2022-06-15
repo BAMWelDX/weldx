@@ -9,3 +9,5 @@ prune doc
 prune tutorials
 
 global-exclude .*
+
+# TODO: sdist contains files in parent, which are not part of the source dist (e.g. unversioned files etc. in repo)
