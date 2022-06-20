@@ -1,8 +1,9 @@
-{% set data = load_setup_py_data() %}
+{% set pyproject = load_file_data("pyproject.toml") %}
+{% set proj = pyproject.get("project") %}
 
 package:
   name: weldx
-  version: {{ data.get("version") }}
+  version: {{ proj.get("version") }}
 
 source:
     path: ../..
@@ -12,7 +13,8 @@ build:
   noarch: python
   script: {{ PYTHON }} -m pip install . -vv
   entry_points:
-  {% for e in data['entry_points']['console_scripts'] %}
+    # TODO: check this only used to be console script entry points, why not ASDF?
+  {% for e in proj.get('entry_points') %}
     - {{ e }}
   {% endfor %}
 requirements:
@@ -21,9 +23,9 @@ requirements:
     - setuptools_scm
     - python
   run:
-    - python >=3.8,<3.10
+    - python {% proj.get("requires-python") %}
     # dependencies are defined in setup.py
-    {% for dep in data['install_requires'] %}
+    {% for dep in proj.get('dependencies') %}
     - {{ dep.lower() }}
     {% endfor %}
 
