@@ -1,9 +1,9 @@
-{% set pyproject = load_file_data("pyproject.toml") %}
-{% set proj = pyproject.get("project") %}
+{% set pyproject = load_file_data('../../pyproject.toml') %}
+{% set proj = pyproject.get('project') %}
 
 package:
   name: weldx
-  version: {{ proj.get("version") }}
+  version: {{ proj.get('version') }}
 
 source:
     path: ../..
@@ -23,8 +23,8 @@ requirements:
     - setuptools_scm
     - python
   run:
-    - python {% proj.get("requires-python") %}
-    # dependencies are defined in setup.py
+    - python {{ proj.get("requires-python") }}
+    # dependencies are defined in pyproject.toml
     {% for dep in proj.get('dependencies') %}
     - {{ dep.lower() }}
     {% endfor %}
