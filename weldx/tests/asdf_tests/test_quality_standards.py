@@ -65,7 +65,7 @@ def test_quality_standards():
         file.write(manifest_file)
     with vfs.open(f"{schema_dir}/test_schema-0.1.0.yaml", "w") as file:
         file.write(schema_file)
-    # print(vfs.tree())
+    # print(vfs.tree())  # skipcq: PY-W0069
 
     # create and enable quality standard
     qs = QualityStandard(vfs.opendir(base_dir))
