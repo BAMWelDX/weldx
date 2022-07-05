@@ -13,8 +13,8 @@ py:class weldx.asdf.types.WeldxConverter
 py:data collections.abc.Callable
 
 # numpy typing
-py:class numpy.typing._array_like._SupportsArray
-py:class numpy.typing._nested_sequence._NestedSequence
+py:class numpy._typing._array_like._SupportsArray
+py:class numpy._typing._nested_sequence._NestedSequence
 py:class npt.ArrayLike
 
 # matplotlib
