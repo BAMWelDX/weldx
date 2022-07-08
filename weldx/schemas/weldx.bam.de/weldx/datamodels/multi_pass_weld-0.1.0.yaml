@@ -5,20 +5,18 @@ id: "asdf://weldx.bam.de/weldx/schemas/datamodels/multi_pass_weld-0.1.0"
 
 title: |
   A generic multi layer GMAW weldment.
+description: |
+  This schema describes a welding application consisting of multiple passes.
 
-type: object
-properties:
-    workpiece:
-      description: |
-        The workpiece to be welded defined by the base metal and the geometric description of the weld seam.
-      type: object
+  The individual weldments are hierarchically grouped into beads, layers and seams.
 
-    weld_seam:
-      description: |
-        List of weld seams composing the final weldment.
-      type: array
-      items:
-        $ref: "#/definitions/weld_seam"
+  Eack weldment may contain the following data:
+
+  - TCP
+  - welding_current
+  - welding_voltage
+
+  Note that this schema is currently work in progress and some optional data will be required in the future.
 
 definitions:
   weld_seam:
@@ -41,3 +39,18 @@ definitions:
     type: array
     items:
       $ref: "./terms-0.1.0#/weldment"
+
+type: object
+properties:
+    workpiece:
+      description: |
+              The workpiece to be welded defined by the base metal and the geometric description of the weld seam.
+      type: object
+
+    weld_seam:
+      description: |
+              List of weld seams composing the final weldment.
+      type: array
+      items:
+        $ref: "#/definitions/weld_seam"
+
