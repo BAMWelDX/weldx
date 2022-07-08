@@ -22,7 +22,7 @@ examples:
   -
     - TODO Add description
     - |
-      !<asdf://weldx.bam.de/weldx/tags/datamodels/multi_pass_weld-0.1.0>
+      !<tag:stsci.edu:asdf/core/asdf-1.1.0>
         weld_seam:
         - - - - TCP: !weldx!core/transformations/local_coordinate_system-0.1.1
                   coordinates: !weldx!core/variable-0.1.1
