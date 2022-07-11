@@ -67,7 +67,7 @@ examples:
                     dtype: <f8
                     units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
                     data: !core/ndarray-1.0.0
-                      data: []
+                      data: [10, 0, 0]
                       datatype: float64
                       shape: [3]
                 welding_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
@@ -80,7 +80,7 @@ examples:
                     dtype: <f8
                     units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
                     data: !core/ndarray-1.0.0
-                      data: []
+                      data:  [20, 0, 0]
                       datatype: float64
                       shape: [3]
                 welding_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
@@ -93,7 +93,7 @@ examples:
                     dtype: <f8
                     units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
                     data: !core/ndarray-1.0.0
-                      data: []
+                      data:  [30, 0, 0]
                       datatype: float64
                       shape: [3]
                 welding_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
