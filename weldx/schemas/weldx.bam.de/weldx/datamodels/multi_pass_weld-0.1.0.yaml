@@ -4,19 +4,27 @@ $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "asdf://weldx.bam.de/weldx/schemas/datamodels/multi_pass_weld-0.1.0"
 
 title: |
-  A generic multi layer GMAW weldment.
+  A generic multi-layer GMAW weldment.
 description: |
   This schema describes a welding application consisting of multiple passes.
 
-  The individual weldments are hierarchically grouped into beads, layers and seams.
+  The individual weldments are hierarchically grouped into beads, layers and seams. This is reflected by a nested array
+  with the name `weld_seam` and a nesting depth of 4 (seam, layer, bead, weldment).
 
-  Eack weldment may contain the following data:
+  Each weldment may contain the following data:
 
+  - process
   - TCP
   - welding_current
   - welding_voltage
 
-  Note that this schema is currently work in progress and some optional data will be required in the future.
+  The `process` entry contains all relevant data that describes the welding process. A comprehensive list of all
+  optional and required fields can be [found here](https://weldx.readthedocs.io/projects/weldx-standard/en/latest/generated/schemas/process/terms-0.1.0.html#base_process).
+  `TCP` describes the trajectory of the torch during the weldment process. The TCP data of all weldments must be
+  defined in relation to the workpiece coordinate system.
+  The welding_current and welding_voltage entries refer to signals containing the final measurement data of corresponding dimensions [current] and [voltage].
+
+  > Note that this schema is currently work in progress and some optional data might become required in the future.
 
 definitions:
   weld_seam:
@@ -56,7 +64,7 @@ properties:
 
 examples:
   -
-    - A description needs to be added
+    - Two seams with a single layer and bead, but the first seam has two weldments while the second has only one.
     - |
       !<tag:stsci.edu:asdf/core/asdf-1.1.0>
         weld_seam:
@@ -72,6 +80,9 @@ examples:
                       shape: [3]
                 welding_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
                   units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> volt
+                  value: 100
+                welding_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+                  units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> ampere
                   value: 10
             - - TCP: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
                   coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.1>
@@ -85,6 +96,9 @@ examples:
                       shape: [3]
                 welding_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
                   units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> volt
+                  value: 200
+                welding_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+                  units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> ampere
                   value: 20
         - - - - TCP: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
                   coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.1>
@@ -98,4 +112,7 @@ examples:
                       shape: [3]
                 welding_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
                   units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> volt
+                  value: 300
+                welding_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+                  units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> ampere
                   value: 30
