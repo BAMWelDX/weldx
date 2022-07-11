@@ -3,13 +3,12 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.9
+  - python=3.8
   - setuptools
   - setuptools_scm
   - conda-verify
   - conda-build
-  - numpy
-  - mamba
+  - mamba=0.23
   - boa>=0.6
   - anaconda-client
   - numpydoc>=0.5
