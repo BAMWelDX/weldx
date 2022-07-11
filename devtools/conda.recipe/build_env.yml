@@ -8,6 +8,7 @@ dependencies:
   - setuptools_scm
   - conda-verify
   - conda-build
+  - numpy
   - mamba
   - boa>=0.6
   - anaconda-client
