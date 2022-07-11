@@ -4,11 +4,11 @@ channels:
   - defaults
 dependencies:
   - python=3.8
-  - setuptools
-  - setuptools_scm
+  - setuptools=62.6.0
+  - setuptools_scm=7.0.2
   - conda-verify
   - conda-build
   - mamba
-  - boa=0.10
+  - boa>=0.6
   - anaconda-client
   - numpydoc>=0.5
