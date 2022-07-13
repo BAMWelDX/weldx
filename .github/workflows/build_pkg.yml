@@ -51,9 +51,6 @@ jobs:
 
       - name: conda list
         run: conda list
-        
-      - name: conda config
-        run: conda config --show
 
       - name: Build from local conda recipe
         run: conda mambabuild -c conda-forge .
