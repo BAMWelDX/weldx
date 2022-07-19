@@ -34,6 +34,7 @@ fixes
 
 -  Fix interactive ``view_tree`` display [:pull:`756`].
 -  Increase ``mypy`` coverage and update type hints and GH action [:pull:`753`].
+-  Fix errors in tutorial about quality standards [:pull:`777`]
 
 dependencies
 ============

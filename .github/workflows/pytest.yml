@@ -80,6 +80,11 @@ jobs:
         run: |
           pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
 
+      - name: test quality standard
+        if: matrix.py == '3.8'
+        run: |
+          pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py
+
       - name: coverage xml (combination is performed by pytest-cov)
         if: matrix.py == '3.8'
         run: coverage xml
