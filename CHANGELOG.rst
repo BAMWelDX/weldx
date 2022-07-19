@@ -6,6 +6,10 @@
  0.6.2 (tba)
 ********************
 
+changes
+=======
+-  Updated the outdated tutorial about the `LocalCoordinateSystem` [:pull:`775`]
+
 fixes
 =====
 
