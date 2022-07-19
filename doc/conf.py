@@ -90,6 +90,24 @@ for f in tutorial_files:
     shutil.copy(f, tutorials_dir)
 
 
+# -- Configure cell removal --------------------------------------------------
+
+from traitlets.config import Config
+
+# Setup config
+c = Config()
+
+# Configure tag removal - be sure to tag your cells to remove  using the
+# words remove_cell to remove cells. You can also modify the code to use
+# a different tag word
+c.TagRemovePreprocessor.remove_cell_tags = ("remove-cell",)
+c.TagRemovePreprocessor.remove_all_outputs_tags = ("remove-output",)
+c.TagRemovePreprocessor.remove_input_tags = ("remove-input",)
+c.TagRemovePreprocessor.enabled = True
+
+# Configure and run out exporter
+c.HTMLExporter.preprocessors = ["nbconvert.preprocessors.TagRemovePreprocessor"]
+
 # -- Project information -----------------------------------------------------
 _now = datetime.datetime.now().year
 
