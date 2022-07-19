@@ -92,6 +92,8 @@ for f in tutorial_files:
 
 # -- Configure cell removal --------------------------------------------------
 
+from nbconvert.exporters import HTMLExporter
+from nbconvert.preprocessors import TagRemovePreprocessor
 from traitlets.config import Config
 
 # Setup config
@@ -107,6 +109,9 @@ c.TagRemovePreprocessor.enabled = True
 
 # Configure and run out exporter
 c.HTMLExporter.preprocessors = ["nbconvert.preprocessors.TagRemovePreprocessor"]
+
+exporter = HTMLExporter(config=c)
+exporter.register_preprocessor(TagRemovePreprocessor(config=c), True)
 
 # -- Project information -----------------------------------------------------
 _now = datetime.datetime.now().year
