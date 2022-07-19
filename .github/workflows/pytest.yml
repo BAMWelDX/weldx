@@ -83,7 +83,7 @@ jobs:
       - name: test quality standard
         if: matrix.py == '3.8'
         run: |
-          pytest --cov-append ./weldx/tests/asdf_tests/test_quality_standards.py
+          pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_test.py
 
       - name: coverage xml (combination is performed by pytest-cov)
         if: matrix.py == '3.8'
