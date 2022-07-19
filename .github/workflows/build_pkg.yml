@@ -104,7 +104,7 @@ jobs:
       - name: run pytest
         run: |
           cd /tmp
-          pytest -n2 --dist=loadfile --pyargs weldx
+          pytest -n2 --dist=loadfile --pyargs weldx --ignore=./weldx/tests/asdf_tests/test_quality_standards.py
           cd -
 
       - name: set pypi test repo defaults
