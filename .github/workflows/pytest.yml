@@ -85,6 +85,11 @@ jobs:
         run: |
           pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py
 
+      - name: install cookiecutter
+        if: matrix.py == '3.8'
+        run: |
+          pip install cookiecutter
+
       - name: coverage xml (combination is performed by pytest-cov)
         if: matrix.py == '3.8'
         run: coverage xml
