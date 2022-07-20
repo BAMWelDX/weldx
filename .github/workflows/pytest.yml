@@ -103,7 +103,7 @@ jobs:
       - name: test installable quality standard from template repository
         if: matrix.py == '3.8'
         run: |
-          pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standards_check.py
+          pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py
 
       - name: coverage xml (combination is performed by pytest-cov)
         if: matrix.py == '3.8'
