@@ -90,6 +90,11 @@ jobs:
         run: |
           pip install cookiecutter
 
+      - name: create installable quality standard from repo
+        if: matrix.py == '3.8'
+        run: |
+          cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template
+
       - name: coverage xml (combination is performed by pytest-cov)
         if: matrix.py == '3.8'
         run: coverage xml
