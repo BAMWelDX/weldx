@@ -195,6 +195,7 @@ def test_unit_validator(test):
     assert np.all(test_read.nested_prop["q1"] == test.nested_prop["q1"])
     assert test_read.nested_prop["q2"] == test.nested_prop["q2"]
     assert test_read.simple_prop == test.simple_prop
+    assert np.all(test_read.current_prop == test.current_prop)
 
 
 @pytest.mark.parametrize(
@@ -220,6 +221,9 @@ def test_unit_validator(test):
         ),
         UnitValidatorTestClass(
             dimensionless=xr.DataArray(data=np.ones(3)),  # xarray must be quantity
+        ),
+        UnitValidatorTestClass(
+            custom_object=TimeSeries(Q_([0, 5], "V"), Q_([0, 1], "s")),  # wrong unit
         ),
     ],
 )
