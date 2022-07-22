@@ -50,17 +50,19 @@ definitions:
 
 type: object
 properties:
-    workpiece:
-      description: |
-              The workpiece to be welded defined by the base metal and the geometric description of the weld seam.
-      type: object
+  workpiece:
+    description: |
+            The workpiece to be welded defined by the base metal and the geometric description of the weld seam.
+    type: object
 
-    weld_seam:
-      description: |
-              List of weld seams composing the final weldment.
-      type: array
-      items:
-        $ref: "#/definitions/weld_seam"
+  weld_seam:
+    description: |
+            List of weld seams composing the final weldment.
+    type: array
+    items:
+      $ref: "#/definitions/weld_seam"
+required: [weld_seam]
+
 
 examples:
   -
