@@ -9,7 +9,7 @@
 changes
 =======
 -  Updated the outdated tutorial about the `LocalCoordinateSystem` [:pull:`775`]
-- `weld_seam` is now a required field in the `multi_pass_weld` schema [:pull:`790`]
+- ``weld_seam`` is now a required field in the ``multi_pass_weld`` schema [:pull:`790`]
 
 fixes
 =====
