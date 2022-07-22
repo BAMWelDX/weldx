@@ -9,12 +9,14 @@
 changes
 =======
 -  Updated the outdated tutorial about the `LocalCoordinateSystem` [:pull:`775`]
+- ``weld_seam`` is now a required field in the ``multi_pass_weld`` schema [:pull:`790`]
 
 fixes
 =====
 
 -  `MathematicalExpression` now uses SciPy and NumPy in numerical function evaluation. This enables it to use
    advanced integration methods and fixes lengths computation of `DynamicShapeSegment` [:pull:`770`].
+-  Fix errors in tutorial about quality standards [:pull:`777`]
 
 ********************
  0.6.1 (19.05.2022)
@@ -34,7 +36,6 @@ fixes
 
 -  Fix interactive ``view_tree`` display [:pull:`756`].
 -  Increase ``mypy`` coverage and update type hints and GH action [:pull:`753`].
--  Fix errors in tutorial about quality standards [:pull:`777`]
 
 dependencies
 ============
