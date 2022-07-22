@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "asdf://weldx.bam.de/weldx/schemas/datamodels/multi_pass_weld-0.1.0"
+id: "asdf://weldx.bam.de/weldx/schemas/datamodels/multi_pass_weld-0.1.1"
 
 title: |
   A generic multi-layer GMAW weldment.
@@ -61,6 +61,7 @@ properties:
     type: array
     items:
       $ref: "#/definitions/weld_seam"
+required: [weld_seam]
 
 
 examples:
