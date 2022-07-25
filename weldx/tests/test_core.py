@@ -301,8 +301,6 @@ class TestTimeSeries:
         if time_exp is None:
             assert "time" not in ts.data_array
         else:
-            t = ts.data_array.time
-            print(ts.data_array.time)
             assert Time(ts.data_array.time).all_close(time_exp)
 
     # test_construction_expression -----------------------------------------------------
