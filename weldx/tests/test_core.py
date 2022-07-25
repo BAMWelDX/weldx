@@ -905,7 +905,7 @@ class TestDerivedFromGenericSeries:
         for i, (k, v) in enumerate(units.items()):
             coords[k] = Q_(np.zeros(i + 2), v)
 
-        shape = tuple([_dim_length(i, d, coords) for i, d in enumerate(dims)])
+        shape = tuple(_dim_length(i, d, coords) for (i, d) in enumerate(dims))
         data = Q_(np.ones(shape))
 
         if exception is None:
