@@ -252,25 +252,46 @@ class TestTimeSeries:
             (Q_(1, "m"), None, None, (1,)),
             (Q_([3, 7, 1], "m"), TDI([0, 1, 2], unit="s"), "step", (3,)),
             (Q_([3, 7, 1], ""), Q_([0, 1, 2], "s"), "step", (3,)),
+            (Q_([3, 7, 1], ""), DTI(["2010", "2011", "2012"]), "step", (3,)),
         ],
     )
-    def test_construction_discrete(data: pint.Quantity, time, interpolation, shape_exp):
+    @pytest.mark.parametrize(
+        "reference_time",
+        [
+            None,
+            "2000-01-01",
+        ],
+    )
+    def test_construction_discrete(
+        data: pint.Quantity, time, interpolation, shape_exp, reference_time
+    ):
         """Test the construction of the TimeSeries class."""
+        if reference_time is not None and isinstance(time, (pd.DatetimeIndex)):
+            pytest.skip()
+
         # set expected values
         time_exp = time
-        if isinstance(time_exp, pint.Quantity):
-            time_exp = pd.TimedeltaIndex(time_exp.m, unit="s")
+
+        if time_exp is not None:
+            time_exp = Time(time, reference_time)
 
         exp_interpolation = interpolation
         if len(data.shape) == 0 and interpolation is None:
             exp_interpolation = "step"
 
         # create instance
-        ts = TimeSeries(data=data, time=time, interpolation=interpolation)
+        ts = TimeSeries(
+            data=data,
+            time=time,
+            interpolation=interpolation,
+            reference_time=reference_time,
+        )
 
         # check
         assert np.all(ts.data == data)
-        assert np.all(ts.time == time_exp)
+        if time_exp is not None:
+            assert ts.reference_time == time_exp.reference_time
+            assert ts.time.all_close(time_exp)
         assert ts.interpolation == exp_interpolation
         assert ts.shape == shape_exp
         assert data.is_compatible_with(ts.units)
@@ -280,7 +301,9 @@ class TestTimeSeries:
         if time_exp is None:
             assert "time" not in ts.data_array
         else:
-            assert np.all(ts.data_array.time == time_exp)
+            t = ts.data_array.time
+            print(ts.data_array.time)
+            assert Time(ts.data_array.time).all_close(time_exp)
 
     # test_construction_expression -----------------------------------------------------
 

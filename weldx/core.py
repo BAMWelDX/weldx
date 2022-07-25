@@ -16,7 +16,7 @@ from bidict import bidict
 
 import weldx.util as ut
 from weldx.constants import Q_, U_, UNITS_KEY
-from weldx.time import Time, TimeDependent, types_time_like
+from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -301,7 +301,7 @@ class TimeSeries(TimeDependent):
         data: Union[pint.Quantity, MathematicalExpression],
         time: types_time_like = None,
         interpolation: str = None,
-        reference_time: pd.Timestamp = None,
+        reference_time: types_timestamp_like = None,
     ):
         """Construct a TimSeries.
 
@@ -325,10 +325,12 @@ class TimeSeries(TimeDependent):
         self._shape = None
         self._units = None
         self._interp_counter = 0
-        self._reference_time = reference_time
+        self._reference_time = (
+            reference_time if reference_time is None else pd.Timestamp(reference_time)
+        )
 
         if isinstance(data, (pint.Quantity, xr.DataArray)):
-            self._initialize_discrete(data, time, interpolation)
+            self._initialize_discrete(data, time, interpolation, reference_time)
         elif isinstance(data, MathematicalExpression):
             self._init_expression(data)
         else:
@@ -398,19 +400,22 @@ class TimeSeries(TimeDependent):
     def _create_data_array(
         data: Union[pint.Quantity, xr.DataArray], time: Time
     ) -> xr.DataArray:
-        if isinstance(data, xr.DataArray):
-            return data
-        return (
-            xr.DataArray(data=data)
-            .rename({"dim_0": "time"})
-            .assign_coords({"time": time.as_timedelta_index()})
-        )
+        if not isinstance(data, xr.DataArray):
+            data = (
+                xr.DataArray(data=data)
+                .rename({"dim_0": "time"})
+                .assign_coords({"time": time.as_timedelta_index()})
+            )
+        if time.reference_time is not None:
+            data.weldx.time_ref = time.reference_time
+        return data
 
     def _initialize_discrete(
         self,
         data: Union[pint.Quantity, xr.DataArray],
         time: types_time_like = None,
         interpolation: str = None,
+        reference_time=None,
     ):
         """Initialize the internal data with discrete values."""
         # set default interpolation
@@ -421,7 +426,6 @@ class TimeSeries(TimeDependent):
             self._check_data_array(data)
             data = data.transpose("time", ...)
             self._data = data
-            # todo: set _reference_time?
         else:
             # expand dim for scalar input
             data = Q_(data)
@@ -431,7 +435,7 @@ class TimeSeries(TimeDependent):
             # constant value case
             if time is None:
                 time = pd.Timedelta(0)
-            time = Time(time)
+            time = Time(time, reference_time)
 
             self._reference_time = time.reference_time
             self._data = self._create_data_array(data, time)
