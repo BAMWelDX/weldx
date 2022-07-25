@@ -591,6 +591,8 @@ class TimeSeries(TimeDependent):
     @property
     def reference_time(self) -> Union[pd.Timestamp, None]:
         """Get the reference time."""
+        if self.is_discrete:
+            return self._data.weldx.time_ref
         return self._reference_time
 
     def interp_time(

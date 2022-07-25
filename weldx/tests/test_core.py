@@ -255,13 +255,7 @@ class TestTimeSeries:
             (Q_([3, 7, 1], ""), DTI(["2010", "2011", "2012"]), "step", (3,)),
         ],
     )
-    @pytest.mark.parametrize(
-        "reference_time",
-        [
-            None,
-            "2000-01-01",
-        ],
-    )
+    @pytest.mark.parametrize("reference_time", [None, "2000-01-01"])
     def test_construction_discrete(
         data: pint.Quantity, time, interpolation, shape_exp, reference_time
     ):
@@ -342,15 +336,22 @@ class TestTimeSeries:
             ([1, 2, 3], "time", dict(time=TDI([1, 2, 3])), TypeError),
         ],
     )
-    def test_init_data_array(data, dims, coords, exception_type):
+    @pytest.mark.parametrize("reference_time", [None, "2000-01-01"])
+    def test_init_data_array(data, dims, coords, reference_time, exception_type):
         """Test the `__init__` method with an xarray as data parameter."""
         da = xr.DataArray(data=data, dims=dims, coords=coords)
+        exp_time_ref = None
+        if reference_time is not None:
+            da.weldx.time_ref = reference_time
+            exp_time_ref = pd.Timestamp(reference_time)
+
         if exception_type is not None:
             with pytest.raises(exception_type):
                 TimeSeries(da)
         else:
             ts = TimeSeries(da)
             assert ts.data_array.dims[0] == "time"
+            assert ts.reference_time == exp_time_ref
 
     # test_construction_exceptions -----------------------------------------------------
 
