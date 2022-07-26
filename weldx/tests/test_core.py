@@ -296,7 +296,6 @@ class TestTimeSeries:
         if time_exp is None:
             assert "time" not in ts.data_array
         else:
-            print(ts.data_array.time)
             assert Time(ts.data_array.time).all_close(time_exp)
 
     # test_construction_expression -----------------------------------------------------
@@ -677,11 +676,8 @@ class TestGenericSeries:
         params = dict(u=u, v=v, w=w)
         gs = GenericSeries(expression, parameters=parameters, units=units)
 
-        print(gs.ndims)
-
         # perform interpolation
         gs_interp = gs(**params)
-        print(gs_interp)
 
         # calculate expected result
         params = {k: Q_(val) for k, val in params.items()}
