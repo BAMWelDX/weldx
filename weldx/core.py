@@ -325,14 +325,12 @@ class TimeSeries(TimeDependent):
         self._shape = None
         self._units = None
         self._interp_counter = 0
-        self._reference_time = (
-            reference_time if reference_time is None else pd.Timestamp(reference_time)
-        )
+        self._reference_time = None
 
         if isinstance(data, (pint.Quantity, xr.DataArray)):
             self._initialize_discrete(data, time, interpolation, reference_time)
         elif isinstance(data, MathematicalExpression):
-            self._init_expression(data)
+            self._init_expression(data, reference_time)
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
@@ -437,11 +435,10 @@ class TimeSeries(TimeDependent):
                 time = pd.Timedelta(0)
             time = Time(time, reference_time)
 
-            self._reference_time = time.reference_time
             self._data = self._create_data_array(data, time)
         self.interpolation = interpolation
 
-    def _init_expression(self, data):
+    def _init_expression(self, data, reference_time):
         """Initialize the internal data with a mathematical expression."""
         if data.num_variables != 1:
             raise Exception(
@@ -468,6 +465,8 @@ class TimeSeries(TimeDependent):
         # assign internal variables
         self._data = data
         self._time_var_name = time_var_name
+        if reference_time is not None:
+            self._reference_time = pd.Timestamp(reference_time)
 
         # check that all parameters of the expression support time arrays
         try:
@@ -486,8 +485,7 @@ class TimeSeries(TimeDependent):
         """Interpolate the time series if its data is composed of discrete values."""
         data = self._data
         if self.time is None and time.is_absolute:
-            # type: ignore[union-attr]
-            data = data.weldx.reset_reference_time(time.reference_time)
+            data = data.weldx.reset_reference_time(time.reference_time)  # type: ignore
 
         return ut.xr_interp_like(
             data,
