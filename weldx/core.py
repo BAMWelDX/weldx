@@ -398,15 +398,11 @@ class TimeSeries(TimeDependent):
     def _create_data_array(
         data: Union[pint.Quantity, xr.DataArray], time: Time
     ) -> xr.DataArray:
-        if not isinstance(data, xr.DataArray):
-            data = (
-                xr.DataArray(data=data)
-                .rename({"dim_0": "time"})
-                .assign_coords({"time": time.as_timedelta_index()})
-            )
-        if time.reference_time is not None:
-            data.weldx.time_ref = time.reference_time
-        return data
+        return (
+            xr.DataArray(data=data)
+            .rename({"dim_0": "time"})
+            .assign_coords({"time": time.as_data_array().time})
+        )
 
     def _initialize_discrete(
         self,

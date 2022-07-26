@@ -503,6 +503,8 @@ class Time:
             If true (the default) the values of the xarray will always be timedeltas.
 
         """
+        # todo: ref time in attribute
+
         if timedelta_base:
             t = self.as_timedelta_index()
         else:

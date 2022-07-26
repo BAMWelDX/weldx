@@ -200,6 +200,7 @@ class TestMathematicalExpression:
             ma_def.evaluate(**variables)
 
     @staticmethod
+    @pytest.mark.slow
     def test_integrate_length_computation():
         """Ensure we can integrate with Sympy during length computation."""
         from weldx import DynamicShapeSegment
@@ -295,6 +296,7 @@ class TestTimeSeries:
         if time_exp is None:
             assert "time" not in ts.data_array
         else:
+            print(ts.data_array.time)
             assert Time(ts.data_array.time).all_close(time_exp)
 
     # test_construction_expression -----------------------------------------------------
