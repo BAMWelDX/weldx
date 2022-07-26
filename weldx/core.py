@@ -486,7 +486,7 @@ class TimeSeries(TimeDependent):
         """Interpolate the time series if its data is composed of discrete values."""
         return ut.xr_interp_like(
             self._data,
-            {"time": time.as_data_array()},
+            time.as_data_array(),
             method=self.interpolation,
             assume_sorted=False,
             broadcast_missing=False,
@@ -502,7 +502,10 @@ class TimeSeries(TimeDependent):
 
         # evaluate expression
         data = self._data.evaluate(**{self._time_var_name: time_xr})
-        return data.assign_coords({"time": time.as_data_array()})
+        data = data.assign_coords({"time": time.as_data_array()})
+        if time.reference_time is not None:
+            data.weldx.time_ref = time.reference_time
+        return data
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:

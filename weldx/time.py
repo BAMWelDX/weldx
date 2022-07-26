@@ -508,7 +508,8 @@ class Time:
         else:
             t = self.index
         da = xr.DataArray(t, coords={"time": t}, dims=["time"])
-        da.time.attrs["time_ref"] = self.reference_time
+        if self.reference_time is not None:
+            da.weldx.time_ref = self.reference_time
         return da
 
     @property

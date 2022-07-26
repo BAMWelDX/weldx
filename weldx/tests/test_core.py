@@ -471,18 +471,41 @@ class TestTimeSeries:
             (ts_expr_vec, time_mul, results_exp_vec, "m"),
         ],
     )
-    def test_interp_time(ts, time, magnitude_exp, unit_exp):
+    @pytest.mark.parametrize(
+        "reference_time",
+        [
+            None,
+            "2000-01-01",
+        ],
+    )
+    def test_interp_time(ts, time, magnitude_exp, unit_exp, reference_time):
         """Test the interp_time function."""
+        if reference_time is not None:
+            if isinstance(ts.data, xr.DataArray):
+                ts = TimeSeries(
+                    ts.data_array,
+                    reference_time=reference_time,
+                    interpolation=ts.interpolation,
+                )
+            else:
+                ts = TimeSeries(
+                    ts.data,
+                    time=ts.time,
+                    reference_time=reference_time,
+                    interpolation=ts.interpolation,
+                )
+            time = Time(time, time_ref=reference_time)
+
         result = ts.interp_time(time)
 
         assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
         assert result.units == U_(unit_exp)
 
-        time = Time(time)
+        time = Time(time, reference_time)
         if len(time) == 1:
             assert result.time is None
         else:
-            assert np.all(Time(result.time, result._reference_time) == time)
+            assert result.time.all_close(time)
 
     # test_interp_time_warning ---------------------------------------------------------
 
