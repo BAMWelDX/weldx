@@ -237,7 +237,7 @@ class TestTimeSeries:
 
     me_params_vec = {"a": Q_([2, 0, 1], "m/s"), "b": Q_([-2, 3, 0], "m")}
 
-    ts_constant = TimeSeries(value_constant)
+    ts_const = TimeSeries(value_constant)
     ts_disc_step = TimeSeries(values_discrete, time_discrete, "step")
     ts_disc_linear = TimeSeries(values_discrete, time_discrete, "linear")
     ts_expr = TimeSeries(ME(me_expr_str, me_params))
@@ -393,21 +393,21 @@ class TestTimeSeries:
     @pytest.mark.parametrize(
         "ts, ts_other, result_exp",
         [
-            (ts_constant, TS(value_constant), True),
+            (ts_const, TS(value_constant), True),
             (ts_disc_step, TS(values_discrete, time_discrete, "step"), True),
             (ts_expr, TS(ME(me_expr_str, me_params)), True),
-            (ts_constant, ts_disc_step, False),
-            (ts_constant, ts_expr, False),
+            (ts_const, ts_disc_step, False),
+            (ts_const, ts_expr, False),
             (ts_disc_step, ts_expr, False),
-            (ts_constant, 1, False),
+            (ts_const, 1, False),
             (ts_disc_step, 1, False),
             (ts_expr, 1, False),
-            (ts_constant, "wrong", False),
+            (ts_const, "wrong", False),
             (ts_disc_step, "wrong", False),
             (ts_expr, "wrong", False),
-            (ts_constant, TS(Q_(1337, "m")), False),
-            (ts_constant, TS(Q_(1, "mm")), False),
-            (ts_constant, TS(Q_(1, "s")), False),
+            (ts_const, TS(Q_(1337, "m")), False),
+            (ts_const, TS(Q_(1, "mm")), False),
+            (ts_const, TS(Q_(1, "s")), False),
             (ts_disc_step, TS(values_discrete, time_wrong_values, "step"), False),
             (ts_disc_step, TS(values_discrete_wrong, time_discrete, "step"), False),
             (ts_disc_step, TS(values_unit_prefix_wrong, time_discrete, "step"), False),
@@ -444,16 +444,11 @@ class TestTimeSeries:
     @pytest.mark.parametrize(
         "ts, time, magnitude_exp, unit_exp",
         [
-            (ts_constant, time_single, 1, "m"),
-            (ts_constant, time_single_q, 1, "m"),
-            (ts_constant, time_mul, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
-            (
-                ts_constant,
-                time_mul + pd.Timestamp("2020"),
-                [1, 1, 1, 1, 1, 1, 1, 1],
-                "m",
-            ),
-            (ts_constant, time_mul_q, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (ts_const, time_single, 1, "m"),
+            (ts_const, time_single_q, 1, "m"),
+            (ts_const, time_mul, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (ts_const, time_mul + pd.Timestamp("2020"), [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (ts_const, time_mul_q, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
             (ts_disc_step, time_single, 12, "mm"),
             (ts_disc_step, time_single_q, 12, "mm"),
             (ts_disc_step, time_mul, [10, 10, 11, 11, 12, 14, 16, 16], "mm"),
@@ -471,13 +466,7 @@ class TestTimeSeries:
             (ts_expr_vec, time_mul, results_exp_vec, "m"),
         ],
     )
-    @pytest.mark.parametrize(
-        "reference_time",
-        [
-            None,
-            "2000-01-01",
-        ],
-    )
+    @pytest.mark.parametrize("reference_time", [None, "2000-01-01"])
     def test_interp_time(ts, time, magnitude_exp, unit_exp, reference_time):
         """Test the interp_time function."""
         if reference_time is not None:
@@ -523,7 +512,7 @@ class TestTimeSeries:
     # test_interp_time_exceptions ------------------------------------------------------
 
     @staticmethod
-    @pytest.mark.parametrize("ts", [ts_constant, ts_disc_step, ts_disc_linear, ts_expr])
+    @pytest.mark.parametrize("ts", [ts_const, ts_disc_step, ts_disc_linear, ts_expr])
     @pytest.mark.parametrize(
         "time,  exception_type, test_name",
         [

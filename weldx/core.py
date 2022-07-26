@@ -484,6 +484,10 @@ class TimeSeries(TimeDependent):
 
     def _interp_time_discrete(self, time: Time) -> xr.DataArray:
         """Interpolate the time series if its data is composed of discrete values."""
+        data = self._data
+        if self.shape == (1,) and time.is_absolute:
+            data.weldx.time_ref = time.reference_time
+
         return ut.xr_interp_like(
             self._data,
             time.as_data_array(),
