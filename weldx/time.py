@@ -503,8 +503,6 @@ class Time:
             If true (the default) the values of the xarray will always be timedeltas.
 
         """
-        # todo: ref time in attribute
-
         if timedelta_base:
             t = self.as_timedelta_index()
         else:
@@ -512,6 +510,8 @@ class Time:
         da = xr.DataArray(t, coords={"time": t}, dims=["time"])
         if self.reference_time is not None:
             da.weldx.time_ref = self.reference_time
+
+        da.attrs = da.time.attrs
         return da
 
     @property

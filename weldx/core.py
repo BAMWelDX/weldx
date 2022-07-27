@@ -401,7 +401,7 @@ class TimeSeries(TimeDependent):
         return (
             xr.DataArray(data=data)
             .rename({"dim_0": "time"})
-            .assign_coords({"time": time.as_data_array().time})
+            .assign_coords({"time": time.as_data_array()})
         )
 
     def _initialize_discrete(
