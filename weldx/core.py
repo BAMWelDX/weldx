@@ -501,10 +501,7 @@ class TimeSeries(TimeDependent):
 
         # evaluate expression
         data = self._data.evaluate(**{self._time_var_name: time_xr})
-        data = data.assign_coords({"time": time.as_data_array()})
-        if time.reference_time is not None:
-            data.weldx.time_ref = time.reference_time
-        return data
+        return data.assign_coords({"time": time.as_data_array()})
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
