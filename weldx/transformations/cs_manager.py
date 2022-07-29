@@ -565,6 +565,16 @@ class CoordinateSystemManager:
     ):
         """Assign spatial data to a coordinate system.
 
+        If the assigned data is time-dependent and a target system is specified, the
+        data will be transformed considering all time-dependencies on the transformation
+        path. This is especially useful to reconstruct specimen geometries from scan
+        data. If the raw scan data contains the timestamps of the scans and the
+        movement of the scanner is described by a corresponding time-dependent
+        coordinate system, the `CoordinateSystemManager` is able to calculate the
+        specimen geometry on its own. Therefore, you need to provide the scanner
+        coordinate system name as the ``reference_system`` parameter and the specimen
+        coordinate system name as the ``target_system`` parameter.
+
         Parameters
         ----------
         data
@@ -575,9 +585,10 @@ class CoordinateSystemManager:
             Name of the coordinate system the data values are defined in.
         target_system:
             Name of the target system the data will be transformed and assigned to.
-            This is useful when adding time-dependent data. The provided name must match
-            an existing system. If `None` is passed (the default), data will not be
-            transformed and assigned to the 'reference_system'.
+            This is useful when adding time-dependent data (see function description).
+            The provided name must match an existing system. If `None` is passed
+            (the default), data will not be transformed and assigned to the
+            'reference_system'.
 
         """
         if not isinstance(data_name, str):
