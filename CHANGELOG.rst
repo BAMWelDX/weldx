@@ -10,7 +10,7 @@ changes
 =======
 -  Updated the outdated tutorial about the `LocalCoordinateSystem` [:pull:`775`]
 - ``weld_seam`` is now a required field in the ``multi_pass_weld`` schema [:pull:`790`]
-- Add section about time-dependent spatial data to the `CoordinateSystemManager` tutorial [:pull:792]
+- Add section about time-dependent spatial data to the `CoordinateSystemManager` tutorial [:pull:`792`]
 
 fixes
 =====
