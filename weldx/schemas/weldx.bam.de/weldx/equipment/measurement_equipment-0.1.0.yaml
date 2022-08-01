@@ -7,7 +7,7 @@ title: |
   A piece of measurement equipment.
 description: |
   This schema describes a piece of measurement equipment that is part of a measurement chain.
-  Equipments can be associated with signal sources and data transformations.
+  Equipment can be associated with signal sources and data transformations.
 
 examples:
   -

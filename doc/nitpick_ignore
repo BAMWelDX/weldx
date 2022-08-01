@@ -7,10 +7,21 @@ py:obj weldx.GmawProcess.power_source
 py:obj weldx.GmawProcess.parameters
 
 py:class types_path_and_file_like
+py:class weldx.asdf.types.WeldxConverter
+
+# python
+py:data collections.abc.Callable
+
+# numpy typing
+py:class numpy._typing._array_like._SupportsArray
+py:class numpy._typing._nested_sequence._NestedSequence
+py:class npt.ArrayLike
 
 # matplotlib
 py:class matplotlib.axes.Axes
+py:obj matplotlib.axes.Axes
 py:class matplotlib.axes._axes.Axes
+py:class matplotlib.figure.Figure
 
 # pandas
 py:class pandas._libs.tslibs.timedeltas.Timedelta
@@ -27,15 +38,26 @@ py:class xarray.core.dataset.Dataset
 py:class xarray.DataArray
 py:class xarray.Dataset
 
-# pint (0.17)
+# pint (0.17 / 0.18)
 py:class pint.quantity.build_quantity_class.<locals>.Quantity
 py:obj pint.quantity.Quantity
 py:class sequence of pint.Quantity
 py:class list of pint.Quantity
 py:class UnitsContainer
+py:class UnitLike
+py:class pint.quantity.Magnitude
 
 # k3d
 py:class k3d.plot
+
+# sphinx bugs -------------------------------------------------------------------
+# weird behavior with dataclasses.InitVar in weldx.geometry.SpatialData
+
+py:class np.ndarray
+py:class DataArray
+py:class InitVar
+py:class dataclasses.InitVar
+py:class Time
 
 # inherited -------------------------------------------------------------------
 # here goes everything that is caused by inheriting from non-weldx types
@@ -79,5 +101,7 @@ py:obj mrp[i]
 # asdf
 py:class asdf.asdf.SerializationContext
 py:class iterable of asdf.extension.Compressor instances
+py:class iterable of asdf.extension.Compressor
 py:class See the class docstring for details on keyword
 py:class iterable of str
+py:class asdf_standard.resource.DirectoryResourceMapping

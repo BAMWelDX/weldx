@@ -10,8 +10,7 @@ __all__ = [
 class MeasurementChainConverter(WeldxConverter):
     """Serialization class for measurement chains"""
 
-    name = "measurement/measurement_chain"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-0.1.*"]
     types = [MeasurementChain]
 
     def to_yaml_tree(self, obj: MeasurementChain, tag: str, ctx) -> dict:

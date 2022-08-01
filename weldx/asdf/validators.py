@@ -1,13 +1,16 @@
 """ASDF-validators for weldx types."""
+from __future__ import annotations
+
 import re
-from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict, Union
+from collections import OrderedDict
+from collections.abc import Callable, Iterator, Mapping
+from typing import Any, Union
 
 from asdf import ValidationError
 from asdf.schema import _type_to_tag
-from asdf.util import uri_match
 
 from weldx.asdf.types import WxSyntaxError
-from weldx.asdf.util import _get_instance_shape
+from weldx.asdf.util import _get_instance_shape, _get_instance_units, uri_match
 from weldx.constants import U_
 
 __all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
@@ -71,7 +74,7 @@ def _walk_validator(
 
 
 def _unit_validator(
-    instance: Mapping, expected_dimensionality: str, position: List[str]
+    instance: Mapping, expected_dimensionality: str, position: list[str]
 ) -> Iterator[ValidationError]:
     """Validate the 'unit' key of the instance against the given string.
 
@@ -92,18 +95,21 @@ def _unit_validator(
     if not position:
         position = instance
 
-    if "units" in instance:
-        unit = instance["units"]
-    else:  # legacy_code
-        unit = instance["unit"]
-    unit = str(unit)  # catch TaggedString
-    valid = U_(unit).is_compatible_with(U_(expected_dimensionality))
-    if not valid:
+    units = _get_instance_units(instance)
+    if units is None:
         yield ValidationError(
             f"Error validating unit dimension for property '{position}'. "
             f"Expected unit of dimension '{expected_dimensionality}' "
-            f"but got unit '{unit}'"
+            "but found no unit information"
         )
+    else:
+        valid = units.is_compatible_with(U_(expected_dimensionality))
+        if not valid:
+            yield ValidationError(
+                f"Error validating unit dimension for property '{position}'. "
+                f"Expected unit of dimension '{expected_dimensionality}' "
+                f"but got unit '{units}'"
+            )
 
 
 def _compare(_int, exp_string):
@@ -418,8 +424,8 @@ def _validate_instance_shape(
 
 
 def _custom_shape_validator(
-    dict_test: Dict[str, Any],
-    dict_expected: Union[Dict[str, Any], List],
+    dict_test: dict[str, Any],
+    dict_expected: Union[dict[str, Any], list],
     optional: bool = False,
 ):
     """Validate dimensions which are stored in two dictionaries dict_test and
@@ -586,7 +592,7 @@ def wx_shape_validator(
 
 
 def wx_property_tag_validator(
-    validator, wx_property_tag: str, instance, schema
+    validator, wx_property_tag: Union[str, list[str]], instance, schema
 ) -> Iterator[ValidationError]:
     """
 
@@ -620,6 +626,11 @@ def wx_property_tag_validator(
                 yield ValidationError(
                     f"mismatched tags, wanted '{tagname}', got '{instance_tag}'"
                 )
+
+    if not isinstance(wx_property_tag, (str, list)):
+        raise WxSyntaxError(
+            f"'wx_property_tag' must be str or List[str], got {wx_property_tag}"
+        )
 
     for _, value in instance.items():
         yield from _tag_validator(tagname=wx_property_tag, instance=value)

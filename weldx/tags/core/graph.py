@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import List
 from uuid import UUID, uuid4
 
 import networkx as nx
@@ -20,8 +21,7 @@ class DiEdge:
 class DiEdgeConverter(WeldxConverter):
     """ASDF type for `DiEdge`."""
 
-    name = "core/graph/di_edge"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-0.1.*"]
     types = [DiEdge]
 
     def to_yaml_tree(self, obj: DiEdge, tag: str, ctx) -> dict:
@@ -40,7 +40,7 @@ class DiEdgeConverter(WeldxConverter):
 class DiNode:
     """Generic directed graph node type."""
 
-    edges: List["DiEdge"] = field(default_factory=list)
+    edges: list["DiEdge"] = field(default_factory=list)
     name: str = field(default_factory=uuid4)
     attributes: dict = field(default_factory=dict)
 
@@ -48,8 +48,7 @@ class DiNode:
 class DiNodeConverter(WeldxConverter):
     """ASDF type for `DiNode`."""
 
-    name = "core/graph/di_node"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.*"]
     types = [DiNode]
 
     def to_yaml_tree(self, obj: DiNode, tag: str, ctx) -> dict:
@@ -149,8 +148,7 @@ def build_graph(current_node: DiNode, graph: nx.DiGraph = None) -> nx.DiGraph:
 class DiGraphConverter(WeldxConverter):
     """Serialization class for `networkx.DiGraph`."""
 
-    name = "core/graph/di_graph"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-0.1.*"]
     types = [nx.DiGraph]
 
     def to_yaml_tree(self, obj: nx.DiGraph, tag: str, ctx) -> dict:

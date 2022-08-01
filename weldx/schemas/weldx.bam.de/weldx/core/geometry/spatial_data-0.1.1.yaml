@@ -1,0 +1,93 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/geometry/spatial_data-0.1.1"
+
+title: |
+  3D point cloud with optional triangulation.
+description: |
+  This schema describes a collection of data points in 3d space.
+  Triangulation information by indizes can be added to represent a mesh.
+
+examples:
+  -
+    - A simple `SpatialData` with triangulation
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.1>
+        coordinates: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0>
+          value: !core/ndarray-1.0.0
+            data:
+            - [0.0, 0.0, 0.0]
+            - [1.0, 0.0, 0.0]
+            - [1.0, 1.0, 0.0]
+            - [0.0, 1.0, 0.0]
+            datatype: float64
+            shape: [4, 3]
+          units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
+        triangles: !core/ndarray-1.0.0
+          data:
+          - [0, 1, 0]
+          - [1, 0, 0]
+          datatype: uint32
+          shape: [2, 3]
+  -
+    - A `SpatialData` object with data in three dimensions
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.1>
+        coordinates: !<asdf://weldx.bam.de/weldx/tags/core/data_array-0.1.0>
+          attributes: {}
+          coordinates:
+          - !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
+            name: c
+            dimensions: [c]
+            dtype: <U1
+            data: !core/ndarray-1.0.0
+              data: [x, y, z]
+              datatype: [ucs4, 1]
+              shape: [3]
+          data: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
+            name: data
+            dimensions: [p, n, c]
+            dtype: <f8
+            units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
+            data: !core/ndarray-1.0.0
+              data:
+              - - [0.0, 0.0, 0.0]
+                - [0.0, 1.0, 0.0]
+              - - [1.0, 0.0, 1.0]
+                - [0.0, 1.0, 1.0]
+              datatype: float64
+              shape: [2, 2, 3]
+            units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> inch
+
+type: object
+properties:
+  coordinates:
+    description: |
+      The coordinates of the data points.
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/data_array-0.1.*"
+        wx_shape: [..., 3]
+        wx_unit: "m"
+      - tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.*"
+        wx_shape: [(~), 3]
+        wx_unit: "m"
+  attributes:
+    description: |
+      An arbitrary set of attributes. For example, normals, colors or measured point data can be stored using this
+      field. Each added attribute is an array with a number of data points equal to the number of points.
+    type: object
+  triangles:
+    description: |
+      An array of index triplets that specify which points form a triangle
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    properties:
+      datatype:
+        type: string
+        enum: [uint32, uint64]
+    wx_shape: [(~), 3]
+
+propertyOrder: [coordinates, attributes, triangles]
+required: [coordinates]
+flowStyle: block
+...

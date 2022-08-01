@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
@@ -12,8 +12,7 @@ __all__ = ["DatetimeIndexConverter"]
 class DatetimeIndexConverter(WeldxConverter):
     """A simple implementation of serializing pandas DatetimeIndex."""
 
-    name = "time/datetimeindex"
-    version = "0.1.*"
+    tags = ["asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.*"]
     types = [pd.DatetimeIndex]
 
     def to_yaml_tree(self, obj: pd.DatetimeIndex, tag: str, ctx) -> dict:
@@ -39,18 +38,9 @@ class DatetimeIndexConverter(WeldxConverter):
         return pd.DatetimeIndex(node["values"])
 
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape (length of TDI) from static tagged tree instance."""
-        _tag: str = node._tag
-
         if "freq" in node:
-            if _tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
-                temp = pd.date_range(
-                    start=node["start"]["value"],
-                    end=node["end"]["value"],
-                    freq=node["freq"],
-                )
-                return [len(temp)]
             temp = pd.date_range(
                 start=str(node["start"]),  # can't handle TaggedString directly
                 end=str(node["end"]),

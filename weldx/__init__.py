@@ -30,6 +30,16 @@ These classes and functions are used to define welding processes.
     GmawProcess
     get_groove
 
+**Unit handling**
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Unit handling
+    :template: class-template_docstring.rst
+
+    Q_
+    U_
+
 **Data handling and transformation**
 
 .. autosummary::
@@ -37,10 +47,10 @@ These classes and functions are used to define welding processes.
     :caption: Data handling and transformation
     :template: class-template.rst
 
-    Q_
-    U_
     Time
     TimeSeries
+    GenericSeries
+    SpatialSeries
     MathematicalExpression
     CoordinateSystemManager
     LocalCoordinateSystem
@@ -57,12 +67,15 @@ These classes are used to define workpiece geometries.
 
     ArcSegment
     Geometry
+    DynamicBaseSegment
+    DynamicShapeSegment
     LineSegment
     LinearHorizontalTraceSegment
     Profile
     Shape
     Trace
     SpatialData
+    DynamicTraceSegment
 
 **Full API Reference**
 
@@ -118,31 +131,38 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 # constants - should be imported first, no internal weldx deps
-from .constants import Q_, U_
+from weldx.constants import Q_, U_
 
 # main modules
-import weldx.time
+import weldx.time  # skipcq: PY-W2000
+
+# skipcq: PY-W2000
 import weldx.util  # import this second to avoid circular dependencies
-import weldx.core
-import weldx.transformations
+import weldx.core  # skipcq: PY-W2000
+import weldx.transformations  # skipcq: PY-W2000
 import weldx.config
-import weldx.geometry
-import weldx.welding
+import weldx.geometry  # skipcq: PY-W2000
+import weldx.welding  # skipcq: PY-W2000
 
 # class imports to weldx namespace
 from weldx.config import Config
-from weldx.core import MathematicalExpression, TimeSeries
+
+# skipcq: PY-W2000
+from weldx.core import GenericSeries, MathematicalExpression, TimeSeries, SpatialSeries
 from weldx.geometry import (
     ArcSegment,
     Geometry,
+    DynamicBaseSegment,
+    DynamicShapeSegment,
     LineSegment,
     LinearHorizontalTraceSegment,
     Profile,
     Shape,
     Trace,
     SpatialData,
+    DynamicTraceSegment,
 )
-from weldx.transformations import (
+from weldx.transformations import (  # skipcq: PY-W2000
     CoordinateSystemManager,
     LocalCoordinateSystem,
     WXRotation,
@@ -152,10 +172,10 @@ from weldx.welding.groove.iso_9692_1 import get_groove
 from weldx.time import Time
 
 # tags (this will partially import weldx.asdf but not the extension)
-from weldx import tags
+from weldx import tags  # skipcq: PY-W2000
 
 # asdf extensions
-import weldx.asdf
+import weldx.asdf  # skipcq: PY-W2000
 from weldx.asdf.file import WeldxFile
 
 __all__ = (
@@ -163,6 +183,8 @@ __all__ = (
     "CoordinateSystemManager",
     "Geometry",
     "GmawProcess",
+    "DynamicBaseSegment",
+    "DynamicShapeSegment",
     "LineSegment",
     "LocalCoordinateSystem",
     "Profile",
@@ -181,6 +203,7 @@ __all__ = (
     "util",
     "welding",
     "TimeSeries",
+    "DynamicTraceSegment",
     "LinearHorizontalTraceSegment",
     "Config",
     "Time",

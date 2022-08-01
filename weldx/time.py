@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from functools import reduce
-from typing import List, Sequence, Union
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -148,7 +149,7 @@ class Time:
     passed directly to `Time` as `time` parameter:
 
     >>> from weldx import LocalCoordinateSystem as LCS
-    >>> lcs = LCS(coordinates=[[0, 0, 0], [1, 1, 1]], time=["1s", "2s"])
+    >>> lcs = LCS(coordinates=Q_([[0, 0, 0], [1, 1, 1]], "mm"), time=["1s", "2s"])
     >>> t_from_lcs = Time(lcs)
     >>>
     >>> from weldx import TimeSeries
@@ -338,7 +339,7 @@ class Time:
         time_ref = None if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
-    def __eq__(self, other: types_time_like) -> Union[bool, List[bool]]:  # type: ignore
+    def __eq__(self, other: types_time_like) -> Union[bool, list[bool]]:  # type: ignore
         """Element-wise comparisons between time object and compatible types.
 
         See Also
@@ -445,7 +446,8 @@ class Time:
             nanoseconds = nanoseconds[0]
         q = Q_(nanoseconds, "ns").to(unit)
         if self.is_absolute:
-            setattr(q, "time_ref", self.reference_time)  # store time_ref info
+            # store time_ref info
+            q.time_ref = self.reference_time  # type: ignore[attr-defined]
         return q
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
@@ -490,10 +492,26 @@ class Time:
             return pd.TimedeltaIndex([self._time])
         return self._time
 
-    def as_data_array(self) -> DataArray:
-        """Return the data as `xarray.DataArray`."""
-        da = xr.DataArray(self._time, coords={"time": self._time}, dims=["time"])
-        da.time.attrs["time_ref"] = self.reference_time
+    def as_data_array(self, timedelta_base: bool = True) -> DataArray:
+        """Return the time data as a `xarray.DataArray` coordinate.
+
+        By default the format is timedelta values with reference time as attribute.
+
+        Parameters
+        ----------
+        timedelta_base
+            If true (the default) the values of the xarray will always be timedeltas.
+
+        """
+        if timedelta_base:
+            t = self.as_timedelta_index()
+        else:
+            t = self.index
+        da = xr.DataArray(t, coords={"time": t}, dims=["time"])
+        if self.reference_time is not None:
+            da.weldx.time_ref = self.reference_time
+
+        da.attrs = da.time.attrs
         return da
 
     @property
@@ -640,8 +658,13 @@ class Time:
         """Build a time-like pandas.Index from pint.Quantity."""
         time_ref = getattr(time, "time_ref", None)
         base = "s"  # using low base unit could cause rounding errors
+
         if not np.iterable(time):  # catch zero-dim arrays
-            time = np.expand_dims(time, 0)
+            # The mypy error in the next line is ignored. `np.expand_dims` only expects
+            # `ndarray` types and does not know about quantities, but pint provides the
+            # necessary interfaces so that the function works as expected
+            time = np.expand_dims(time, 0)  # type: ignore[assignment]
+
         delta = pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
         if time_ref is not None:
             delta = delta + time_ref
@@ -655,7 +678,10 @@ class Time:
         if "time" in time.coords:
             time = time.time
         time_ref = time.weldx.time_ref
-        time_index = pd.Index(time.values)
+        if time.shape:
+            time_index = pd.Index(time.values)
+        else:
+            time_index = pd.Index([time.values])
         if time_ref is not None:
             time_index = time_index + time_ref
         return time_index
@@ -702,7 +728,7 @@ class Time:
     union = _UnionDescriptor()
     """Calculate the union of multiple time-like objects.
 
-    This method can eiter be used as a class or instance method. When used on an
+    This method can either be used as a class or instance method. When used on an
     instance, its values are included in the calculated time union.
 
     Note that any reference time information will be dropped.

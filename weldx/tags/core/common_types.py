@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import dataclasses
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Hashable, List, Mapping
+from typing import Any, Hashable
 
 import numpy as np
 import pint
@@ -35,7 +38,7 @@ class Variable:
     """Represents an n-dimensional piece of data."""
 
     name: str
-    dimensions: List
+    dimensions: list
     data: np.ndarray
     attrs: Mapping[Hashable, Any] = dataclasses.field(default_factory=dict)
 
@@ -43,9 +46,14 @@ class Variable:
 class VariableConverter(WeldxConverter):
     """Serialization class for a Variable"""
 
-    name = "core/variable"
-    version = "0.1.0"
+    tags = [
+        "asdf://weldx.bam.de/weldx/tags/core/variable-0.1.*",
+    ]
     types = [Variable]
+
+    def select_tag(self, obj, tags, ctx):
+        """Set highest available weldx tag for deserialization."""
+        return sorted(tags)[-1]
 
     @staticmethod
     def convert_time_dtypes(data: np.ndarray):
@@ -106,14 +114,12 @@ class VariableConverter(WeldxConverter):
 
         if "units" in node:  # convert to pint.Quantity
             data = Q_(data, node["units"])
-        elif "unit" in node:  # legacy_code
-            data = Q_(data, node["unit"])
 
         attrs = node.get("attrs", None)
 
         return Variable(node["name"], node["dimensions"], data, attrs)
 
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
         return _get_instance_shape(node["data"])

@@ -2,12 +2,14 @@
 import numpy as np
 import pandas as pd
 import pytest
+import xarray as xr
 from asdf import ValidationError
 
-from weldx import Q_, TimeSeries
 from weldx.asdf.types import WxSyntaxError
 from weldx.asdf.util import write_buffer, write_read_buffer
 from weldx.asdf.validators import _custom_shape_validator
+from weldx.constants import Q_
+from weldx.core import TimeSeries
 from weldx.tags.debug.test_property_tag import PropertyTagTestClass
 from weldx.tags.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.tags.debug.test_unit_validator import UnitValidatorTestClass
@@ -178,6 +180,9 @@ def test_shape_validator_exceptions(test_input):
     [
         UnitValidatorTestClass(),
         UnitValidatorTestClass(length_prop=Q_(1, "inch")),
+        UnitValidatorTestClass(dimensionless=Q_(1, " ")),
+        UnitValidatorTestClass(dimensionless=np.ones(3)),
+        UnitValidatorTestClass(dimensionless=xr.DataArray(data=Q_(np.ones(3)))),
     ],
 )
 def test_unit_validator(test):
@@ -190,6 +195,7 @@ def test_unit_validator(test):
     assert np.all(test_read.nested_prop["q1"] == test.nested_prop["q1"])
     assert test_read.nested_prop["q2"] == test.nested_prop["q2"]
     assert test_read.simple_prop == test.simple_prop
+    assert np.all(test_read.current_prop == test.current_prop)
 
 
 @pytest.mark.parametrize(
@@ -208,7 +214,16 @@ def test_unit_validator(test):
             nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "V")),  # wrong unit
         ),
         UnitValidatorTestClass(
-            simple_prop={"value": float(3), "unit": "s"},  # wrong unit
+            simple_prop={"value": float(3), "units": "s"},  # wrong unit
+        ),
+        UnitValidatorTestClass(
+            dimensionless=Q_(1, "s"),  # wrong unit
+        ),
+        UnitValidatorTestClass(
+            dimensionless=xr.DataArray(data=np.ones(3)),  # xarray must be quantity
+        ),
+        UnitValidatorTestClass(
+            custom_object=TimeSeries(Q_([0, 5], "V"), Q_([0, 1], "s")),  # wrong unit
         ),
     ],
 )

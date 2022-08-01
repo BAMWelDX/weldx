@@ -1,4 +1,9 @@
+"""PyTest configuration."""
 import pytest
+
+collect_ignore_glob = [
+    "weldx/visualization/*.py",
+]
 
 
 @pytest.fixture(autouse=True)

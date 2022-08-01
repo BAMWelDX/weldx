@@ -1,13 +1,19 @@
+"""Update the manifest file with schema files found in this directory."""
 from pathlib import Path
 
 import yaml
 
+from weldx.asdf.constants import (
+    WELDX_EXTENSION_URI,
+    WELDX_EXTENSION_VERSION,
+    WELDX_MANIFEST_URI,
+)
 from weldx.asdf.util import get_converter_for_tag
 
 
 def update_manifest(
     search_dir: str = "../../weldx/schemas",
-    out: str = "../../weldx/manifests/weldx-0.1.0.yaml",
+    out: str = f"../../weldx/manifests/weldx-{WELDX_EXTENSION_VERSION}.yaml",
 ):
     """Create manifest file from existing schemas."""
     # read existing manifest
@@ -16,6 +22,9 @@ def update_manifest(
         Loader=yaml.SafeLoader,
     )
 
+    manifest["id"] = WELDX_MANIFEST_URI
+    manifest["extension_uri"] = WELDX_EXTENSION_URI
+
     # keep only ASDF schema mappings
     manifest["tags"] = [
         mapping
@@ -23,7 +32,7 @@ def update_manifest(
         if mapping["schema_uri"].startswith("http://stsci.edu/schemas")
     ]
 
-    schemas = Path(search_dir).rglob("*.yaml")
+    schemas = sorted(Path(search_dir).rglob("*.yaml"))
 
     for schema in schemas:
         content = yaml.load(
@@ -34,12 +43,6 @@ def update_manifest(
             uri: str = content["id"]
             if uri.startswith("asdf://weldx.bam.de"):
                 tag = uri.replace("/schemas/", "/tags/")
-            elif uri.startswith("http://weldx.bam.de"):  # legacy_code
-                if "tag" in content:
-                    tag = content["tag"]
-                else:
-                    tag = None
-                    print(f"No tag for {uri=}")
             else:
                 raise ValueError(f"Unknown URI format {uri=}")
 
@@ -50,7 +53,7 @@ def update_manifest(
             else:
                 print(f"No converter for URI: {schema}")
 
-    with open(Path(out), "w") as outfile:
+    with open(Path(out), "w") as outfile:  # skipcq: PTC-W6004
         outfile.write("%YAML 1.1\n---\n")
         yaml.dump(
             manifest,

@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List
 
 from weldx.asdf.util import dataclass_serialization_class
 
@@ -12,7 +13,7 @@ __all__ = ["ShieldingGasType", "ShieldingGasTypeConverter"]
 class ShieldingGasType:
     """<CLASS DOCSTRING>"""
 
-    gas_component: List[GasComponent]
+    gas_component: list[GasComponent]
     common_name: str
     designation: str = None
 
