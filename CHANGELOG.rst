@@ -11,12 +11,17 @@ changes
 
 -  ``weldx`` now requires pip to install (previously it could be installed by directly invoking setup.py) [:pull:`774`].
    From a users perspective nothing changes here, as the package was always recommended to be installed via pip.
+-  Updated the outdated tutorial about the `LocalCoordinateSystem` [:pull:`775`]
+- ``weld_seam`` is now a required field in the ``multi_pass_weld`` schema [:pull:`790`]
+
 
 fixes
 =====
 
 -  `MathematicalExpression` now uses SciPy and NumPy in numerical function evaluation. This enables it to use
    advanced integration methods and fixes lengths computation of `DynamicShapeSegment` [:pull:`770`].
+-  Fix errors in tutorial about quality standards [:pull:`777`]
+-  Correct wrong handling of absolute times of the `TimeSeries` class [:pull:`791`]
 
 ********************
  0.6.1 (19.05.2022)
