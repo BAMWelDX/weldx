@@ -4,7 +4,7 @@ $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-0.1.0"
 
 title: |
-  Single pass, single wire GMAW weldment.
+  Single pass, single wire GMAW weldment in an ISO 9692_1 groove.
 description: |
   Schema describing a simple single pass welding application along a linear weld seam with constant groove shape.
 
@@ -47,54 +47,18 @@ description: |
 type: object
 properties:
   process:
-    description: |
-      Metadata describing the GMAW process.
-    type: object
-    properties:
-      welding_process:
-        $ref: "asdf://weldx.bam.de/weldx/schemas/process/GMAW-0.1.0"
-      shielding_gas:
-        tag: "asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-0.1.*"
-      weld_speed:
-        description: |
-          The constant weld speed of the welding TCP movement.
-        tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
-        wx_unit: "m/s"
-        wx_shape: [1]
-      welding_wire:
-        description: |
-          Object describing the welding wire used.
-        type: object
-        properties:
-          diameter:
-            description: |
-              The diameter of the welding wire.
-            tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.*"
-            wx_unit: "m"
-            wx_shape: [1]
-          class:
-            description: |
-              The wire classification according to DIN EN ISO 14341, DIN EN 12072 or similar standards.
-              Addition standard details should be stored in the wx_user property.
-            type: string
-        required: [diameter]
-    required: [welding_process, shielding_gas, weld_speed, welding_wire]
+    $ref: "./terms-0.1.0#/GMAW_process"
   welding_current:
-    description: |
-      The signal representing the welding current measurement.
-    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
-    wx_unit: "A"
+    $ref: "./terms-0.1.0#/weldment/properties/welding_current"
   welding_voltage:
-    description: |
-      The signal representing the welding voltage measurement.
-    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
-    wx_unit: "V"
+   $ref: "./terms-0.1.0#/weldment/properties/welding_voltage"
+
   TCP:
     description: |
       Transformation describing the welding TCP movement in relation to the groove coordinates.
 
       The movement describes a linear motion between two points along the weld seam at constant velocity.
-    tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.*"
+    $ref: "./terms-0.1.0#/weldment/properties/TCP"
     wx_shape:
       time: [2~]
   coordinate_systems:
@@ -103,7 +67,7 @@ properties:
     tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-0.1.*"
   equipment:
     description: |
-      A list of equipments used for measurements and describing the weld seam.
+      A list of equipment used for measurements and describing the weld seam.
     type: array
     items:
       tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-0.1.*"
@@ -119,19 +83,7 @@ properties:
     type: object
     properties:
       base_metal:
-        description: |
-          The base metal composition of the workpiece.
-        type: object
-        properties:
-          common_name:
-            description: |
-              The common description of the base metal composition or classification as listed in the standard.
-            type: string
-          standard:
-            description: |
-              The standard listing and describing the base metal compositions.
-            type: string
-        required: [common_name, standard]
+        $ref: "./terms-0.1.0#base_metal"
       geometry:
         description: |
           Description of the workpiece geometry consisting of the groove shape and the total seam length.
@@ -160,7 +112,7 @@ properties:
     description: |
       Metadata container for additional user documentation of the experiment.
     type: object
-required: [equipment,workpiece,measurements,welding_current,welding_voltage,TCP]
+required: [process, equipment, workpiece, measurements, welding_current, welding_voltage, TCP]
 
 examples:
   -
@@ -192,6 +144,7 @@ examples:
             name: coordinates
             dimensions: [time, c]
             dtype: <f8
+            units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
             data: !core/ndarray-1.0.0
               data:
               - [5.0, 1.2246467991473533e-15, 12.0]
@@ -245,6 +198,7 @@ examples:
                           name: coordinates
                           dimensions: [time, c]
                           dtype: <f8
+                          units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
                           data: !core/ndarray-1.0.0
                             data:
                             - [5.0, 0.0, 2.0]
@@ -265,6 +219,7 @@ examples:
                               name: coordinates
                               dimensions: [c]
                               dtype: <f8
+                              units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
                               data: !core/ndarray-1.0.0
                                 data: [0.0, 0.0, -10.0]
                                 datatype: float64

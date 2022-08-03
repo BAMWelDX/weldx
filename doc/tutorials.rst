@@ -2,6 +2,24 @@
  Getting Started
 #################
 
+************************
+Working with WelDX files
+************************
+
+This tutorial series teaches you step by step how to access the data
+stored inside of an existing WelDX file. Furthermore, it demonstrates
+the main features of the `weldx` Python package that help you with
+data processing and visualization.
+
+.. toctree::
+   :numbered:
+   :maxdepth: 1
+   :caption: Welding examples
+
+   tutorials/01_01_introduction
+   tutorials/01_02_time_dependent_data
+   tutorials/01_03_geometry
+
 ******************
  Welding Examples
 ******************
@@ -37,6 +55,7 @@ The API tutorials provide more detailed usages and examples of core
    tutorials/transformations_02_coordinate_system_manager
    tutorials/geometry_01_profiles
    tutorials/geometry_02_geometry
+   tutorials/generic_series
    tutorials/timeseries_01
    tutorials/measurement_chain
    tutorials/weldxfile

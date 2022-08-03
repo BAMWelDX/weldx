@@ -1,27 +1,33 @@
-from copy import deepcopy
+from copy import copy
 
-import numpy as np
-
-from weldx.asdf.util import dataclass_serialization_class
+from weldx.asdf.types import WeldxConverter
+from weldx.asdf.util import get_highest_tag_version
 from weldx.geometry import SpatialData
 
-
-def _to_yaml_tree_mod(tree):
-    tree = deepcopy(tree)
-    tree["coordinates"] = tree["coordinates"].data
-    return tree
+__all__ = ["SpatialDataConverter"]
 
 
-def _from_yaml_tree_mod(tree):
-    if "coordinates" in tree:
-        tree["coordinates"] = np.asarray(tree["coordinates"])
-    return tree
+class SpatialDataConverter(WeldxConverter):
+    """Converter for SpatialData."""
 
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.*"]
+    types = [SpatialData]
 
-SpatialDataConverter = dataclass_serialization_class(
-    class_type=SpatialData,
-    class_name="core/geometry/spatial_data",
-    version="0.1.0",
-    to_yaml_tree_mod=_to_yaml_tree_mod,
-    from_yaml_tree_mod=_from_yaml_tree_mod,
-)
+    def to_yaml_tree(self, obj: SpatialData, tag: str, ctx) -> dict:
+        """Serialize into tree."""
+        tree = copy(obj.__dict__)  # shallow copy so we dont change original object
+        if tree["coordinates"].ndim <= 2:
+            tree["coordinates"] = tree["coordinates"].data
+        return tree
+
+    def from_yaml_tree(self, node: dict, tag: str, ctx) -> SpatialData:
+        """Reconstruct from yaml node."""
+        from weldx.constants import Q_
+
+        if tag == "asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.0":
+            node["coordinates"] = Q_(node["coordinates"], "mm")  # legacy
+        return SpatialData(**node)
+
+    def select_tag(self, obj, tags, ctx) -> str:
+        """Determine the output tag for serialization."""
+        return get_highest_tag_version(self.tags)

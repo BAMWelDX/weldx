@@ -6,8 +6,7 @@
 
 # Local build command ------------------------------------------------------------------
 
-# sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
-# -D nbsphinx_kernel_name="weldx" -D nbsphinx_execute="never"
+# sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -D nbsphinx_execute="never"
 
 # -- Path setup --------------------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -21,13 +20,25 @@ import shutil
 import sys
 import typing
 
-import traitlets
+from sphinx.util.logging import getLogger
+
+logger = getLogger("weldx_sphinx_conf")
 
 
 def _workaround_imports_typechecking():
-    """Load some packages needed for type annotations."""
+    """Load some packages needed for type annotations.
+
+    If these packages are imported implicitly via the import of weldx,
+    we see circular import errors within these packages. This could be due to
+    the fact, that Sphinx `exec` this config file with its own globals dictionary.
+
+    So this workaround function has to be executed prior importing weldx.
+    """
     import ipywidgets  # noqa
+    import meshio  # noqa
     import pandas  # noqa
+    import pint  # noqa
+    import sympy  # noqa
     import xarray  # noqa
 
 
@@ -41,7 +52,7 @@ def _prevent_sphinx_circular_imports_bug():
 
 
 _prevent_sphinx_circular_imports_bug()
-_workaround_imports_typechecking()
+_workaround_imports_typechecking()  # needs to be called prior importing weldx.
 
 typing.TYPE_CHECKING = True
 try:
@@ -54,8 +65,26 @@ except Exception as ex:
 
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
 
+tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
+logger.info("tutorials dir: %s", tutorials_dir)
+
+
 # -- copy tutorial files to doc folder -------------------------------------------------
-tutorials_dir = pathlib.Path("./tutorials")
+def _copy_tut_files():
+    # TODO: git move tutorial files to tutorials_dir, then delete this function
+    logger.info("tutorials dir: %s", tutorials_dir)
+    _exts = ("*.ipynb", "*.py")
+    tutorial_files = []
+    for ext in _exts:
+        tutorial_files.extend(pathlib.Path("./../tutorials/").glob(ext))
+    for f in tutorial_files:
+        shutil.copy(f, tutorials_dir)
+
+
+_copy_tut_files()
+
+
+# TODO: git move tutorial files to tutorials_dir!
 tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
 for f in tutorial_files:
     shutil.copy(f, tutorials_dir)
@@ -81,16 +110,23 @@ pygments_style = "sphinx"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinxcontrib.napoleon",
+    "sphinx.ext.napoleon",
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
     "numpydoc",
     "sphinx_autodoc_typehints",  # list after napoleon
 ]
+
+# allow easy Issue/PR links
+extlinks = {
+    "issue": ("https://github.com/BAMWelDX/weldx/issues/%s", "GH %s"),
+    "pull": ("https://github.com/BAMWelDX/weldx/pull/%s", "PR %s"),
+}
 
 # autosummary --------------------------------------------------------------------------
 autosummary_generate = True
@@ -149,21 +185,9 @@ master_doc = "index"
 nbsphinx_execute = "always"
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc <figure.dpi=96>",
 ]
 
-if traitlets.__version__ < "5":
-    nbsphinx_execute_arguments.append("--InlineBackend.rc={'figure.dpi': 96}")
-else:
-    nbsphinx_execute_arguments.append("--InlineBackend.rc <figure.dpi=96>")
-
-# Select notebook kernel for nbsphinx
-# default "python3" is needed for readthedocs run
-# if building locally, this might need to be "weldx" - try setting using -D option:
-# -D nbsphinx_kernel_name="weldx"
-if os.getenv("READTHEDOCS", False):
-    nbsphinx_kernel_name = "python3"
-else:
-    nbsphinx_kernel_name = "weldx"
 
 # This is processed by Jinja2 and inserted before each notebook
 nbsphinx_prolog = r"""
@@ -245,19 +269,26 @@ html_context = {
 # html_theme_options = {"logo_only": True}
 
 # Intersphinx mappings -----------------------------------------------------
+import asdf as _asdf
+
+_asdf_version = _asdf.__version__
+
+import scipy as _scipy
+
+_scipy_version = _scipy.__version__
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "numpy": ("https://numpy.org/doc/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
-    "xarray": ("http://xarray.pydata.org/en/stable", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy", None),
-    "matplotlib": ("https://matplotlib.org", None),
+    "xarray": ("https://xarray.pydata.org/en/stable", None),
+    "scipy": (f"https://docs.scipy.org/doc/scipy-{_scipy_version}/", None),
+    "matplotlib": ("https://matplotlib.org/stable", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
-    "pint": ("https://pint.readthedocs.io/en/latest", None),
+    "pint": ("https://pint.readthedocs.io/en/stable", None),
     "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
-    "asdf": ("https://asdf.readthedocs.io/en/latest/", None),
+    "asdf": (f"https://asdf.readthedocs.io/en/{_asdf_version}/", None),
     "networkx": ("https://networkx.org/documentation/stable/", None),
     "IPython": ("https://ipython.readthedocs.io/en/stable/", None),
     "k3d": ("https://k3d-jupyter.org/", None),

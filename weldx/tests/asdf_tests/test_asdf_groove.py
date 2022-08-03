@@ -1,6 +1,5 @@
 """Test all ASDF groove implementations."""
 
-import matplotlib.pyplot as plt
 import pytest
 from decorator import contextmanager
 
@@ -51,9 +50,7 @@ def test_asdf_groove(groove: IsoBaseGroove, expected_dtype):
     ), f"Error calling plot function of {type(groove)} "
 
     # call plot function
-    fig, ax = plt.subplots()
-    groove.plot(ax=ax)
-    plt.close(fig)
+    groove.plot()
 
 
 def test_asdf_groove_exceptions():
@@ -75,9 +72,7 @@ def test_asdf_groove_exceptions():
     }
 
     # test custom groove axis labels
-    fig, _ = plt.subplots()
     v_groove.plot(axis_label=["x", "y"])
-    plt.close(fig)
 
     # test exceptions
     with pytest.raises(KeyError):
@@ -119,9 +114,9 @@ def test_cross_section(groove):  # noqa
 
     groove_obj, groove_cls = groove
     # make rasterization for U-based grooves rather rough.
-    with temp_attr(
+    with temp_attr(  # skipcq: PYL-E1129
         groove_obj, "_AREA_RASTER_WIDTH", Q_(0.75, _DEFAULT_LEN_UNIT)
-    ):  # skipcq: PYL-E1129
+    ):
         try:
             A = groove_obj.cross_sect_area
         except NotImplementedError:

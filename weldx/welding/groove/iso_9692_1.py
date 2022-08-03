@@ -5,15 +5,18 @@ from __future__ import annotations
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 import pint
 from sympy import Point2D, Polygon
 
 import weldx.geometry as geo
-from weldx.constants import Q_, U_
-from weldx.util import inherit_docstrings, ureg_check_class
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
+from weldx.util import check_matplotlib_available, inherit_docstrings, ureg_check_class
+
+if TYPE_CHECKING:  # pragma: no cover
+    from weldx.types import QuantityLike
 
 __all__ = [
     "IsoBaseGroove",
@@ -31,9 +34,6 @@ __all__ = [
     "FFGroove",
     "get_groove",
 ]
-
-
-_DEFAULT_LEN_UNIT = U_("mm")
 
 
 def _set_default_heights(groove):
@@ -54,7 +54,7 @@ def _get_bounds(points):
 
 
 def _compute_cross_sect_shape_points(
-    points: List[List[Union[Point2D, Tuple]]]
+    points: list[list[Union[Point2D, tuple]]]
 ) -> pint.Quantity:  # noqa
     # Assumes that we have two separate shapes for each workpiece
     # 1. compute the total area of all workpieces
@@ -76,15 +76,15 @@ def _compute_cross_sect_shape_points(
 
     bounding_box = Polygon((x1, y1), (x2, y1), (x2, y2), (x1, y2), evaluate=False)
 
-    return Q_(float(bounding_box.area - area_workpiece), "mm²")
+    return Q_(float(bounding_box.area - area_workpiece), f"{_DEFAULT_LEN_UNIT}**2")
 
 
 class IsoBaseGroove(metaclass=abc.ABCMeta):
     """Generic base class for all groove types."""
 
-    _mapping: Dict[str, str] = None
+    _mapping: dict[str, str] = None
 
-    _AREA_RASTER_WIDTH = Q_("0.1mm")
+    _AREA_RASTER_WIDTH: pint.Quantity = Q_(0.1, _DEFAULT_LEN_UNIT)
     """steers the area approximation of the groove in ~cross_sect_area."""
 
     def __post_init__(self):
@@ -105,11 +105,12 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         """Display the Groove as plot in notebooks."""
         self.plot()
 
+    @check_matplotlib_available
     def plot(
         self,
         title=None,
         axis_label=None,
-        raster_width=Q_(0.5, _DEFAULT_LEN_UNIT),
+        raster_width: pint.Quantity = None,
         show_params=True,
         axis="equal",
         grid=True,
@@ -138,9 +139,11 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         ax :
              Axis to plot to
         show_area
-            Calculate and show the groove cross section area in the plot title.
+            Calculate and show the groove cross-section area in the plot title.
 
         """
+        if raster_width is None:
+            raster_width = Q_(0.5, _DEFAULT_LEN_UNIT)
         profile = self.to_profile()
         if title is None:
             title = _groove_type_to_name[self.__class__]
@@ -148,7 +151,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         if show_area:
             try:
                 ca = self.cross_sect_area
-                title = title + f" ({np.around(ca,1):~.3P})"
+                title = title + f" ({np.around(ca, 1):~.3P})"
             except NotImplementedError:
                 pass
             except Exception as ex:
@@ -212,9 +215,20 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         # out of the rasterization points
         profile = self.to_profile()
         rasterization = profile.rasterize(self._AREA_RASTER_WIDTH, stack=False)
+        # skipcq: PYL-R1721
         points = [[(x, y) for x, y in shape.m.T] for shape in rasterization]
 
         return _compute_cross_sect_shape_points(points)
+
+    @staticmethod
+    def _translate_reflect(b, segment_list, x_value, y_value):
+        shape = _helperfunction(segment_list, (x_value, y_value))
+        shape = shape.translate(Q_(np.append(-b / 2, 0), _DEFAULT_LEN_UNIT))
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
+        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
 @ureg_check_class("[length]", "[length]", None)
@@ -239,11 +253,11 @@ class IGroove(IsoBaseGroove):
 
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
+    code_number: list[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
 
     _mapping = dict(t="workpiece_thickness", b="root_gap")
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -252,24 +266,17 @@ class IGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, b, width = self.t, self.b, width_default
 
-        # x-values
-        x_value = np.stack((-width, 0, 0, -width))
+        x_value = np.stack((-width, 0, 0, -width))  # skipcq: PYL-E1130
 
-        # y-values
         y_value = np.stack((0, 0, t, t))
         segment_list = ["line", "line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -304,7 +311,7 @@ class VGroove(IsoBaseGroove):
     alpha: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
+    code_number: list[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -313,7 +320,7 @@ class VGroove(IsoBaseGroove):
         c="root_face",
     )
 
-    def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -322,6 +329,9 @@ class VGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(2, "mm")
+
         t, alpha, b, c, width = self.t, self.alpha, self.b, self.c, width_default
 
         # Calculations:
@@ -333,7 +343,7 @@ class VGroove(IsoBaseGroove):
             width = width - edge
 
         # Bottom segment
-        x_value = np.append(-width, 0)
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
@@ -349,19 +359,11 @@ class VGroove(IsoBaseGroove):
         segment_list.append("line")
 
         # Top segment
-        x_value = np.append(x_value, -width)
+        x_value = np.append(x_value, -width)  # skipcq: PYL-E1130
         y_value = np.append(y_value, t)
         segment_list.append("line")
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis is mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -402,7 +404,7 @@ class VVGroove(IsoBaseGroove):
     h: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.7"])
+    code_number: list[str] = field(default_factory=lambda: ["1.7"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -413,7 +415,7 @@ class VVGroove(IsoBaseGroove):
         h="root_face2",
     )
 
-    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -422,6 +424,9 @@ class VVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, b, c, h, width = self.t, self.b, self.c, self.h, width_default
         alpha, beta = self.alpha, self.beta
 
@@ -437,9 +442,7 @@ class VVGroove(IsoBaseGroove):
             # adjustment of the width
             width = width - edge
 
-        # x-values
-        x_value = np.append(-width, 0)
-        # y-values
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
@@ -448,19 +451,11 @@ class VVGroove(IsoBaseGroove):
             y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (-s_1, -s_1 - s_2, -width))
+        x_value = np.append(x_value, (-s_1, -s_1 - s_2, -width))  # skipcq: PYL-E1130
         y_value = np.append(y_value, (h + c, t, t))
         segment_list += ["line", "line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -501,7 +496,7 @@ class UVGroove(IsoBaseGroove):
     R: pint.Quantity
     h: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.6"])
+    code_number: list[str] = field(default_factory=lambda: ["1.6"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -512,7 +507,7 @@ class UVGroove(IsoBaseGroove):
         h="root_face",
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(2, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -521,6 +516,9 @@ class UVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(2, "mm")
+
         t, alpha, beta, R, b, h, width = (
             self.t,
             self.alpha,
@@ -534,7 +532,7 @@ class UVGroove(IsoBaseGroove):
         # calculations:
         x_1 = np.tan(alpha / 2) * h
         # Center of the circle [0, y_m]
-        y_circle = np.sqrt(R ** 2 - x_1 ** 2)
+        y_circle = np.sqrt(R**2 - x_1**2)  # skipcq: PTC-W0028
         y_m = h + y_circle
         # From next point to circle center is the vector (x,y)
         x = R * np.cos(beta)
@@ -550,21 +548,13 @@ class UVGroove(IsoBaseGroove):
             # adjustment of the width
             width = width + edge
 
-        # x-values
-        x_value = np.stack((-width, 0, -x_1, 0, x_arc, x_end, -width))
-        # y-values
+        x_value = np.stack(
+            (-width, 0, -x_1, 0, x_arc, x_end, -width)  # skipcq: PYL-E1130
+        )
         y_value = np.stack((0, 0, h, y_m, y_arc, t, t))
         segment_list = ["line", "line", "arc", "line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -602,7 +592,7 @@ class UGroove(IsoBaseGroove):
     R: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.8"])
+    code_number: list[str] = field(default_factory=lambda: ["1.8"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -612,7 +602,7 @@ class UGroove(IsoBaseGroove):
         c="root_face",
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(3, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -621,6 +611,9 @@ class UGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(3, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(3, "mm")
+
         t, beta, R, b, c, width = (
             self.t,
             self.beta,
@@ -645,14 +638,10 @@ class UGroove(IsoBaseGroove):
             # adjustment of the width
             width = width + edge
 
-        # x-values
-        x_value = []
-        # y-values
-        y_value = []
         segment_list = []
 
         # bottom segment
-        x_value = np.append(-width, 0)
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         y_value = Q_([0, 0], "mm")
         segment_list.append("line")
 
@@ -677,19 +666,11 @@ class UGroove(IsoBaseGroove):
         segment_list.append("line")
 
         # top segment
-        x_value = np.append(x_value, -width)
+        x_value = np.append(x_value, -width)  # skipcq: PYL-E1130
         y_value = np.append(y_value, t)
         segment_list.append("line")
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -723,13 +704,13 @@ class HVGroove(IsoBaseGroove):
     beta: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
+    code_number: list[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
 
     _mapping = dict(
         t="workpiece_thickness", beta="bevel_angle", b="root_gap", c="root_face"
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -738,6 +719,9 @@ class HVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, beta, b, c, width = (
             self.t,
             self.beta,
@@ -755,7 +739,7 @@ class HVGroove(IsoBaseGroove):
             # adjustment of the width
             width = width - edge
 
-        x_value = np.append(-width, 0)
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
@@ -764,7 +748,7 @@ class HVGroove(IsoBaseGroove):
             y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (-s, -width))
+        x_value = np.append(x_value, (-s, -width))  # skipcq: PYL-E1130
         y_value = np.append(y_value, (t, t))
         segment_list += ["line", "line"]
 
@@ -777,10 +761,10 @@ class HVGroove(IsoBaseGroove):
         shape_h = geo.Shape()
         arr = np.stack(
             (
-                np.append(-width - (b / 2), 0),
+                np.append(-width - (b / 2), 0),  # skipcq: PYL-E1130
                 np.append(-b / 2, 0),
                 np.append(-b / 2, t),
-                np.append(-width - (b / 2), t),
+                np.append(-width - (b / 2), t),  # skipcq: PYL-E1130
             )
         )
         shape_h.add_line_segments(arr)
@@ -823,7 +807,7 @@ class HUGroove(IsoBaseGroove):
     R: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.11", "2.10"])
+    code_number: list[str] = field(default_factory=lambda: ["1.11", "2.10"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -833,7 +817,7 @@ class HUGroove(IsoBaseGroove):
         c="root_face",
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -842,6 +826,9 @@ class HUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, beta, R, b, c, width = (
             self.t,
             self.beta,
@@ -862,7 +849,7 @@ class HUGroove(IsoBaseGroove):
             # adjustment of the width
             width = width + edge
 
-        x_value = np.append(-width, 0)
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
@@ -871,7 +858,7 @@ class HUGroove(IsoBaseGroove):
             y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (0, -x, -x - s, -width))
+        x_value = np.append(x_value, (0, -x, -x - s, -width))  # skipcq: PYL-E1130
         y_value = np.append(y_value, (c + R, c + R - y, t, t))
         segment_list += ["arc", "line", "line"]
 
@@ -884,10 +871,10 @@ class HUGroove(IsoBaseGroove):
         shape_h = geo.Shape()
         arr = np.stack(
             (
-                np.append(-width - (b / 2), 0),
+                np.append(-width - (b / 2), 0),  # skipcq: PYL-E1130
                 np.append(-b / 2, 0),
                 np.append(-b / 2, t),
-                np.append(-width - (b / 2), t),
+                np.append(-width - (b / 2), t),  # skipcq: PYL-E1130
             )
         )
         shape_h.add_line_segments(arr)
@@ -936,7 +923,7 @@ class DVGroove(IsoBaseGroove):
     h1: pint.Quantity = None
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
+    code_number: list[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -952,7 +939,7 @@ class DVGroove(IsoBaseGroove):
         """Calculate missing values."""
         _set_default_heights(self)
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -961,6 +948,9 @@ class DVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, alpha_1, alpha_2, b, c, h1, h2, width = (
             self.t,
             self.alpha_1,
@@ -982,7 +972,7 @@ class DVGroove(IsoBaseGroove):
             # adjustment of the width
             width = width - edge
 
-        x_value = np.stack((-width, -s_lower, 0))
+        x_value = np.stack((-width, -s_lower, 0))  # skipcq: PYL-E1130
         y_value = np.stack((0, 0, h2))
         segment_list = ["line", "line"]
 
@@ -991,18 +981,11 @@ class DVGroove(IsoBaseGroove):
             y_value = np.append(y_value, h2 + c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (-s_upper, -width))
+        x_value = np.append(x_value, (-s_upper, -width))  # skipcq: PYL-E1130
         y_value = np.append(y_value, (t, t))
         segment_list += ["line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -1063,7 +1046,7 @@ class DUGroove(IsoBaseGroove):
     h1: pint.Quantity = None
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["2.7"])
+    code_number: list[str] = field(default_factory=lambda: ["2.7"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -1081,7 +1064,7 @@ class DUGroove(IsoBaseGroove):
         """Calculate missing values."""
         _set_default_heights(self)
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1090,6 +1073,9 @@ class DUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, beta_1, beta_2, R, R2, b, c, h1, h2, width = (
             self.t,
             self.beta_1,
@@ -1117,7 +1103,9 @@ class DUGroove(IsoBaseGroove):
             # adjustment of the width
             width = width + edge
 
-        x_value = np.stack((-width, -(s_lower + x_lower), -x_lower, 0, 0))
+        x_value = np.stack(
+            (-width, -(s_lower + x_lower), -x_lower, 0, 0)  # skipcq: PYL-E1130
+        )
         y_value = np.stack((0, 0, h2 - (R2 - y_lower), h2 - R2, h2))
         segment_list = ["line", "line", "arc"]
 
@@ -1126,18 +1114,13 @@ class DUGroove(IsoBaseGroove):
             y_value = np.append(y_value, h1 + c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (0, -x_upper, -(s_upper + x_upper), -width))
+        x_value = np.append(
+            x_value, (0, -x_upper, -(s_upper + x_upper), -width)  # skipcq: PYL-E1130
+        )
         y_value = np.append(y_value, (h2 + c + R, t - (h1 - (R - y_upper)), t, t))
         segment_list += ["arc", "line", "line"]
 
-        shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate(np.append(-b / 2, 0))
-        # y-axis as mirror axis
-        shape_r = shape.reflect_across_line(
-            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
-        )
-
-        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+        return self._translate_reflect(b, segment_list, x_value, y_value)
 
     @property
     def cross_sect_area(self):  # noqa
@@ -1181,7 +1164,7 @@ class DHVGroove(IsoBaseGroove):
     h1: pint.Quantity = None
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
+    code_number: list[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -1197,7 +1180,7 @@ class DHVGroove(IsoBaseGroove):
         """Calculate missing values."""
         _set_default_heights(self)
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1206,6 +1189,9 @@ class DHVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         dv_groove = DVGroove(
             t=self.t,
             alpha_1=self.beta_1 * 2,
@@ -1221,10 +1207,10 @@ class DHVGroove(IsoBaseGroove):
         left_shape = geo.Shape()
         arr = np.stack(
             (
-                np.append(-width_default - (self.b / 2), 0),
+                np.append(-width_default - (self.b / 2), 0),  # skipcq: PYL-E1130
                 np.append(-self.b / 2, 0),
                 np.append(-self.b / 2, self.t),
-                np.append(-width_default - (self.b / 2), self.t),
+                np.append(-width_default - (self.b / 2), self.t),  # skipcq: PYL-E1130
             )
         )
         left_shape.add_line_segments(arr)
@@ -1290,7 +1276,7 @@ class DHUGroove(IsoBaseGroove):
     h1: pint.Quantity = None
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["2.11"])
+    code_number: list[str] = field(default_factory=lambda: ["2.11"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -1308,7 +1294,7 @@ class DHUGroove(IsoBaseGroove):
         """Calculate missing values."""
         _set_default_heights(self)
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1317,6 +1303,9 @@ class DHUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         du_profile = DUGroove(
             t=self.t,
             beta_1=self.beta_1,
@@ -1333,10 +1322,10 @@ class DHUGroove(IsoBaseGroove):
         left_shape = geo.Shape()
         arr = np.stack(
             (
-                np.append(-width_default - (self.b / 2), 0),
+                np.append(-width_default - (self.b / 2), 0),  # skipcq: PYL-E1130
                 np.append(-self.b / 2, 0),
                 np.append(-self.b / 2, self.t),
-                np.append(-width_default - (self.b / 2), self.t),
+                np.append(-width_default - (self.b / 2), self.t),  # skipcq: PYL-E1130
             )
         )
         left_shape.add_line_segments(arr)
@@ -1377,14 +1366,14 @@ class FFGroove(IsoBaseGroove):
     e :
         special depth
     code_number :
-        Numbers of the standard
+        Numbers of the standard, allowed values are
+        ["1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"]
 
     """
 
     t_1: pint.Quantity
     t_2: pint.Quantity = None
     alpha: pint.Quantity = None
-    # ["1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"]
     code_number: str = None
     b: pint.Quantity = None
     e: pint.Quantity = None
@@ -1398,7 +1387,7 @@ class FFGroove(IsoBaseGroove):
         code_number="code_number",
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: QuantityLike = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1408,11 +1397,12 @@ class FFGroove(IsoBaseGroove):
 
 
         """
-        if (
-            self.code_number == "1.12"
-            or self.code_number == "1.13"
-            or self.code_number == "2.12"
-        ):
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
+        width_default: pint.Quantity = Q_(width_default)
+
+        if self.code_number in ("1.12", "1.13", "2.12"):
             shape1 = geo.Shape()
             arr1 = np.stack(
                 (
@@ -1436,14 +1426,12 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "3.1.1":
+
+        if self.code_number == "3.1.1":
             t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
             if width_default < t_1 + Q_(1, "mm"):
                 width_default = t_1 + width_default
-
-            # x = t_1
-            # y = 0
 
             x_1 = np.cos(alpha) * width_default
             y_1 = np.sin(alpha) * width_default
@@ -1467,15 +1455,16 @@ class FFGroove(IsoBaseGroove):
             shape2 = geo.Shape()
             arr2 = np.stack(
                 (
-                    np.append(width_default, -b),
-                    np.append(0, -b),
-                    np.append(0, -t_2 - b),
-                    np.append(width_default, -t_2 - b),
+                    np.append(width_default, -b),  # skipcq: PYL-E1130
+                    np.append(0, -b),  # skipcq: PYL-E1130
+                    np.append(0, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(width_default, -t_2 - b),  # skipcq: PYL-E1130
                 )
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "3.1.2":
+
+        if self.code_number == "3.1.2":
             t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
             arr1 = np.stack(
@@ -1490,15 +1479,16 @@ class FFGroove(IsoBaseGroove):
             shape2 = geo.Shape()
             arr2 = np.stack(
                 (
-                    np.append(0, -b),
-                    np.append(2 * width_default, -b),
-                    np.append(2 * width_default, -t_2 - b),
-                    np.append(0, -t_2 - b),
+                    np.append(0, -b),  # skipcq: PYL-E1130
+                    np.append(2 * width_default, -b),  # skipcq: PYL-E1130
+                    np.append(2 * width_default, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(0, -t_2 - b),  # skipcq: PYL-E1130
                 )
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "3.1.3" or self.code_number == "4.1.1":
+
+        if self.code_number in ("3.1.3", "4.1.1"):
             t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
             x = np.sin(alpha + np.pi / 2) * b + b
@@ -1534,7 +1524,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "4.1.2":
+
+        if self.code_number == "4.1.2":
             t_1, t_2, alpha, e = self.t_1, self.t_2, self.alpha, self.e
 
             x_1 = np.sin(alpha) * e
@@ -1570,7 +1561,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "4.1.3":
+
+        if self.code_number == "4.1.3":
             t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
             arr1 = np.stack(
@@ -1585,29 +1577,29 @@ class FFGroove(IsoBaseGroove):
             shape2 = geo.Shape()
             arr2 = np.stack(
                 (
-                    np.append(-width_default, -b),
-                    np.append(t_1 + width_default, -b),
-                    np.append(t_1 + width_default, -t_2 - b),
-                    np.append(-width_default, -t_2 - b),
-                    np.append(-width_default, -b),
+                    np.append(-width_default, -b),  # skipcq: PYL-E1130
+                    np.append(t_1 + width_default, -b),  # skipcq: PYL-E1130
+                    np.append(t_1 + width_default, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(-width_default, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(-width_default, -b),  # skipcq: PYL-E1130
                 )
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        else:
-            raise ValueError(
-                "Wrong code_number. The Code Number has to be"
-                " one of the following strings: "
-                '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
-                ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
-            )
+
+        raise ValueError(
+            "Wrong code_number. The Code Number has to be"
+            " one of the following strings: "
+            '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
+            ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
+        )
 
     @property
     def cross_sect_area(self):  # noqa
         raise NotImplementedError("Cannot determine FFGroove cross sectional area")
 
 
-def _helperfunction(segment, array) -> geo.Shape:
+def _helperfunction(segment: list[str], array: np.ndarray) -> geo.Shape:
     """Calculate a shape from input.
 
     Input segment of successive segments as strings.
@@ -1629,22 +1621,28 @@ def _helperfunction(segment, array) -> geo.Shape:
         geo.Shape
 
     """
-    segment_list = []
+    segment_list: list[Union[geo.LineSegment, geo.ArcSegment]] = []
     counter = 0
     for elem in segment:
         if elem == "line":
             seg = geo.LineSegment(
-                np.vstack(
-                    [array[0][counter : counter + 2], array[1][counter : counter + 2]]
+                Q_(
+                    np.vstack(
+                        [
+                            array[0][counter : counter + 2],
+                            array[1][counter : counter + 2],
+                        ]
+                    ),
+                    _DEFAULT_LEN_UNIT,
                 )
             )
             segment_list.append(seg)
             counter += 1
-        if elem == "arc":
+        elif elem == "arc":
             arr0 = array[0][[counter, counter + 2, counter + 1]]
             arr1 = array[1][[counter, counter + 2, counter + 1]]
             arr = np.vstack((arr0, arr1))
-            seg = geo.ArcSegment(arr, False)
+            seg = geo.ArcSegment(Q_(arr, _DEFAULT_LEN_UNIT), False)
             segment_list.append(seg)
             counter += 2
 
@@ -1658,20 +1656,20 @@ _groove_name_to_type = {cls.__name__: cls for cls in IsoBaseGroove.__subclasses_
 
 def get_groove(
     groove_type: str,
-    workpiece_thickness: pint.Quantity = None,
-    workpiece_thickness2: pint.Quantity = None,
-    root_gap: pint.Quantity = None,
-    root_face: pint.Quantity = None,
-    root_face2: pint.Quantity = None,
-    root_face3: pint.Quantity = None,
-    bevel_radius: pint.Quantity = None,
-    bevel_radius2: pint.Quantity = None,
-    bevel_angle: pint.Quantity = None,
-    bevel_angle2: pint.Quantity = None,
-    groove_angle: pint.Quantity = None,
-    groove_angle2: pint.Quantity = None,
-    special_depth: pint.Quantity = None,
-    code_number=None,
+    workpiece_thickness: QuantityLike = None,  # skipcq: PYL-W0613
+    workpiece_thickness2: QuantityLike = None,  # skipcq: PYL-W0613
+    root_gap: QuantityLike = None,  # skipcq: PYL-W0613
+    root_face: QuantityLike = None,  # skipcq: PYL-W0613
+    root_face2: QuantityLike = None,  # skipcq: PYL-W0613
+    root_face3: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_radius: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_radius2: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_angle: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_angle2: QuantityLike = None,  # skipcq: PYL-W0613
+    groove_angle: QuantityLike = None,  # skipcq: PYL-W0613
+    groove_angle2: QuantityLike = None,  # skipcq: PYL-W0613
+    special_depth: QuantityLike = None,  # skipcq: PYL-W0613
+    code_number=None,  # skipcq: PYL-W0613
 ) -> IsoBaseGroove:
     """Create a Groove from weldx.tags.core.groove.
 
@@ -1966,7 +1964,7 @@ def get_groove(
     _loc = locals()
 
     groove_cls = _groove_name_to_type[groove_type]
-    _mapping = groove_cls._mapping
+    _mapping = groove_cls._mapping  # skipcq: PYL-W0212
 
     # convert function arguments to groove arguments
     args = {k: Q_(_loc[v]) for k, v in _mapping.items() if _loc[v] is not None}

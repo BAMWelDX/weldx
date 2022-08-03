@@ -1,7 +1,8 @@
 """Test the internal utility functions."""
+from __future__ import annotations
+
 import copy
 import unittest
-from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -12,7 +13,7 @@ from pint.errors import DimensionalityError
 from xarray import DataArray
 
 import weldx.util as ut
-from weldx.constants import Q_
+from weldx.constants import META_ATTR, Q_, U_, UNITS_KEY
 from weldx.time import Time
 
 
@@ -77,11 +78,11 @@ class TestXarrayInterpolation:
         ],
     )
     def test_xr_interp_like(
-        data: List,
-        coords: Dict,
-        coords_ref: Dict,
-        exp_values: List,
-        kwargs: Dict,
+        data: list,
+        coords: dict,
+        coords_ref: dict,
+        exp_values: list,
+        kwargs: dict,
         use_dict_ref: bool,
         assume_sorted: bool,
     ):
@@ -142,89 +143,158 @@ class TestXarrayInterpolation:
         assert da_interp.values.shape == np.array(exp_values).shape
         assert np.allclose(da_interp.values, exp_values, equal_nan=True)
 
+    @staticmethod
+    @pytest.mark.parametrize("fmt", ["dict", "xarray"])
+    @pytest.mark.parametrize("quantified", [True, False])
+    @pytest.mark.parametrize("broadcast_missing", [True, False])
+    def test_xr_interp_like_units(fmt, broadcast_missing, quantified):
+        """Test the unit aware behavior of xr_interp_like.
 
-def test_xr_interp_like():
-    """Test behaviour of custom interpolation method for xarray Objects."""
-    # basic interpolation behavior on a single coordinate
-    n_a = 5  # range of "a" coordinate in da_a
-    s_a = 0.5  # default steps in "a" coordinate in da_a
-    da_a = xr.DataArray(
-        np.arange(0, n_a + s_a, s_a),
-        dims=["a"],
-        coords={"a": np.arange(0, n_a + s_a, s_a)},
-    )
+        Parameters
+        ----------
+        fmt
+            The input format of the indexer.
+        broadcast_missing
+            Test missing coordinates broadcasting.
+        quantified
+            If True provide indexer in full quantified form.
 
-    # single point to array interpolation
-    # important: da_a.loc[5] for indexing would drop coordinates (unsure why)
-    with pytest.raises(ValueError):
-        ut.xr_interp_like(da_a.loc[2:2], da_a, fillna=False)
+        """
+        a = Q_([0.0, 1.0], "m")
+        t = Q_([-1.0, 0.0, 1.0], "s")
+        t_interp = Q_([-100.0, 0.0, 200.0], "ms")
+        b_interp = Q_([10.0, 20.0], "V")
 
-    # test coordinate selection with interp_coords
-    da1 = da_a
-    test = ut.xr_interp_like(
-        da1,
-        {"b": np.arange(3), "c": np.arange(3)},
-        broadcast_missing=True,
-        interp_coords=["c"],
-    )
-    assert "b" not in test.coords
-    assert "c" in test.coords
+        data_units = U_("A")
+        data = Q_([[1, 2, 3], [4, 5, 6]], data_units)
+        result = Q_([[1.9, 2, 2.2], [4.9, 5, 5.2]], data_units)
 
-    # catch error on unsorted array
-    da = xr.DataArray([0, 1, 2, 3], dims="a", coords={"a": [2, 1, 3, 0]})
-    with pytest.raises(ValueError):
-        test = ut.xr_interp_like(da, {"a": np.arange(6)}, assume_sorted=True)
+        da = xr.DataArray(
+            data,
+            dims=["a", "t"],
+            coords={
+                "t": ("t", t.m, {UNITS_KEY: t.u}),
+                "a": ("a", a.m, {UNITS_KEY: a.u}),
+            },
+            attrs={META_ATTR: "meta"},
+        )
 
-    # basic interpolation behavior with different coordinates (broadcasting)
-    n_b = 3  # range of "b" coordinate in da_b
-    s_b = 1  # default steps in "b" coordinate in da_b
-    da_b = xr.DataArray(
-        np.arange(0, n_b + s_b, s_b) ** 2,
-        dims=["b"],
-        coords={"b": np.arange(0, n_b + s_b, s_b)},
-    )
+        if fmt == "dict":
+            da_interp = {"t": t_interp, "b": b_interp}
+        else:
+            da_interp = xr.DataArray(
+                dims=["t", "b"],
+                coords={
+                    "t": ("t", t_interp.m, {UNITS_KEY: t_interp.u}),
+                    "b": ("b", b_interp.m, {UNITS_KEY: b_interp.u}),
+                },
+            )
 
-    assert da_a.equals(ut.xr_interp_like(da_a, da_b))
-    assert da_a.broadcast_like(da_b).broadcast_equals(
-        ut.xr_interp_like(da_a, da_b, broadcast_missing=True)
-    )
+            if not quantified:
+                da_interp = da_interp.pint.dequantify()
 
-    # coords syntax
-    assert da_a.broadcast_like(da_b).broadcast_equals(
-        ut.xr_interp_like(da_a, da_b.coords, broadcast_missing=True)
-    )
+        da2 = ut.xr_interp_like(da, da_interp, broadcast_missing=broadcast_missing)
 
-    # sorting and interpolation with multiple dimensions
-    a = np.arange(3, 6)
-    b = np.arange(1, -3, -1)
-    da_ab = xr.DataArray(
-        a[..., np.newaxis] @ b[np.newaxis, ...],
-        dims=["a", "b"],
-        coords={"a": a, "b": b},
-    )
+        if broadcast_missing:
+            assert da2.b.attrs.get(UNITS_KEY, None) == b_interp.units
+            da2 = da2.isel(b=0)
 
-    a_new = np.arange(3, 5, 0.5)
-    b_new = np.arange(-1, 1, 0.5)
-    test = ut.xr_interp_like(
-        da_ab,
-        {"a": a_new, "b": b_new, "c": np.arange(2)},
-        assume_sorted=False,
-        broadcast_missing=True,
-    )
-    assert np.all(
-        test.transpose(..., "a", "b") == a_new[..., np.newaxis] @ b_new[np.newaxis, ...]
-    )
+        for n in range(len(da.a)):
+            assert np.all(da2.sel(a=n) == result[n, :])
+        assert da2.pint.units == data_units
+        assert da2.attrs[META_ATTR] == "meta"
 
-    # tests with time data types
-    # TODO: add more complex test examples
-    t = pd.timedelta_range(start="10s", end="0s", freq="-1s", closed="left")
-    da_t = xr.DataArray(np.arange(10, 0, -1), dims=["t"], coords={"t": t})
+        assert da2.t.attrs.get(UNITS_KEY, None) == t_interp.units
+        assert da2.a.attrs.get(UNITS_KEY, None) == a.units
 
-    test = ut.xr_interp_like(
-        da_t,
-        {"t": pd.timedelta_range(start="3s", end="7s", freq="125ms", closed="left")},
-    )
-    assert np.all(test == np.arange(3, 7, 0.125))
+    @staticmethod
+    def test_xr_interp_like_old():
+        """Test behaviour of custom interpolation method for xarray Objects."""
+        # basic interpolation behavior on a single coordinate
+        n_a = 5  # range of "a" coordinate in da_a
+        s_a = 0.5  # default steps in "a" coordinate in da_a
+        da_a = xr.DataArray(
+            np.arange(0, n_a + s_a, s_a),
+            dims=["a"],
+            coords={"a": np.arange(0, n_a + s_a, s_a)},
+        )
+
+        # single point to array interpolation
+        # important: da_a.loc[5] for indexing would drop coordinates (unsure why)
+        with pytest.raises(ValueError):
+            ut.xr_interp_like(da_a.loc[2:2], da_a, fillna=False)
+
+        # test coordinate selection with interp_coords
+        da1 = da_a
+        test = ut.xr_interp_like(
+            da1,
+            {"b": np.arange(3), "c": np.arange(3)},
+            broadcast_missing=True,
+            interp_coords=["c"],
+        )
+        assert "b" not in test.coords
+        assert "c" in test.coords
+
+        # catch error on unsorted array
+        da = xr.DataArray([0, 1, 2, 3], dims="a", coords={"a": [2, 1, 3, 0]})
+        with pytest.raises(ValueError):
+            test = ut.xr_interp_like(da, {"a": np.arange(6)}, assume_sorted=True)
+
+        # basic interpolation behavior with different coordinates (broadcasting)
+        n_b = 3  # range of "b" coordinate in da_b
+        s_b = 1  # default steps in "b" coordinate in da_b
+        da_b = xr.DataArray(
+            np.arange(0, n_b + s_b, s_b) ** 2,
+            dims=["b"],
+            coords={"b": np.arange(0, n_b + s_b, s_b)},
+        )
+
+        assert da_a.equals(ut.xr_interp_like(da_a, da_b))
+        assert da_a.broadcast_like(da_b).broadcast_equals(
+            ut.xr_interp_like(da_a, da_b, broadcast_missing=True)
+        )
+
+        # coords syntax
+        assert da_a.broadcast_like(da_b).broadcast_equals(
+            ut.xr_interp_like(da_a, da_b.coords, broadcast_missing=True)
+        )
+
+        # sorting and interpolation with multiple dimensions
+        a = np.arange(3, 6)
+        b = np.arange(1, -3, -1)
+        da_ab = xr.DataArray(
+            a[..., np.newaxis] @ b[np.newaxis, ...],
+            dims=["a", "b"],
+            coords={"a": a, "b": b},
+        )
+
+        a_new = np.arange(3, 5, 0.5)
+        b_new = np.arange(-1, 1, 0.5)
+        test = ut.xr_interp_like(
+            da_ab,
+            {"a": a_new, "b": b_new, "c": np.arange(2)},
+            assume_sorted=False,
+            broadcast_missing=True,
+        )
+        assert np.all(
+            test.transpose(..., "a", "b")
+            == a_new[..., np.newaxis] @ b_new[np.newaxis, ...]
+        )
+
+        # tests with time data types
+        # TODO: add more complex test examples
+        t = pd.timedelta_range(start="10s", end="0s", freq="-1s", closed="left")
+        da_t = xr.DataArray(np.arange(10, 0, -1), dims=["t"], coords={"t": t})
+
+        test = ut.xr_interp_like(
+            da_t,
+            {
+                "t": pd.timedelta_range(
+                    start="3s", end="7s", freq="125ms", closed="left"
+                )
+            },
+        )
+        assert np.all(test == np.arange(3, 7, 0.125))
 
 
 def test_xr_fill_all():
@@ -266,13 +336,13 @@ _dax_check = xr.DataArray(
         "d5": ["x", "y", "z"],
     },
 )
-_dax_check["d1"].attrs["units"] = "cm"
+_dax_check["d1"].attrs[UNITS_KEY] = "cm"
 
 _dax_ref = dict(
     d1={
         "values": np.array([-1, 1]),
         "dtype": "float",
-        "units": "cm",
+        UNITS_KEY: "cm",
         "dimensionality": "m",
     },
     d2={"values": np.array([-1, 1]), "dtype": int},
@@ -289,7 +359,7 @@ _dax_ref = dict(
 
 
 @pytest.mark.parametrize(
-    "dax, ref_dict",
+    "coords, ref_dict",
     [
         (_dax_check, _dax_ref),
         (_dax_check.coords, _dax_ref),
@@ -302,9 +372,9 @@ _dax_ref = dict(
         (_dax_check, {"d3": {"dtype": ["datetime64", "timedelta64"]}}),
     ],
 )
-def test_xr_check_coords(dax, ref_dict):
+def test_xr_check_coords(coords, ref_dict):
     """Test weldx.utility.xr_check_coords function."""
-    assert ut.xr_check_coords(dax, ref_dict)
+    assert ut.xr_check_coords(coords, ref_dict)
 
 
 @pytest.mark.parametrize(
@@ -319,11 +389,10 @@ def test_xr_check_coords(dax, ref_dict):
             ValueError,
         ),
         (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
-        (_dax_check, {"d1": {"units": "dm"}}, ValueError),
+        (_dax_check, {"d1": {UNITS_KEY: "dm"}}, ValueError),
         (_dax_check, {"d1": {"dimensionality": "kg"}}, DimensionalityError),
         (_dax_check, {"d3": {"dtype": "timedelta64"}}, TypeError),
         (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
-        ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):
@@ -503,7 +572,7 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         assert ut.compare_nested(self.a, self.b)
 
     def test_metadata_modified(self):  # noqa: D102
-        self.b["wx_metadata"]["welder"] = "anonymous"
+        self.b[META_ATTR]["welder"] = "anonymous"
         assert not ut.compare_nested(self.a, self.b)
 
     def test_measurements_modified(self):  # noqa: D102
@@ -530,3 +599,13 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
 def test_is_interactive():
     """Assert that the Pytest session is not recognized as interactive."""
     assert not ut.is_interactive_session()
+
+
+def test_pint_default_ureg():
+    """Test if the weldx unit registry is set as the default unit registry."""
+    da = xr.DataArray(
+        Q_([1, 2, 3, 4], "mm"),
+        dims=["a"],
+        coords={"a": ("a", [1, 2, 3, 4], {"units": U_("s")})},
+    )
+    da.pint.dequantify().pint.quantify().pint.dequantify().pint.quantify()

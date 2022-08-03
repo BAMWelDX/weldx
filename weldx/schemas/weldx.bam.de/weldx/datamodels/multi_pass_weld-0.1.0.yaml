@@ -1,0 +1,146 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/datamodels/multi_pass_weld-0.1.0"
+
+title: |
+  A generic multi-layer GMAW weldment.
+description: |
+  This schema describes a welding application consisting of multiple passes.
+
+  The individual weldments are hierarchically grouped into beads, layers and seams. This is reflected by a nested array
+  with the name `weld_seam` and a nesting depth of 4 (seam, layer, bead, weldment).
+
+  Each weldment may contain the following data:
+
+  - process
+  - TCP
+  - welding_current
+  - welding_voltage
+
+  The `process` entry contains all relevant data that describes the welding process. A comprehensive list of all
+  optional and required fields can be [found here](https://weldx.readthedocs.io/projects/weldx-standard/en/latest/generated/schemas/process/terms-0.1.0.html#base_process).
+  `TCP` describes the trajectory of the torch during the weldment process. The TCP data of all weldments must be
+  defined in relation to the workpiece coordinate system.
+  The welding_current and welding_voltage entries refer to signals containing the final measurement data of corresponding dimensions [current] and [voltage].
+
+  > Note that this schema is currently work in progress and some optional data might become required in the future.
+
+definitions:
+  weld_seam:
+    description: |
+      A single weld seam consisting of one or more layers.
+    type: array
+    items:
+      $ref: "#/definitions/weld_layer"
+
+  weld_layer:
+    description: |
+      A single weld layer consisting of one or more beads.
+    type: array
+    items:
+      $ref: "#/definitions/weld_bead"
+
+  weld_bead:
+    description: |
+      A single weld bead consisting of one or more weldments.
+    type: array
+    items:
+      $ref: "./terms-0.1.0#/weldment"
+
+type: object
+properties:
+  workpiece:
+    description: |
+            The workpiece to be welded defined by the base metal and the geometric description of the weld seam.
+    type: object
+
+  weld_seam:
+    description: |
+            List of weld seams composing the final weldment.
+    type: array
+    items:
+      $ref: "#/definitions/weld_seam"
+
+
+examples:
+  -
+    - Two seams with a single layer and bead, but the first seam has two weldments while the second has only one.
+    - |
+      !<tag:stsci.edu:asdf/core/asdf-1.1.0>
+        weld_seam:
+        - - - - TCP: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
+                  time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
+                    values: !core/ndarray-1.0.0
+                      data: [0, 30000000000]
+                      datatype: int64
+                      shape: [2]
+                    start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                    end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M30S
+                    min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                    max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M30S
+                  coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.1>
+                    name: coordinates
+                    dimensions: [c]
+                    dtype: <f8
+                    units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
+                    data: !core/ndarray-1.0.0
+                      data: [[0, 0, 0], [50, 0, 0]]
+                      datatype: float64
+                      shape: [2, 3]
+                welding_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+                  units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> volt
+                  value: 30
+                welding_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+                  units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> ampere
+                  value: 250
+            - - TCP: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
+                  time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
+                    values: !core/ndarray-1.0.0
+                      data: [0, 30000000000]
+                      datatype: int64
+                      shape: [2]
+                    start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                    end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M30S
+                    min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                    max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M30S
+                  coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.1>
+                    name: coordinates
+                    dimensions: [c]
+                    dtype: <f8
+                    units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
+                    data: !core/ndarray-1.0.0
+                      data:  [[0, 5, 0], [50, 5, 0]]
+                      datatype: float64
+                      shape: [2, 3]
+                welding_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+                  units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> volt
+                  value: 30
+                welding_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+                  units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> ampere
+                  value: 250
+        - - - - TCP: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
+                  time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
+                    values: !core/ndarray-1.0.0
+                      data: [0, 30000000000]
+                      datatype: int64
+                      shape: [2]
+                    start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                    end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M30S
+                    min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                    max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M30S
+                  coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.1>
+                    name: coordinates
+                    dimensions: [c]
+                    dtype: <f8
+                    units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
+                    data: !core/ndarray-1.0.0
+                      data:  [[0, 2.5, 5], [50, 2.5, 5]]
+                      datatype: float64
+                      shape: [2, 3]
+                welding_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+                  units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> volt
+                  value: 30
+                welding_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+                  units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> ampere
+                  value: 350

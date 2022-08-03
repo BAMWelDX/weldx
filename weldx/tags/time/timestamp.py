@@ -17,8 +17,6 @@ class TimestampConverter(WeldxConverter):
 
     def from_yaml_tree(self, node: str, tag: str, ctx) -> pd.Timestamp:
         """Construct timestamp from node."""
-        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
-            return pd.Timestamp(node["value"])
         # using pd.Timestamp.fromisoformat here would probably be 'better' but
         # there is a bug/regression in some pandas versions that doesn't play nice
         # with nanosecond precision (fails in 1.3.0, works ion 1.3.3)

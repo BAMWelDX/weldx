@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
@@ -12,8 +12,7 @@ __all__ = ["TimedeltaIndexConverter"]
 class TimedeltaIndexConverter(WeldxConverter):
     """A simple implementation of serializing pandas TimedeltaIndex."""
 
-    name = "time/timedeltaindex"
-    version = "0.1.*"
+    tags = ["asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.*"]
     types = [pd.TimedeltaIndex]
 
     def to_yaml_tree(self, obj: pd.TimedeltaIndex, tag: str, ctx) -> dict:
@@ -41,18 +40,9 @@ class TimedeltaIndexConverter(WeldxConverter):
         return pd.TimedeltaIndex(values)
 
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
-        _tag: str = node._tag
-
         if "freq" in node:
-            if _tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
-                tdi_temp = pd.timedelta_range(
-                    start=node["start"]["value"],
-                    end=node["end"]["value"],
-                    freq=node["freq"],
-                )
-                return [len(tdi_temp)]
             tdi_temp = pd.timedelta_range(
                 start=str(node["start"]),  # can't handle TaggedString directly
                 end=str(node["end"]),

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import typing
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, List, Tuple, Union
+from typing import Any, Union
 
 import numpy as np
 import pandas as pd
@@ -13,15 +14,16 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
 from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.transformations.types import types_coordinates, types_orientation
 from weldx.transformations.util import normalize
 
-if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.axes
-
 __all__ = ("LocalCoordinateSystem",)
+
+if typing.TYPE_CHECKING:
+    import matplotlib
 
 
 class LocalCoordinateSystem(TimeDependent):
@@ -78,6 +80,7 @@ class LocalCoordinateSystem(TimeDependent):
         # warn about dropped time data
         if (
             time is not None
+            and len(Time(time)) > 1
             and "time" not in orientation.dims
             and (isinstance(coordinates, TimeSeries) or "time" not in coordinates.dims)
         ):
@@ -282,16 +285,35 @@ class LocalCoordinateSystem(TimeDependent):
         """Create xarray coordinates from different formats and time-inputs."""
         if isinstance(coordinates, TimeSeries):
             if coordinates.is_expression:
+                if not coordinates.units.is_compatible_with(_DEFAULT_LEN_UNIT):
+                    raise pint.DimensionalityError(
+                        coordinates.units,
+                        _DEFAULT_LEN_UNIT,
+                        extra_msg="\nThe units resulting from the expression must "
+                        "represent a length.",
+                    )
                 return coordinates
             coordinates = cls._coords_from_discrete_time_series(coordinates)
 
         if coordinates is None:
-            coordinates = np.zeros(3)
+            coordinates = Q_(np.zeros(3), _DEFAULT_LEN_UNIT)
 
         if not isinstance(coordinates, xr.DataArray):
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                 coordinates = np.array(coordinates)
+
             coordinates = ut.xr_3d_vector(coordinates, time)
+
+        c_data = coordinates.data
+        if not isinstance(c_data, pint.Quantity) or not c_data.is_compatible_with(
+            _DEFAULT_LEN_UNIT
+        ):
+            unit = c_data.u if isinstance(c_data, pint.Quantity) else None
+            raise pint.DimensionalityError(
+                unit,
+                _DEFAULT_LEN_UNIT,
+                extra_msg="\nThe coordinates require units representing a length.",
+            )
 
         # make sure we have correct "time" format
         coordinates = coordinates.weldx.time_ref_restore()
@@ -362,11 +384,6 @@ class LocalCoordinateSystem(TimeDependent):
                 f"{time_series.shape}"
             )
         coordinates = time_series.data_array
-        # This is a workaround to remove the warning about stripped units. This line
-        # should be removed once we add/require units in the lcs
-        # Additionally, the correct unit should be checked for TimeSeries
-        # (also expressions)
-        coordinates.data = coordinates.data.to("mm").m
 
         c_dict = dict(c=["x", "y", "z"])
         if coordinates.data.shape[0] == 1:
@@ -376,7 +393,7 @@ class LocalCoordinateSystem(TimeDependent):
     @staticmethod
     def _unify_time_axis(
         orientation: xr.DataArray, coordinates: Union[xr.DataArray, TimeSeries]
-    ) -> Tuple:
+    ) -> tuple:
         """Unify time axis of orientation and coordinates if both are DataArrays."""
         if (
             not isinstance(coordinates, TimeSeries)
@@ -504,7 +521,8 @@ class LocalCoordinateSystem(TimeDependent):
 
         if num_none == 1:
             idx = next(i for i, v in enumerate(mat) if v is None)  # skipcq: PTC-W0063
-            mat[idx] = np.cross(mat[(idx - 2) % 3], mat[(idx - 1) % 3])
+            # type: ignore[arg-type]
+            mat[idx] = np.cross(mat[(idx - 2) % 3], mat[(idx - 1) % 3])  # type: ignore
         elif num_none > 1:
             raise ValueError("You need to specify two or more vectors.")
 
@@ -548,7 +566,7 @@ class LocalCoordinateSystem(TimeDependent):
             `True` if the coordinate system is time dependent, `False` otherwise.
 
         """
-        return self.time is not None or self._coord_ts is not None
+        return self._coord_ts is not None or ("time" in self._dataset.dims)
 
     @property
     def has_timeseries(self) -> bool:
@@ -593,7 +611,7 @@ class LocalCoordinateSystem(TimeDependent):
             Time-like data array representing the time union of the LCS
 
         """
-        if "time" in self._dataset.dims:
+        if "time" in self._dataset.coords:
             return Time(self._dataset.time, self.reference_time)
         return None
 
@@ -667,9 +685,9 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" not in self.orientation.dims:  # don't interpolate static
             return self.orientation
         if time.max() <= self.time.min():  # only use edge timestamp
-            return self.orientation.values[0]
+            return self.orientation.isel(time=0).data
         if time.min() >= self.time.max():  # only use edge timestamp
-            return self.orientation.values[-1]
+            return self.orientation.isel(time=-1).data
         # full interpolation with overlapping times
         return ut.xr_interp_orientation_in_time(self.orientation, time)
 
@@ -686,9 +704,9 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" not in self.coordinates.dims:  # don't interpolate static
             return self.coordinates
         if time.max() <= self.time.min():  # only use edge timestamp
-            return self.coordinates[0]
+            return self.coordinates.isel(time=0).data
         if time.min() >= self.time.max():  # only use edge timestamp
-            return self.coordinates[-1]
+            return self.coordinates.isel(time=-1).data
         # full interpolation with overlapping times
         return ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
@@ -774,13 +792,13 @@ class LocalCoordinateSystem(TimeDependent):
 
     def plot(
         self,
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: str = None,
         label: str = None,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         time_index: int = None,
-        scale_vectors: Union[float, List, np.ndarray] = None,
+        scale_vectors: Union[float, list, np.ndarray] = None,
         show_origin: bool = True,
         show_trace: bool = True,
         show_vectors: bool = True,

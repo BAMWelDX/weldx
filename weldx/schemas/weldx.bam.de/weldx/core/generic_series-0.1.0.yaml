@@ -1,0 +1,69 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/generic_series-0.1.0"
+
+title: |
+  Schema that describes a quantity that depends on one or more dimensions.
+description: |
+  Describes a dimension dependent quantity.
+
+definitions:
+  discrete:
+    type: object
+    properties:
+      data:
+        description: |
+          The discrete data of the multidimensional quantity.
+        tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.*"
+      interpolation:
+        description: |
+          Name of the interpolation method that should be used on the data.
+        type: string
+      dimensions:
+        description: |
+          The names of all dimensions, in the order as they occur in the data.
+        type: array
+        items:
+          type: string
+      coordinates:
+        description: |
+          The coordinate values of the data
+        type: object
+        wx_property_tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.*"
+    required: [data, dimensions, coordinates]
+    propertyOrder: [data, interpolation, dimensions, coordinates]
+
+  expression:
+    type: object
+    properties:
+      expression:
+        description: |
+          The expression that describes the series
+        type: string
+      units:
+        description: |
+          Units of the data after the evaluation of the expression.
+        tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
+      free_dimensions:
+        description: |
+          A list of all dimensions that are variables of the expression.
+        type: object
+        wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/generic_series_free_dimension-0.1.0"
+      parameters:
+        description: |
+          A list of all expression symbols that have fixed values assigned to them.
+        type: object
+        wx_property_tag:
+          - "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.*"
+          - "asdf://weldx.bam.de/weldx/tags/core/data_array-0.1.*"
+
+    required: [expression, units, free_dimensions]
+    propertyOrder: [expression, units, free_dimensions, parameters]
+
+oneOf:
+  - $ref: "#definitions/discrete"
+  - $ref: "#definitions/expression"
+
+flowStyle: block
+...

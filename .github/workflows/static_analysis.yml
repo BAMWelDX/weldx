@@ -6,16 +6,21 @@ on:
   schedule:
     - cron: '0 6 * * 1'
 
+# execute commands with conda aware shell by default:
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.x
       - name: Lint
-        uses: pre-commit/action@v2.0.3
+        uses: pre-commit/action@v3.0.0
         with:
           extra_args: --all-files --show-diff-on-failure
 
@@ -25,20 +30,41 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
         with:
-          python-version: '3.9'
-      - name: pip installs
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - uses: CagtayFabry/pydeps2env@main
+        with:
+          channels: 'conda-forge defaults'
+          extras: ''
+          setup_requires: 'include'
+
+      - name: Cache mypy cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./.mypy_cache
+          key: ${{ runner.os }}-${{ hashFiles('./environment.yml') }}
+
+      - uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: ./environment.yml
+          environment-name: weldx
+          cache-env: true
+          extra-specs: |
+            python=3.9
+            wheel
+            pip
+      - name: activate env
+        run: micromamba activate weldx
+
+      - name: pip installs  # use mypy from pypy, as the conda-forge pkg lacks behind.
         run: pip install mypy
+
+      - name: Add mypy annotator
+        uses: pr-annotators/mypy-pr-annotator@v1.0.0
+
       - name: run mypy
         run: |
           mypy --install-types --non-interactive .
-
-  check-notebooks:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Check notebooks
-        uses: ResearchSoftwareActions/EnsureCleanNotebooksAction@1.1

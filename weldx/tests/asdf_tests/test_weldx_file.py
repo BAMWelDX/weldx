@@ -12,16 +12,17 @@ import pytest
 import xarray as xr
 from jsonschema import ValidationError
 
-from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
-from weldx.asdf.util import get_schema_path
+from weldx.asdf.file import _PROTECTED_KEYS, DEFAULT_ARRAY_INLINE_THRESHOLD, WeldxFile
+from weldx.asdf.util import get_schema_path, write_buffer
+from weldx.constants import META_ATTR
 from weldx.types import SupportsFileReadWrite
 from weldx.util import compare_nested
 
 SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 
 
-class ReadOnlyFile:
+class _ReadOnlyFile:
     """Simulate a read-only file."""
 
     def __init__(self, tmpdir):  # noqa: D107
@@ -42,7 +43,7 @@ class ReadOnlyFile:
         return True
 
 
-class WritableFile:
+class _WritableFile:
     """Example of a class implementing SupportsFileReadWrite."""
 
     def __init__(self):  # noqa: D107
@@ -70,7 +71,7 @@ class WritableFile:
 
 def test_protocol_check(tmpdir):
     """Instance checks."""
-    assert isinstance(WritableFile(), SupportsFileReadWrite)
+    assert isinstance(_WritableFile(), SupportsFileReadWrite)
     assert isinstance(BytesIO(), SupportsFileReadWrite)
 
     # real file:
@@ -82,7 +83,7 @@ def test_protocol_check(tmpdir):
 @pytest.fixture(scope="class")
 def simple_asdf_file(request):
     """Create an ASDF file with a very simple tree and attaches it to cls."""
-    f = asdf.AsdfFile(tree=dict(wx_metadata=dict(welder="anonymous")))
+    f = asdf.AsdfFile(tree={META_ATTR: dict(welder="anonymous")})
     buff = BytesIO()
     f.write_to(buff)
     request.cls.simple_asdf_file = buff
@@ -176,7 +177,7 @@ class TestWeldXFile:
     @staticmethod
     def test_create_writable_protocol():
         """Interface test for writable files."""
-        f = WritableFile()
+        f = _WritableFile()
         WeldxFile(f, tree=dict(test="yes"), mode="rw")
         new_file = TestWeldXFile.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
@@ -184,13 +185,13 @@ class TestWeldXFile:
     @staticmethod
     def test_create_readonly_protocol(tmpdir):
         """A read-only file should be supported by ASDF."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         WeldxFile(f)
 
     @staticmethod
     def test_read_only_raise_on_write(tmpdir):
         """Read-only files cannot be written to."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         with pytest.raises(ValueError):
             WeldxFile(f, mode="rw")
 
@@ -208,10 +209,10 @@ class TestWeldXFile:
         f = tempfile.mktemp(dir=tmpdir)
         self.fh.write_to(f)
         with WeldxFile(f, mode="rw") as fh:
-            fh["wx_metadata"]["key"] = True
+            fh[META_ATTR]["key"] = True
 
         with WeldxFile(f, mode="r") as fh:
-            assert fh["wx_metadata"]["key"]
+            assert fh[META_ATTR]["key"]
 
     @staticmethod
     def make_copy(fh):
@@ -228,7 +229,7 @@ class TestWeldXFile:
     def test_operation_on_closed(self):
         """Accessing the file_handle after closing is illegal."""
         self.fh.close()
-        assert self.fh["wx_metadata"]
+        assert self.fh[META_ATTR]
 
         # cannot access closed handles
         with pytest.raises(RuntimeError):
@@ -260,16 +261,16 @@ class TestWeldXFile:
         """Check the file handle gets closed."""
         copy = self.fh.write_to()
         with WeldxFile(copy, mode="rw", sync=sync) as fh:
-            assert "something" not in fh["wx_metadata"]
-            fh["wx_metadata"]["something"] = True
+            assert "something" not in fh[META_ATTR]
+            fh[META_ATTR]["something"] = True
 
         copy.seek(0)
         # check if changes have been written back according to sync flag.
         with WeldxFile(copy, mode="r") as fh2:
             if sync:
-                assert fh2["wx_metadata"]["something"]
+                assert fh2[META_ATTR]["something"]
             else:
-                assert "something" not in fh2["wx_metadata"]
+                assert "something" not in fh2[META_ATTR]
 
     def test_history(self):
         """Test custom software specs for history entries."""
@@ -277,22 +278,22 @@ class TestWeldXFile:
             name="weldx_file_test", author="marscher", homepage="http://no", version="1"
         )
         fh = WeldxFile(
-            tree=dict(wx_metadata={}),
+            tree={META_ATTR: {}},
             software_history_entry=software,
             mode="rw",
         )
-        fh["wx_metadata"]["something"] = True
+        fh[META_ATTR]["something"] = True
         desc = "added some metadata"
         fh.add_history_entry(desc)
         fh.sync()
         buff = self.make_copy(fh)
 
         new_fh = WeldxFile(buff)
-        assert new_fh["wx_metadata"]["something"]
+        assert new_fh[META_ATTR]["something"]
         assert new_fh.history[-1]["description"] == desc
         assert new_fh.history[-1]["software"] == software
 
-        del new_fh["wx_metadata"]["something"]
+        del new_fh[META_ATTR]["something"]
         other_software = dict(
             name="software name", version="42", homepage="no", author="anon"
         )
@@ -313,7 +314,7 @@ class TestWeldXFile:
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
-        w.show_asdf_header()  # check for exception safety.
+        w.header()  # check for exception safety.
 
     @staticmethod
     def test_custom_schema_resolve_path():
@@ -338,11 +339,82 @@ class TestWeldXFile:
             WeldxFile(custom_schema="no")
 
     @staticmethod
+    def _get_schema_file(arg, mismatch: bool, tmp_path) -> (str, np.ndarray):
+        data = np.arange(6)
+        if not arg or not isinstance(arg, (list, tuple)):
+            return None, data
+        result = [None, None]
+        shape = (1, -1)
+        schema = """
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/debug/test_shape_validator-0.1.0"
+
+title: test
+type: object
+properties:
+  prop1:
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape: [{shape}]
+        """
+
+        if isinstance(arg, (list, tuple)):
+            a, b = arg
+
+            def _create_schema(shape_, name):
+                file_name = tmp_path / name
+                shape_s = ",".join(str(s) for s in shape_)
+                with open(file_name, "w+") as fh:
+                    fh.write(schema.format(shape=shape_s))
+                return file_name
+
+            if a is not None:
+                shape = [2, 3]
+                result[0] = _create_schema(shape, name="a")
+            if b is not None:
+                shape = [3, 2]
+                result[1] = _create_schema(shape, name="b")
+
+            return result, data.reshape(shape) if not mismatch else data
+
+    @pytest.mark.parametrize(
+        ("custom_schema", "mismatch"),
+        (
+            (None, False),  # no validation (default)
+            ("A", False),  # validate against A on read and write (pre 0.6 behavior)
+            (("A", "B"), True),  # validate with A on read, validate with B on write
+            (("A", "B"), False),  # validate with A on read, validate with B on write
+            ((None, "A"), True),  # no validation on read, validate with B on write
+            ((None, "A"), False),  # no validation on read, validate with B on write
+            (("A", None), False),  # validate with A on read, no validation on write
+        ),
+    )
+    def test_custom_schema_modes(self, custom_schema, mismatch, tmp_path):
+        """Checks we can have separate read/write arguments for custom_schema."""
+        schema_resolved, data = self._get_schema_file(custom_schema, mismatch, tmp_path)
+        tree = {"prop1": data}
+
+        if mismatch:
+            if (
+                len(custom_schema) == 2
+                and custom_schema[0] == "A"
+                and custom_schema[1] == "B"
+            ):
+                buff = write_buffer(tree)
+            else:
+                buff = None
+            with pytest.raises(ValidationError):
+                WeldxFile(buff, tree=tree, mode="rw", custom_schema=schema_resolved)
+        else:
+            WeldxFile(tree=tree, mode="rw", custom_schema=schema_resolved)
+
+    @staticmethod
     def test_show_header_file_pos_unchanged():
         """Check displaying the header."""
         file = WeldxFile(tree={"sensor": "HKS_sensor"}, mode="rw")
         old_pos = file.file_handle.tell()
-        file.show_asdf_header()
+        file.header()
         after_pos = file.file_handle.tell()
         assert old_pos == after_pos
 
@@ -368,7 +440,7 @@ class TestWeldXFile:
         with WeldxFile(mode=mode) as fh:
             fh["x"] = large_array
             before = get_mem_info()
-            fh.show_asdf_header(use_widgets=False, _interactive=False)
+            fh.header(use_widgets=False, _interactive=False)
             after = get_mem_info()
             fh.write_to(fn)
 
@@ -376,7 +448,7 @@ class TestWeldXFile:
             diff = after - before
             # pytest increases memory a bit, but not as much as our large array would
             # occupy in memory.
-            assert diff <= large_array.nbytes * 1.1, diff / 1024 ** 2
+            assert diff <= large_array.nbytes * 1.1, diff / 1024**2
         assert np.all(WeldxFile(fn)["x"] == large_array)
 
     @staticmethod
@@ -385,7 +457,7 @@ class TestWeldXFile:
         """Ensure that the updated tree is displayed in show_header."""
         with WeldxFile(mode=mode) as fh:
             fh["wx_user"] = dict(test=True)
-            fh.show_asdf_header()
+            fh.header()
 
         out, _ = capsys.readouterr()
         assert "wx_user" in out
@@ -399,7 +471,7 @@ class TestWeldXFile:
     def test_show_header_params(use_widgets, interactive, capsys):
         """Check different inputs for show method."""
         fh = WeldxFile()
-        fh.show_asdf_header(use_widgets=use_widgets, _interactive=interactive)
+        fh.header(use_widgets=use_widgets, _interactive=interactive)
 
     def test_invalid_software_entry(self):
         """Invalid software entries should raise."""
@@ -432,7 +504,7 @@ class TestWeldXFile:
         wx_file = WeldxFile(fn, "rw", compression="input")
         size_rw = get_size_and_mtime(fn)
 
-        wx_file.show_asdf_header()
+        wx_file.header()
         size_show_hdr = get_size_and_mtime(fn)
         wx_file.close()
 
@@ -501,14 +573,92 @@ class TestWeldXFile:
             f.update()
             f.close()
 
-        # compare data
-        assert (
-            pathlib.Path("test.asdf").stat().st_size
-            == pathlib.Path("test.wx").stat().st_size
+        # file sizes should be almost equal (array inlining in wxfile).
+        a = pathlib.Path("test.asdf").stat().st_size
+        b = pathlib.Path("test.wx").stat().st_size
+        assert a >= b
+
+        if a == b:
+
+            def _read(fn):
+                with open(fn, "br") as fh:
+                    return fh.read()
+
+            assert _read("test.asdf") == _read("test.wx")
+
+    @pytest.mark.filterwarnings("ignore:You tried to manipulate an ASDF internal")
+    @pytest.mark.filterwarnings("ignore:Call to deprecated function data.")
+    @pytest.mark.parametrize("protected_key", _PROTECTED_KEYS)
+    def test_cannot_update_del_protected_keys(self, protected_key):
+        """Ensure we cannot manipulate protected keys."""
+        expected_match = "manipulate an ASDF internal structure"
+        warning_type = UserWarning
+
+        # reading is also forbidden
+        with pytest.raises(KeyError):
+            _ = self.fh[protected_key]
+
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.update({protected_key: None})
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.pop(protected_key)
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh[protected_key] = NotImplemented
+
+    def test_popitem_remain_protected_keys(self):
+        """Ensure we cannot manipulate protected keys."""
+        keys = []
+
+        while len(self.fh):
+            key, _ = self.fh.popitem()
+            keys.append(key)
+        assert keys == [META_ATTR]
+
+    def test_len_protected_keys(self):
+        """Should only contain key 'wx_metadata'."""
+        assert len(self.fh) == 1
+
+    def test_keys_not_in_protected_keys(self):
+        """Protected keys do not show up in keys()."""
+        assert self.fh.keys() not in set(_PROTECTED_KEYS)
+
+        for x in iter(self.fh):
+            assert x not in _PROTECTED_KEYS
+
+    @staticmethod
+    def test_array_inline_threshold():
+        """Test array inlining threshold."""
+        x = np.arange(7)
+        buff = WeldxFile(
+            tree=dict(x=x), mode="rw", array_inline_threshold=len(x) + 1
+        ).file_handle
+        buff.seek(0)
+        assert str(list(x)).encode("utf-8") in buff.read()
+
+        # now we create an array longer than the default threshold
+        y = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+        buff2 = WeldxFile(tree=dict(x=y), mode="rw").file_handle
+        buff2.seek(0)
+        data = buff2.read()
+        assert b"BLOCK" in data
+        assert str(list(y)).encode("utf-8") not in data
+
+    @staticmethod
+    def test_array_inline_threshold_sync():
+        x = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+
+        with WeldxFile(mode="rw") as wx:
+            wx.update(x=x)
+            wx.sync(array_inline_threshold=len(x) + 1)
+            buff3 = wx.file_handle
+            buff3.seek(0)
+            data3 = buff3.read()
+            assert b"BLOCK" not in data3
+
+    @staticmethod
+    def test_array_inline_threshold_write_to():
+        x = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+        buff = WeldxFile(tree=dict(x=x), mode="rw").write_to(
+            array_inline_threshold=len(x) + 1
         )
-
-        def _read(fn):
-            with open(fn, "br") as fh:
-                return fh.read()
-
-        assert _read("test.asdf") == _read("test.wx")
+        assert b"BLOCK" not in buff.read()

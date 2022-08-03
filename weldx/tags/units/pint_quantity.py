@@ -1,8 +1,9 @@
-from typing import List
+from __future__ import annotations
 
 import pint
 from asdf.tagged import TaggedDict
 
+from weldx.asdf.constants import WELDX_TAG_URI_BASE
 from weldx.asdf.types import WeldxConverter
 from weldx.asdf.util import _get_instance_shape
 from weldx.constants import Q_, U_
@@ -34,12 +35,14 @@ class PintQuantityConverter(WeldxConverter):
         """Reconstruct from tree."""
         if tag.startswith("tag:stsci.edu:asdf"):  # asdf compat
             return Q_(node["value"], node["unit"])
-        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
-            return Q_(node["value"], node["unit"])
         return Q_(node["value"], node["units"])
 
+    def select_tag(self, obj, tags, ctx):
+        tags = [tag for tag in tags if tag.startswith(WELDX_TAG_URI_BASE)]
+        return sorted(tags)[-1]
+
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
         if isinstance(node["value"], dict):  # ndarray
             return _get_instance_shape(node["value"])
@@ -57,7 +60,7 @@ class PintUnitConverter(WeldxConverter):
 
     def to_yaml_tree(self, obj: pint.Unit, tag: str, ctx) -> str:
         """Convert to python dict."""
-        return f"{obj:.}"  # use 'long' (.) formatting for serialization (short = ~)
+        return f"{obj:D}"  # use def/long (D) formatting for serialization
 
     def from_yaml_tree(self, node: str, tag: str, ctx) -> pint.Unit:
         """Reconstruct from tree."""

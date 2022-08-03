@@ -1,50 +1,28 @@
-"""Test functions of the visualization package."""
+"""Perform some checks regarding the import redirection if weldx_widgets is missing."""
+from unittest.mock import patch
 
-import matplotlib.pyplot as plt
-import pandas as pd
 import pytest
 
-# pylint: disable=W0611
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 
-import weldx.transformations as tf
-import weldx.visualization as vs
+def test_redirection_weldx_widgets_not_found():
+    """Check we receive a warning about weldx_widgets not being available."""
+    orig_import = __import__  # Store original __import__
 
-# pylint: enable=W0611
+    def import_mock(name, *args, **kwargs):
+        if "weldx_widgets" in name:
+            raise ModuleNotFoundError("weldx_widgets not found")
+        if "matplotlib" in name:
+            raise ModuleNotFoundError("matplotlib not found")
+        return orig_import(name, *args, **kwargs)
 
+    pattern = ".*weldx_widget.*unavailable"
 
-def test_plot_coordinate_system():
-    """Test executing all possible code paths."""
-    lcs_constant = tf.LocalCoordinateSystem()
+    with patch("builtins.__import__", side_effect=import_mock):
+        with pytest.warns(match=pattern):
+            import weldx.visualization as vs
 
-    time = pd.TimedeltaIndex([10, 11, 12], "s")
-    orientation_tdp = [
-        [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-        [[0, 1, 0], [-1, 0, 0], [0, 0, 1]],
-        [[-1, 0, 0], [0, -1, 0], [0, 0, 1]],
-    ]
-    coordinates_tdp = [[0, 0, 1], [0, 0, 2], [0, -1, 0]]
-    lcs_tdp = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp, coordinates=coordinates_tdp, time=time
-    )
-
-    _, ax = plt.subplots(subplot_kw=dict(projection="3d"))
-
-    vs.draw_coordinate_system_matplotlib(lcs_constant, ax, "g")
-    vs.draw_coordinate_system_matplotlib(lcs_tdp, ax, "r", "2016-01-10")
-    vs.draw_coordinate_system_matplotlib(lcs_tdp, ax, "b", "2016-01-11", time_idx=1)
-    vs.draw_coordinate_system_matplotlib(
-        lcs_tdp, ax, "y", "2016-01-12", pd.TimedeltaIndex([12], "s")
-    )
-
-    # exceptions ------------------------------------------
-
-    # label without color
-    with pytest.raises(Exception):
-        vs.draw_coordinate_system_matplotlib(lcs_constant, ax, label="label")
-
-
-def test_axes_equal():
-    """Test executing all possible code paths."""
-    _, ax = plt.subplots(subplot_kw=dict(projection="3d"))
-    vs.axes_equal(ax)
+        # ensure that using declared features emits the warning again.
+        for name in vs.__all__:
+            with pytest.warns(match=pattern):
+                obj = getattr(vs, name)
+                obj()

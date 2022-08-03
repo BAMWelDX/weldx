@@ -1,6 +1,7 @@
 """Test the `Time` class."""
+from __future__ import annotations
 
-from typing import List, Tuple, Type, Union
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -12,8 +13,10 @@ from pandas import TimedeltaIndex as TDI
 from pandas import Timestamp, date_range
 from pint import DimensionalityError
 
-from weldx import Q_, LocalCoordinateSystem, TimeSeries
+from weldx.constants import Q_
+from weldx.core import TimeSeries
 from weldx.time import Time, types_time_like
+from weldx.transformations.local_cs import LocalCoordinateSystem
 
 
 def _initialize_delta_type(cls_type, values, unit):
@@ -45,7 +48,7 @@ def _initialize_datetime_type(cls_type, values):
 def _initialize_date_time_quantity(timedelta, unit, time_ref):
     """Initialize a quantity that represents a datetime by adding a ``time_ref``."""
     quantity = Q_(timedelta, unit)
-    setattr(quantity, "time_ref", Timestamp(time_ref))
+    quantity.time_ref = Timestamp(time_ref)
     return quantity
 
 
@@ -95,7 +98,7 @@ class TestTime:
     @staticmethod
     def _parse_time_type_test_input(
         type_input,
-    ) -> Tuple[Union[types_time_like, Time], bool]:
+    ) -> tuple[Union[types_time_like, Time], bool]:
         """Return the time type and a bool that defines if the returned type is a delta.
 
         This is mainly used in generalized tests where a type like `Time` itself can
@@ -103,7 +106,7 @@ class TestTime:
         to extract the information from a tuple.
 
         """
-        if isinstance(type_input, Tuple):
+        if isinstance(type_input, tuple):
             # to avoid wrong test setups due to spelling mistakes
             assert type_input[1] in ["timedelta", "datetime"]
             time_type = type_input[0]
@@ -181,7 +184,7 @@ class TestTime:
     )
     def test_init(
         self,
-        input_vals: Union[Type, Tuple[Type, str]],
+        input_vals: Union[type, tuple[type, str]],
         set_time_ref: bool,
         scl: bool,
         arr: bool,
@@ -241,8 +244,12 @@ class TestTime:
     @pytest.mark.parametrize(
         "time_dep_type",
         [
-            LocalCoordinateSystem(coordinates=np.zeros((2, 3)), time=["2s", "3s"]),
-            LocalCoordinateSystem(coordinates=np.zeros((2, 3)), time=["2000", "2001"]),
+            LocalCoordinateSystem(
+                coordinates=Q_(np.zeros((2, 3)), "mm"), time=["2s", "3s"]
+            ),
+            LocalCoordinateSystem(
+                coordinates=Q_(np.zeros((2, 3)), "mm"), time=["2000", "2001"]
+            ),
             TimeSeries(Q_([2, 4, 1], "m"), TDI([1, 2, 3], "s")),
             TimeSeries(Q_([2, 4, 1], "m"), ["2001", "2002", "2003"]),
         ],
@@ -336,6 +343,8 @@ class TestTime:
             np.ndarray,
             np.timedelta64,
             np.datetime64,
+            DTI,
+            TDI,
         ):
             return
 
@@ -419,7 +428,7 @@ class TestTime:
             return
 
         # skip __radd__ cases where we got conflicts with the other types' __add__
-        if not other_on_rhs and other_type in (Q_, np.ndarray, np.timedelta64):
+        if not other_on_rhs and other_type in (Q_, np.ndarray, np.timedelta64, TDI):
             return
 
         # setup rhs
@@ -535,6 +544,8 @@ class TestTime:
             np.ndarray,
             np.timedelta64,
             np.datetime64,
+            DTI,
+            TDI,
         ):
             return
 
@@ -680,7 +691,7 @@ class TestTime:
         assert np.all(time_q == Q_(range(10), "s"))
         assert time_q.time_ref == ts
 
-        arr2 = time.as_data_array().weldx.time_ref_restore()
+        arr2 = time.as_data_array()
         assert arr.time.identical(arr2.time)
 
     # test_duration --------------------------------------------------------------------

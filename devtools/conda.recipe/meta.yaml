@@ -32,8 +32,9 @@ test:
     - pip
     - pytest
     - pytest-xdist
-    # Remove once this is fixed: https://github.com/K3D-tools/K3D-jupyter/issues/312
-    - jupyterlab
+    - black
+    # requires wx-widgets here, so we can properly load the visualization sub-package.
+    - weldx_widgets
   files:
     - conftest.py
   imports:

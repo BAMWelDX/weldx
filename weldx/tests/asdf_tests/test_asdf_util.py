@@ -1,14 +1,19 @@
 """tests for asdf utility functions."""
+from __future__ import annotations
+
+import io
+import unittest
 from dataclasses import dataclass
-from typing import List
 
 import numpy as np
 import pytest
 
-from weldx import WeldxFile
+from weldx.asdf.file import WeldxFile
 from weldx.asdf.util import (
+    _ProtectedViewDict,
     dataclass_serialization_class,
     get_highest_tag_version,
+    get_schema_tree,
     get_yaml_header,
     read_buffer,
     write_buffer,
@@ -50,6 +55,17 @@ def test_get_yaml_header(create_file_and_buffer, index, parse):
     else:
         assert isinstance(header, str)
         assert "asdf_library" in header
+
+
+def test_get_yaml_header_win_eol():
+    """Ensure we can read win and unix line endings with get_yaml_header."""
+    wx = WeldxFile(tree=dict(x=np.arange(20)), mode="rw")  # has binary blocks
+    buff = wx.write_to()
+    native = buff.read()  # could be "\r\n" or "\n"
+    unix = native.replace(b"\r\n", b"\n")
+    win = unix.replace(b"\n", b"\r\n")
+    for b in [native, unix, win]:
+        get_yaml_header(io.BytesIO(b))
 
 
 def _to_yaml_tree_mod(tree):
@@ -121,7 +137,7 @@ def test_dataclass_serialization_class(
 
     @dataclass
     class _DataClass:
-        a: List[str]
+        a: list[str]
         b: int = 1
 
     dc = _DataClass(a=val_a, b=2)
@@ -167,3 +183,51 @@ def test_get_highest_tag_version():
 
     with pytest.raises(ValueError):
         get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/**-*")
+
+
+def test_get_schema_tree():
+    d = get_schema_tree("single_pass_weld-0.1.0")
+    assert isinstance(d, dict)
+
+
+class TestProtectedView(unittest.TestCase):
+    def setUp(self):
+        data = dict(foo="blub", bar=42)
+        self.protected_key = "bar"
+        self.view = _ProtectedViewDict(protected_keys=[self.protected_key], data=data)
+
+    def test_protected_keys_hidden(self):
+        assert self.protected_key not in self.view.keys()
+        assert self.protected_key not in self.view
+        assert (self.protected_key, 42) not in self.view.items()
+
+    def test_allowed_access(self):
+        assert self.view["foo"] == "blub"
+
+    def test_illegal_access(self):
+        with pytest.raises(KeyError):
+            _ = self.view["bar"]
+
+        with pytest.raises(KeyError):
+            del self.view["bar"]
+
+    def test_access_non_existent(self):
+        with pytest.raises(KeyError):
+            _ = self.view["no"]
+
+    def test_update(self):
+        expected_match = "manipulate an ASDF internal structure"
+        warning_type = UserWarning
+
+        with pytest.warns(warning_type, match=expected_match):
+            self.view.update(dict(bar=None), foo=1)
+        assert self.view["foo"] == 1
+
+    def test_popitem(self):
+        k, v = self.view.popitem()
+        assert k == "foo"
+        assert v == "blub"
+
+    def test_clear(self):
+        self.view.clear()
+        assert len(self.view) == 0

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
+from typing import TYPE_CHECKING, Union  # noqa: F401
 from warnings import warn
 
 import pint
@@ -11,11 +11,14 @@ from networkx import draw, draw_networkx_edge_labels
 
 from weldx.constants import Q_, U_
 from weldx.core import MathematicalExpression, TimeSeries
+from weldx.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.pyplot as plt
+    import matplotlib.axes
     from pandas import TimedeltaIndex
     from pint import Quantity, Unit
+
+    from weldx.types import UnitLike
 
 
 # measurement --------------------------------------------------------------------------
@@ -33,7 +36,7 @@ class Signal:
     """Simple dataclass implementation for measurement signals."""
 
     signal_type: str
-    units: Union[str, pint.Unit]
+    units: UnitLike
     data: TimeSeries = None
 
     def __post_init__(self):
@@ -45,11 +48,11 @@ class Signal:
     def plot(
         self,
         time: Union[TimedeltaIndex, Quantity] = None,
-        axes: plt.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         data_name: str = "values",
         time_unit: Union[str, Unit] = None,
         **mpl_kwargs,
-    ) -> plt.Axes:
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the time dependent data of the `Signal`.
 
         Parameters
@@ -69,7 +72,7 @@ class Signal:
 
         Returns
         -------
-        matplotlib.axes._axes.Axes :
+         matplotlib.axes.Axes :
             The matplotlib axes object that was used for the plot
 
         """
@@ -89,8 +92,8 @@ class SignalTransformation:
     error: Error
     func: MathematicalExpression = None
     type_transformation: str = None
-    input_shape: Tuple = None
-    output_shape: Tuple = None
+    input_shape: tuple = None
+    output_shape: tuple = None
     meta: str = None
 
     def __post_init__(self):
@@ -131,8 +134,8 @@ class MeasurementEquipment:
     """Simple dataclass implementation for generic equipment."""
 
     name: str
-    sources: List = field(default_factory=lambda: [])
-    transformations: List = field(default_factory=lambda: [])
+    sources: list = field(default_factory=lambda: [])
+    transformations: list = field(default_factory=lambda: [])
 
     def __post_init__(self):
         """Perform some data consistency checks."""
@@ -168,7 +171,7 @@ class MeasurementEquipment:
         raise KeyError(f"No source with name '{name}' found.")
 
     @property
-    def source_names(self) -> List[str]:
+    def source_names(self) -> list[str]:
         """Get the names of all sources.
 
         Returns
@@ -199,7 +202,7 @@ class MeasurementEquipment:
         raise KeyError(f"No transformation with name '{name}' found.")
 
     @property
-    def transformation_names(self) -> List[str]:
+    def transformation_names(self) -> list[str]:
         """Get the names of all transformations.
 
         Returns
@@ -279,7 +282,7 @@ class MeasurementChain:
         )
 
     @classmethod
-    def from_dict(cls, dictionary: Dict) -> "MeasurementChain":
+    def from_dict(cls, dictionary: dict) -> "MeasurementChain":
         """Create a measurement chain from a dictionary.
 
         Parameters
@@ -515,7 +518,7 @@ class MeasurementChain:
 
     @staticmethod
     def _determine_output_signal_unit(
-        func: MathematicalExpression, input_unit: Union[str, Union]
+        func: MathematicalExpression, input_unit: UnitLike
     ) -> pint.Unit:
         """Determine the unit of a transformations' output signal.
 
@@ -546,7 +549,7 @@ class MeasurementChain:
                     "The provided function is incompatible with the input signals unit."
                     f" \nThe test raised the following exception:\n{e}"
                 )
-            return test_output.units
+            return test_output.data.units
 
         return input_unit
 
@@ -926,6 +929,7 @@ class MeasurementChain:
 
         raise KeyError(f"No transformation with name '{name}' found")
 
+    @check_matplotlib_available
     def plot(self, axes=None):
         """Plot the measurement chain.
 
@@ -1038,7 +1042,7 @@ class MeasurementChain:
 
         return axes
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Get the content of the measurement chain as dictionary.
 
         Returns
@@ -1082,7 +1086,7 @@ class MeasurementChain:
         return [self._graph.edges[edge]["transformation"] for edge in self._graph.edges]
 
     @property
-    def transformation_names(self) -> List:
+    def transformation_names(self) -> list:
         """Get the names of all transformations.
 
         Returns
@@ -1106,5 +1110,5 @@ class Measurement:
     """Simple dataclass implementation for generic measurements."""
 
     name: str
-    data: List[TimeSeries]
+    data: list[TimeSeries]
     measurement_chain: MeasurementChain

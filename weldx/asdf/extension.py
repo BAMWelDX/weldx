@@ -1,10 +1,9 @@
 """ASDF-extensions for weldx types."""
-from typing import List
+from __future__ import annotations
 
 from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
 
-from .constants import LEGACY_SCHEMA_PATH  # legacy_code
 from .constants import (
     MANIFEST_PATH,
     SCHEMA_PATH,
@@ -42,24 +41,11 @@ def get_schema_resource_mapping() -> DirectoryResourceMapping:
     return mapping
 
 
-def get_legacy_resource_mapping() -> DirectoryResourceMapping:  # legacy_code
-    """Get the weldx schema legacy resource mapping."""
-    mapping = DirectoryResourceMapping(
-        LEGACY_SCHEMA_PATH,
-        "http://weldx.bam.de/schemas/weldx/",
-        recursive=True,
-        filename_pattern="*.yaml",
-        stem_filename=True,
-    )
-    return mapping
-
-
-def get_resource_mappings() -> List[DirectoryResourceMapping]:
+def get_resource_mappings() -> list[DirectoryResourceMapping]:
     """Get list of all weldx resource mappings."""
     return [
         get_extension_resource_mapping(),
         get_schema_resource_mapping(),
-        get_legacy_resource_mapping(),  # legacy_code
     ]
 
 
@@ -80,6 +66,6 @@ class WeldxExtension(ManifestExtension):
     }
 
 
-def get_extensions() -> List[ManifestExtension]:
+def get_extensions() -> list[ManifestExtension]:
     """Get a list of all weldx extensions."""
     return [WeldxExtension.from_uri(WELDX_EXTENSION_URI)]
