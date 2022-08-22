@@ -5,15 +5,16 @@ from weldx import WeldxFile
 from weldx.config import enable_quality_standard
 from weldx.measurement import MeasurementEquipment
 
-# def test_installable_quality_standard():
-#    enable_quality_standard("quality_standard_demo")
 
-# eq = MeasurementEquipment("Equipment")
+def test_installable_quality_standard():
+    enable_quality_standard("quality_standard_demo")
 
-# tree = dict(equip=eq)
+    eq = MeasurementEquipment("Equipment")
 
-# with pytest.raises(ValidationError):
-#    WeldxFile(tree=tree, mode="rw")
+    tree = dict(equip=eq)
 
-# eq.wx_metadata = {"serial_number": 1234}
-# WeldxFile(tree=tree, mode="rw")
+    with pytest.raises(ValidationError):
+        WeldxFile(tree=tree, mode="rw")
+
+    eq.wx_metadata = {"serial_number": 1234}
+    WeldxFile(tree=tree, mode="rw")
