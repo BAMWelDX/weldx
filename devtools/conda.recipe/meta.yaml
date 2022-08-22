@@ -1,9 +1,12 @@
 {% set pyproject = load_file_data("../../pyproject.toml", from_recipe_dir=True)  %}
 {% set proj = pyproject.get('project') %}
+{% set src_version_full = load_file_data("../../weldx/_version.py", from_recipe_dir=True, fmt="yaml") %}
+{% set i = src_version_full.find("=") %}
+{% set src_version = src_version_full[i+1:] %}
 
 package:
   name: weldx
-  version: {{ proj.get('version') }}
+  version: {{ src_version }}
 
 source:
     path: ../..
@@ -13,7 +16,6 @@ build:
   noarch: python
   script: {{ PYTHON }} -m pip install . -vv
   entry_points:
-    # TODO: check this only used to be console script entry points, why not ASDF?
   {% for e in proj.get('entry-points') %}
     - {{ e }}
   {% endfor %}
