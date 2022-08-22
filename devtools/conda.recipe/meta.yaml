@@ -1,4 +1,4 @@
-{% set pyproject = load_file_data('pyproject.toml') %}
+{% set pyproject = load_file_data("../../pyproject.toml", from_recipe_dir=True)  %}
 {% set proj = pyproject.get('project') %}
 
 package:
@@ -14,7 +14,7 @@ build:
   script: {{ PYTHON }} -m pip install . -vv
   entry_points:
     # TODO: check this only used to be console script entry points, why not ASDF?
-  {% for e in proj.get('entry_points') %}
+  {% for e in proj.get('entry-points') %}
     - {{ e }}
   {% endfor %}
 requirements:
@@ -35,7 +35,7 @@ test:
     - pytest
     - pytest-xdist
     - black
-    # requires wx-widgets here, so we can properly load the visualization sub-package.
+    # require wx-widgets here, so we can properly load the visualization sub-package.
     - weldx_widgets
   files:
     - conftest.py
