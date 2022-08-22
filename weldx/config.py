@@ -175,14 +175,14 @@ class Config:
     @staticmethod
     def load_installed_standards():
         """Load all standards that are installed to the active virtual environment."""
-        for entry_point in pkg_resources.iter_entry_points("weldx.standard"):
-            #standards = entry_point.load()()
-            #if not isinstance(standards, List):
-            #    standards = [standards]
-            #for standard in standards:
-            #    if not isinstance(standard, QualityStandard):
-            #        raise TypeError("Invalid quality standard.")
-            #    Config.add_quality_standard(standard)
+        # for entry_point in pkg_resources.iter_entry_points("weldx.standard"):
+        # standards = entry_point.load()()
+        # if not isinstance(standards, List):
+        #    standards = [standards]
+        # for standard in standards:
+        #    if not isinstance(standard, QualityStandard):
+        #        raise TypeError("Invalid quality standard.")
+        #    Config.add_quality_standard(standard)
 
 
 def add_quality_standard(standard: QualityStandard):
