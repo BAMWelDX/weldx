@@ -85,3 +85,5 @@ repos:
     hooks:
       - id: codespell
         exclude: doc/legal-notice.rst
+        args:
+          - -L ro
