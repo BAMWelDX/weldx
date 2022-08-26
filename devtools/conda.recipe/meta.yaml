@@ -1,5 +1,7 @@
 {% set pyproject = load_file_data("../../pyproject.toml", from_recipe_dir=True)  %}
 {% set proj = pyproject.get('project') %}
+# obtain version
+# TODO: this requires a dev install/invoked setup in the working copy!
 {% set src_version_full = load_file_data("../../weldx/_version.py", from_recipe_dir=True, fmt="yaml") %}
 {% set i = src_version_full.find("=") %}
 {% set src_version = src_version_full[i+1:] %}
