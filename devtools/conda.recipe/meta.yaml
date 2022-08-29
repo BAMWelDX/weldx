@@ -15,8 +15,10 @@ build:
     - SETUPTOOLS_SCM_PRETEND_VERSION
   script: "{{ PYTHON }} -m pip install . -vv"
   entry_points:
-  {% for e in proj.get('entry-points') %}
-    - {{ e }}
+  {% for module, entrypoints in proj.get('entry-points').items() %}
+  {% for name, path in entrypoints.items() %}
+    - {{ name }} = {{ module }}.{{ path }}
+  {% endfor %}
   {% endfor %}
 requirements:
   host:
