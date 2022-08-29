@@ -70,18 +70,12 @@ vis = [
 
 # ASDF extension entry points.
 
-[project.entry-points."timmins.display"]
-excl = "timmins_plugin_fancy:excl_display"
-lined = "timmins_plugin_fancy:lined_display"
+[project.entry-points."asdf.extensions"]
+weldx = "weldx.asdf.extension:get_extensions"
+weldx_validators = "weldx.asdf._extension:WeldxValidatorExtension"
 
-#[project.entry-points."asdf.extensions"]
-#weldx = "weldx.asdf.extension:get_extensions"
-#weldx_validators = "weldx.asdf._extension:WeldxValidatorExtension"
-#
-#[project.entry-points."asdf.resource_mappings"]
-#weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
-
-
+[project.entry-points."asdf.resource_mappings"]
+weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
 
 # console scripts
 [project.scripts]
