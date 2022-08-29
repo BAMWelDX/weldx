@@ -52,6 +52,9 @@ jobs:
       - name: conda list
         run: conda list
 
+      - name: set pkg version
+        run: echo "SETUPTOOLS_SCM_PRETEND_VERSION=$(python -m setuptools_scm)" >> $GITHUB_ENV
+
       - name: Build from local conda recipe
         run: conda mambabuild -c conda-forge .
 
