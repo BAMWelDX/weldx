@@ -6,6 +6,11 @@
  0.6.2 (tba)
 ********************
 
+added
+=====
+
+- New tutorial that demonstrates the usage of the CSM in conjunction with an existing WelDX file [:pull:`793`]
+
 changes
 =======
 
@@ -13,6 +18,7 @@ changes
    From a users perspective nothing changes here, as the package was always recommended to be installed via pip.
 -  Updated the outdated tutorial about the `LocalCoordinateSystem` [:pull:`775`]
 - ``weld_seam`` is now a required field in the ``multi_pass_weld`` schema [:pull:`790`]
+- Add section about time-dependent spatial data to the `CoordinateSystemManager` tutorial [:pull:`792`]
 
 
 fixes
