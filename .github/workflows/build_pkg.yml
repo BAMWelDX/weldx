@@ -90,7 +90,7 @@ jobs:
 
       - name: build package
         run: |
-          python setup.py sdist bdist_wheel
+          mkdir -p dist; cd dist; python -m pip wheel . --no-deps
 
       - uses: actions/upload-artifact@v3
         with:
