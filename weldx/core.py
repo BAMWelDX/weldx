@@ -16,7 +16,7 @@ from bidict import bidict
 
 import weldx.util as ut
 from weldx.constants import Q_, U_, UNITS_KEY
-from weldx.time import Time, TimeDependent, types_time_like
+from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -56,7 +56,7 @@ class MathematicalExpression:
         self._expression: sympy.Expr = expression
 
         self.function = sympy.lambdify(
-            tuple(self._expression.free_symbols), self._expression, "numpy"
+            tuple(self._expression.free_symbols), self._expression, ("numpy", "scipy")
         )
 
         self._parameters: dict[str, Union[pint.Quantity, xr.DataArray]] = {}
@@ -301,7 +301,7 @@ class TimeSeries(TimeDependent):
         data: Union[pint.Quantity, MathematicalExpression],
         time: types_time_like = None,
         interpolation: str = None,
-        reference_time: pd.Timestamp = None,
+        reference_time: types_timestamp_like = None,
     ):
         """Construct a TimSeries.
 
@@ -325,12 +325,12 @@ class TimeSeries(TimeDependent):
         self._shape = None
         self._units = None
         self._interp_counter = 0
-        self._reference_time = reference_time
+        self._reference_time = None
 
         if isinstance(data, (pint.Quantity, xr.DataArray)):
-            self._initialize_discrete(data, time, interpolation)
+            self._initialize_discrete(data, time, interpolation, reference_time)
         elif isinstance(data, MathematicalExpression):
-            self._init_expression(data)
+            self._init_expression(data, reference_time)
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
@@ -398,12 +398,10 @@ class TimeSeries(TimeDependent):
     def _create_data_array(
         data: Union[pint.Quantity, xr.DataArray], time: Time
     ) -> xr.DataArray:
-        if isinstance(data, xr.DataArray):
-            return data
         return (
             xr.DataArray(data=data)
             .rename({"dim_0": "time"})
-            .assign_coords({"time": time.as_timedelta_index()})
+            .assign_coords({"time": time.as_data_array()})
         )
 
     def _initialize_discrete(
@@ -411,6 +409,7 @@ class TimeSeries(TimeDependent):
         data: Union[pint.Quantity, xr.DataArray],
         time: types_time_like = None,
         interpolation: str = None,
+        reference_time=None,
     ):
         """Initialize the internal data with discrete values."""
         # set default interpolation
@@ -421,7 +420,6 @@ class TimeSeries(TimeDependent):
             self._check_data_array(data)
             data = data.transpose("time", ...)
             self._data = data
-            # todo: set _reference_time?
         else:
             # expand dim for scalar input
             data = Q_(data)
@@ -431,13 +429,12 @@ class TimeSeries(TimeDependent):
             # constant value case
             if time is None:
                 time = pd.Timedelta(0)
-            time = Time(time)
+            time = Time(time, reference_time)
 
-            self._reference_time = time.reference_time
             self._data = self._create_data_array(data, time)
         self.interpolation = interpolation
 
-    def _init_expression(self, data):
+    def _init_expression(self, data, reference_time):
         """Initialize the internal data with a mathematical expression."""
         if data.num_variables != 1:
             raise Exception(
@@ -464,6 +461,8 @@ class TimeSeries(TimeDependent):
         # assign internal variables
         self._data = data
         self._time_var_name = time_var_name
+        if reference_time is not None:
+            self._reference_time = pd.Timestamp(reference_time)
 
         # check that all parameters of the expression support time arrays
         try:
@@ -480,9 +479,13 @@ class TimeSeries(TimeDependent):
 
     def _interp_time_discrete(self, time: Time) -> xr.DataArray:
         """Interpolate the time series if its data is composed of discrete values."""
+        data = self._data
+        if self.time is None and time.is_absolute:
+            data = data.weldx.reset_reference_time(time.reference_time)  # type: ignore
+
         return ut.xr_interp_like(
-            self._data,
-            {"time": time.as_data_array()},
+            data,
+            time.as_data_array(),
             method=self.interpolation,
             assume_sorted=False,
             broadcast_missing=False,
@@ -587,6 +590,8 @@ class TimeSeries(TimeDependent):
     @property
     def reference_time(self) -> Union[pd.Timestamp, None]:
         """Get the reference time."""
+        if self.is_discrete:
+            return self._data.weldx.time_ref  # type: ignore[union-attr]
         return self._reference_time
 
     def interp_time(

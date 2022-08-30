@@ -24,7 +24,7 @@ class WxSyntaxError(Exception):
 
 
 def to_yaml_tree_metadata(func):
-    """Wrapper that will add the metadata and userdata field for ``to_yaml_tree`` methods.
+    """Wrapper that will add the metadata / userdata field for ``to_yaml_tree`` methods.
 
     Also removes all "None" values from the initial tree.
     Behavior should be similar to ASDF defaults pre v2.8 (ASDF GH #863).

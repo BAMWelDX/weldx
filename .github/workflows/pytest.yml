@@ -59,6 +59,21 @@ jobs:
       - name: activate env
         run: micromamba activate weldx
 
+      - name: install cookiecutter
+        if: matrix.py == '3.8'
+        run: |
+          pip install cookiecutter
+
+      - name: create installable quality standard from repo
+        if: matrix.py == '3.8'
+        run: |
+          cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template
+
+      - name: install quality standard
+        if: matrix.py == '3.8'
+        run: |
+          pip install -e ./quality_standard_demo
+
       - name: run pytest
         run: |
           pytest -n 2 --runslow --junit-xml pytest.xml
@@ -79,6 +94,17 @@ jobs:
         if: matrix.py == '3.8'
         run: |
           pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
+
+      - name: test quality standard
+        if: matrix.py == '3.8'
+        run: |
+          pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py
+
+
+      - name: test installable quality standard from template repository
+        if: matrix.py == '3.8'
+        run: |
+          pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py
 
       - name: coverage xml (combination is performed by pytest-cov)
         if: matrix.py == '3.8'

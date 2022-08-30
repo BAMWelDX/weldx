@@ -110,7 +110,7 @@ pygments_style = "sphinx"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinxcontrib.napoleon",
+    "sphinx.ext.napoleon",
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
@@ -124,8 +124,8 @@ extensions = [
 
 # allow easy Issue/PR links
 extlinks = {
-    "issue": ("https://github.com/BAMWelDX/weldx/issues/%s", "GH"),
-    "pull": ("https://github.com/BAMWelDX/weldx/pull/%s", "PR"),
+    "issue": ("https://github.com/BAMWelDX/weldx/issues/%s", "GH %s"),
+    "pull": ("https://github.com/BAMWelDX/weldx/pull/%s", "PR %s"),
 }
 
 # autosummary --------------------------------------------------------------------------
@@ -269,19 +269,26 @@ html_context = {
 # html_theme_options = {"logo_only": True}
 
 # Intersphinx mappings -----------------------------------------------------
+import asdf as _asdf
+
+_asdf_version = _asdf.__version__
+
+import scipy as _scipy
+
+_scipy_version = _scipy.__version__
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "numpy": ("https://numpy.org/doc/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "xarray": ("https://xarray.pydata.org/en/stable", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy-1.8.0/html-scipyorg/", None),
+    "scipy": (f"https://docs.scipy.org/doc/scipy-{_scipy_version}/", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
     "pint": ("https://pint.readthedocs.io/en/stable", None),
     "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
-    "asdf": ("https://asdf.readthedocs.io/en/2.9.2/", None),
+    "asdf": (f"https://asdf.readthedocs.io/en/{_asdf_version}/", None),
     "networkx": ("https://networkx.org/documentation/stable/", None),
     "IPython": ("https://ipython.readthedocs.io/en/stable/", None),
     "k3d": ("https://k3d-jupyter.org/", None),
