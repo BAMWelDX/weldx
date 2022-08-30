@@ -20,7 +20,7 @@ repos:
       - id: check-yaml
         exclude: devtools/conda.recipe/meta.yaml  # doesn't play nice with jinja
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.15
+    rev: 0.7.16
     hooks:
       - id: mdformat
         additional_dependencies:
