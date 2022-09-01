@@ -53,7 +53,7 @@ jobs:
         run: conda list
 
       - name: Build from local conda recipe
-        run: conda mambabuild .
+        run: conda mambabuild -c conda-forge .
 
   pypi:
     if: |
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
@@ -99,11 +99,10 @@ jobs:
 
       - name: pip dist install
         run: |
-          pip install ${{ env.SDIST_FILE }}
+          pip install ${{ env.SDIST_FILE }}[test]
 
       - name: run pytest
         run: |
-          pip install pytest pytest-cov pytest-xdist
           cd /tmp
           pytest -n2 --dist=loadfile --pyargs weldx
           cd -

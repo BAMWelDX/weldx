@@ -15,7 +15,8 @@ dependencies:
   - bottleneck>=1.3
   # notebook execution
   - ipykernel
-  - ipywidgets
+  - ipywidgets<8
+  - weldx_widgets >=0.2.1
   # documentation
   - sphinx>=4.1.1
   - jinja2=3.0

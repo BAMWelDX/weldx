@@ -11,6 +11,7 @@ exclude_patterns = [
   "weldx/_version.py",
   "weldx/asdf/**",
   "weldx/tags/**",
+  "conftest.py"
 ]
 
 [[analyzers]]

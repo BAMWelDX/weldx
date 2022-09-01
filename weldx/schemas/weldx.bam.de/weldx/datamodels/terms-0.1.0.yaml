@@ -1,0 +1,71 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/datamodels/terms-0.1.0"
+
+title: |
+  Common terms for welding data models, e.g. metal and process information.
+
+weldment:
+  description: |
+    Process metadata and measurements about a single weldment.
+  type: object
+  properties:
+    process:
+      $ref: "#/GMAW_process"
+    TCP:
+      description: |
+        Transformation describing the welding TCP movement in relation to the groove coordinates.
+      tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.*"
+    welding_current:
+      description: |
+        The signal representing the welding current measurement.
+      tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
+      wx_unit: "A"
+    welding_voltage:
+      description: |
+        The signal representing the welding voltage measurement.
+      tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
+      wx_unit: "V"
+
+base_metal:
+  description: |
+    The base metal composition of the workpiece.
+  type: object
+  properties:
+    common_name:
+      description: |
+        The common description of the base metal composition or classification as listed in the standard.
+      type: string
+    standard:
+      description: |
+        The standard listing and describing the base metal compositions.
+      type: string
+  required: [common_name, standard]
+
+GMAW_process:
+  description: |
+    Metadata describing a generic GMAW process.
+  type: object
+  properties:
+    welding_process:
+      $ref: "asdf://weldx.bam.de/weldx/schemas/process/GMAW-0.1.0"
+    shielding_gas:
+      tag: "asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-0.1.*"
+    welding_wire:
+      description: |
+        Object describing the welding wire used.
+      type: object
+      properties:
+        diameter:
+          description: |
+            The diameter of the welding wire.
+          tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.*"
+          wx_unit: "m"
+          wx_shape: [1]
+        class:
+          description: |
+            The wire classification according to DIN EN ISO 14341, DIN EN 12072 or similar standards.
+            Addition standard details should be stored in the wx_user property.
+          type: string
+      required: [diameter]

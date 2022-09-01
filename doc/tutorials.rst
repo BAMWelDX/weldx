@@ -19,6 +19,8 @@ data processing and visualization.
    tutorials/01_01_introduction
    tutorials/01_02_time_dependent_data
    tutorials/01_03_geometry
+   tutorials/01_04_coordinate_systems
+   tutorials/01_05_measurement_chains
 
 ******************
  Welding Examples

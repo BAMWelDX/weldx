@@ -60,6 +60,10 @@ properties:
     description: a basic numeric type without any units or dimensionless quantity
     wx_unit: " "
 
+  custom_object:
+    description: property to test different weldx objects with custom implementation
+    wx_unit: "A"
+
 required: [length_prop, velocity_prop, current_prop, delta_prop]
 propertyOrder: [length_prop, velocity_prop, current_prop]
 flowStyle: block

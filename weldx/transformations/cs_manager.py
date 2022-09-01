@@ -15,14 +15,14 @@ from weldx import util
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
-from weldx.util.util import dataclass_nested_eq
+from weldx.util import check_matplotlib_available, dataclass_nested_eq
 
 from .local_cs import LocalCoordinateSystem
 from .types import types_coordinates, types_orientation
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.axes
+    import matplotlib
     import networkx as nx
 
 
@@ -565,6 +565,16 @@ class CoordinateSystemManager:
     ):
         """Assign spatial data to a coordinate system.
 
+        If the assigned data is time-dependent and a target system is specified, the
+        data will be transformed considering all time-dependencies on the transformation
+        path. This is especially useful to reconstruct specimen geometries from scan
+        data. If the raw scan data contains the timestamps of the scans and the
+        movement of the scanner is described by a corresponding time-dependent
+        coordinate system, the `CoordinateSystemManager` is able to calculate the
+        specimen geometry on its own. Therefore, you need to provide the scanner
+        coordinate system name as the ``reference_system`` parameter and the specimen
+        coordinate system name as the ``target_system`` parameter.
+
         Parameters
         ----------
         data
@@ -575,9 +585,10 @@ class CoordinateSystemManager:
             Name of the coordinate system the data values are defined in.
         target_system:
             Name of the target system the data will be transformed and assigned to.
-            This is useful when adding time-dependent data. The provided name must match
-            an existing system. If `None` is passed (the default), data will not be
-            transformed and assigned to the 'reference_system'.
+            This is useful when adding time-dependent data (see function description).
+            The provided name must match an existing system. If `None` is passed
+            (the default), data will not be transformed and assigned to the
+            'reference_system'.
 
         """
         if not isinstance(data_name, str):
@@ -1432,6 +1443,7 @@ class CoordinateSystemManager:
             pos[child] = data["position"]
         return pos
 
+    @check_matplotlib_available
     def plot_graph(self, ax=None):
         """Plot the graph of the coordinate system manager.
 
@@ -1453,6 +1465,10 @@ class CoordinateSystemManager:
             from matplotlib import pylab as plt
 
             _, ax = plt.subplots()
+            _axes_created = True
+        else:
+            _axes_created = False
+
         color_map = []
         pos = self._get_tree_positions_for_plot()
 
@@ -1487,12 +1503,16 @@ class CoordinateSystemManager:
             self._graph, pos, edgelist=tdp_edges, ax=ax, edge_color=(0.9, 0.6, 0)
         )
 
+        if _axes_created:  # adjust subplots such, that all system labels are visible.
+            right = (self.number_of_coordinate_systems + 1) / 3
+            plt.subplots_adjust(right=right)
+
         return ax
 
     def plot(
         self,
         backend: str = "mpl",
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         reference_system: str = None,
         coordinate_systems: list[str] = None,
         data_sets: list[str] = None,

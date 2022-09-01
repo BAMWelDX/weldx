@@ -199,6 +199,21 @@ class TestMathematicalExpression:
         with pytest.raises(exception_type):
             ma_def.evaluate(**variables)
 
+    @staticmethod
+    @pytest.mark.slow
+    def test_integrate_length_computation():
+        """Ensure we can integrate with Sympy during length computation."""
+        from weldx import DynamicShapeSegment
+
+        class MySegment(DynamicShapeSegment):
+            def __init__(self):
+                f = "x * sin(s) + y * s"
+                p = dict(x=Q_([1, 0, 0], "mm"), y=Q_([0, 1, 0], "mm"))
+                super().__init__(f, parameters=p)
+
+        s = MySegment()
+        assert s.get_section_length(1).u == Q_("mm")
+
 
 # --------------------------------------------------------------------------------------
 # TimeSeries
@@ -223,7 +238,7 @@ class TestTimeSeries:
 
     me_params_vec = {"a": Q_([2, 0, 1], "m/s"), "b": Q_([-2, 3, 0], "m")}
 
-    ts_constant = TimeSeries(value_constant)
+    ts_const = TimeSeries(value_constant)
     ts_disc_step = TimeSeries(values_discrete, time_discrete, "step")
     ts_disc_linear = TimeSeries(values_discrete, time_discrete, "linear")
     ts_expr = TimeSeries(ME(me_expr_str, me_params))
@@ -238,25 +253,40 @@ class TestTimeSeries:
             (Q_(1, "m"), None, None, (1,)),
             (Q_([3, 7, 1], "m"), TDI([0, 1, 2], unit="s"), "step", (3,)),
             (Q_([3, 7, 1], ""), Q_([0, 1, 2], "s"), "step", (3,)),
+            (Q_([3, 7, 1], ""), DTI(["2010", "2011", "2012"]), "step", (3,)),
         ],
     )
-    def test_construction_discrete(data: pint.Quantity, time, interpolation, shape_exp):
+    @pytest.mark.parametrize("reference_time", [None, "2000-01-01"])
+    def test_construction_discrete(
+        data: pint.Quantity, time, interpolation, shape_exp, reference_time
+    ):
         """Test the construction of the TimeSeries class."""
+        if reference_time is not None and isinstance(time, (pd.DatetimeIndex)):
+            pytest.skip()
+
         # set expected values
         time_exp = time
-        if isinstance(time_exp, pint.Quantity):
-            time_exp = pd.TimedeltaIndex(time_exp.m, unit="s")
+
+        if time_exp is not None:
+            time_exp = Time(time, reference_time)
 
         exp_interpolation = interpolation
         if len(data.shape) == 0 and interpolation is None:
             exp_interpolation = "step"
 
         # create instance
-        ts = TimeSeries(data=data, time=time, interpolation=interpolation)
+        ts = TimeSeries(
+            data=data,
+            time=time,
+            interpolation=interpolation,
+            reference_time=reference_time,
+        )
 
         # check
         assert np.all(ts.data == data)
-        assert np.all(ts.time == time_exp)
+        if time_exp is not None:
+            assert ts.reference_time == time_exp.reference_time
+            assert ts.time.all_close(time_exp)
         assert ts.interpolation == exp_interpolation
         assert ts.shape == shape_exp
         assert data.is_compatible_with(ts.units)
@@ -266,7 +296,7 @@ class TestTimeSeries:
         if time_exp is None:
             assert "time" not in ts.data_array
         else:
-            assert np.all(ts.data_array.time == time_exp)
+            assert Time(ts.data_array.time).all_close(time_exp)
 
     # test_construction_expression -----------------------------------------------------
 
@@ -307,15 +337,22 @@ class TestTimeSeries:
             ([1, 2, 3], "time", dict(time=TDI([1, 2, 3])), TypeError),
         ],
     )
-    def test_init_data_array(data, dims, coords, exception_type):
+    @pytest.mark.parametrize("reference_time", [None, "2000-01-01"])
+    def test_init_data_array(data, dims, coords, reference_time, exception_type):
         """Test the `__init__` method with an xarray as data parameter."""
         da = xr.DataArray(data=data, dims=dims, coords=coords)
+        exp_time_ref = None
+        if reference_time is not None:
+            da.weldx.time_ref = reference_time
+            exp_time_ref = pd.Timestamp(reference_time)
+
         if exception_type is not None:
             with pytest.raises(exception_type):
                 TimeSeries(da)
         else:
             ts = TimeSeries(da)
             assert ts.data_array.dims[0] == "time"
+            assert ts.reference_time == exp_time_ref
 
     # test_construction_exceptions -----------------------------------------------------
 
@@ -357,21 +394,21 @@ class TestTimeSeries:
     @pytest.mark.parametrize(
         "ts, ts_other, result_exp",
         [
-            (ts_constant, TS(value_constant), True),
+            (ts_const, TS(value_constant), True),
             (ts_disc_step, TS(values_discrete, time_discrete, "step"), True),
             (ts_expr, TS(ME(me_expr_str, me_params)), True),
-            (ts_constant, ts_disc_step, False),
-            (ts_constant, ts_expr, False),
+            (ts_const, ts_disc_step, False),
+            (ts_const, ts_expr, False),
             (ts_disc_step, ts_expr, False),
-            (ts_constant, 1, False),
+            (ts_const, 1, False),
             (ts_disc_step, 1, False),
             (ts_expr, 1, False),
-            (ts_constant, "wrong", False),
+            (ts_const, "wrong", False),
             (ts_disc_step, "wrong", False),
             (ts_expr, "wrong", False),
-            (ts_constant, TS(Q_(1337, "m")), False),
-            (ts_constant, TS(Q_(1, "mm")), False),
-            (ts_constant, TS(Q_(1, "s")), False),
+            (ts_const, TS(Q_(1337, "m")), False),
+            (ts_const, TS(Q_(1, "mm")), False),
+            (ts_const, TS(Q_(1, "s")), False),
             (ts_disc_step, TS(values_discrete, time_wrong_values, "step"), False),
             (ts_disc_step, TS(values_discrete_wrong, time_discrete, "step"), False),
             (ts_disc_step, TS(values_unit_prefix_wrong, time_discrete, "step"), False),
@@ -408,16 +445,11 @@ class TestTimeSeries:
     @pytest.mark.parametrize(
         "ts, time, magnitude_exp, unit_exp",
         [
-            (ts_constant, time_single, 1, "m"),
-            (ts_constant, time_single_q, 1, "m"),
-            (ts_constant, time_mul, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
-            (
-                ts_constant,
-                time_mul + pd.Timestamp("2020"),
-                [1, 1, 1, 1, 1, 1, 1, 1],
-                "m",
-            ),
-            (ts_constant, time_mul_q, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (ts_const, time_single, 1, "m"),
+            (ts_const, time_single_q, 1, "m"),
+            (ts_const, time_mul, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (ts_const, time_mul + pd.Timestamp("2020"), [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (ts_const, time_mul_q, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
             (ts_disc_step, time_single, 12, "mm"),
             (ts_disc_step, time_single_q, 12, "mm"),
             (ts_disc_step, time_mul, [10, 10, 11, 11, 12, 14, 16, 16], "mm"),
@@ -435,18 +467,35 @@ class TestTimeSeries:
             (ts_expr_vec, time_mul, results_exp_vec, "m"),
         ],
     )
-    def test_interp_time(ts, time, magnitude_exp, unit_exp):
+    @pytest.mark.parametrize("reference_time", [None, "2000-01-01"])
+    def test_interp_time(ts, time, magnitude_exp, unit_exp, reference_time):
         """Test the interp_time function."""
+        if reference_time is not None:
+            if isinstance(ts.data, xr.DataArray):
+                ts = TimeSeries(
+                    ts.data_array,
+                    reference_time=reference_time,
+                    interpolation=ts.interpolation,
+                )
+            else:
+                ts = TimeSeries(
+                    ts.data,
+                    time=ts.time,
+                    reference_time=reference_time,
+                    interpolation=ts.interpolation,
+                )
+            time = Time(time, time_ref=reference_time)
+
         result = ts.interp_time(time)
 
         assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
         assert result.units == U_(unit_exp)
 
-        time = Time(time)
+        time = Time(time, reference_time)
         if len(time) == 1:
             assert result.time is None
         else:
-            assert np.all(Time(result.time, result._reference_time) == time)
+            assert result.time.all_close(time)
 
     # test_interp_time_warning ---------------------------------------------------------
 
@@ -464,11 +513,11 @@ class TestTimeSeries:
     # test_interp_time_exceptions ------------------------------------------------------
 
     @staticmethod
-    @pytest.mark.parametrize("ts", [ts_constant, ts_disc_step, ts_disc_linear, ts_expr])
+    @pytest.mark.parametrize("ts", [ts_const, ts_disc_step, ts_disc_linear, ts_expr])
     @pytest.mark.parametrize(
         "time,  exception_type, test_name",
         [
-            # (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),
+            # (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),  # skipcq: PY-W0069
             ("a string", TypeError, "# wrong type #2"),
             ([1, 2, 3], TypeError, "# wrong type #3"),
             (1, TypeError, "# wrong type #4"),
@@ -627,11 +676,8 @@ class TestGenericSeries:
         params = dict(u=u, v=v, w=w)
         gs = GenericSeries(expression, parameters=parameters, units=units)
 
-        print(gs.ndims)
-
         # perform interpolation
         gs_interp = gs(**params)
-        print(gs_interp)
 
         # calculate expected result
         params = {k: Q_(val) for k, val in params.items()}
@@ -870,7 +916,7 @@ class TestDerivedFromGenericSeries:
         for i, (k, v) in enumerate(units.items()):
             coords[k] = Q_(np.zeros(i + 2), v)
 
-        shape = tuple([_dim_length(i, d, coords) for i, d in enumerate(dims)])
+        shape = tuple(_dim_length(i, d, coords) for (i, d) in enumerate(dims))
         data = Q_(np.ones(shape))
 
         if exception is None:

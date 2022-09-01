@@ -122,13 +122,13 @@ installing the WelDX package.
 
 .. code:: console
 
-   conda install weldx -c conda-forge
+   conda install weldx weldx_widgets -c conda-forge
 
 The package is also available on pypi.
 
 .. code:: console
 
-   pip install weldx
+   pip install weldx weldx-widgets
 
 ***************
  Documentation
@@ -176,8 +176,8 @@ Documentation build
 .. |Anaconda-Server Badge| image:: https://anaconda.org/conda-forge/weldx/badges/version.svg
    :target: https://anaconda.org/conda-forge/weldx
 
-.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5710040.svg
-   :target: https://doi.org/10.5281/zenodo.5710040
+.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6504615.svg
+   :target: https://doi.org/10.5281/zenodo.6504615
 
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-orange.svg
    :target: https://opensource.org/licenses/BSD-3-Clause

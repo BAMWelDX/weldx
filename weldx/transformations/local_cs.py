@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import typing
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Union
+from typing import Any, Union
 
 import numpy as np
 import pandas as pd
@@ -19,10 +20,10 @@ from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_lik
 from weldx.transformations.types import types_coordinates, types_orientation
 from weldx.transformations.util import normalize
 
-if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.axes
-
 __all__ = ("LocalCoordinateSystem",)
+
+if typing.TYPE_CHECKING:
+    import matplotlib
 
 
 class LocalCoordinateSystem(TimeDependent):
@@ -520,7 +521,8 @@ class LocalCoordinateSystem(TimeDependent):
 
         if num_none == 1:
             idx = next(i for i, v in enumerate(mat) if v is None)  # skipcq: PTC-W0063
-            mat[idx] = np.cross(mat[(idx - 2) % 3], mat[(idx - 1) % 3])
+            # type: ignore[arg-type]
+            mat[idx] = np.cross(mat[(idx - 2) % 3], mat[(idx - 1) % 3])  # type: ignore
         elif num_none > 1:
             raise ValueError("You need to specify two or more vectors.")
 
@@ -790,7 +792,7 @@ class LocalCoordinateSystem(TimeDependent):
 
     def plot(
         self,
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: str = None,
         label: str = None,
         time: types_time_like = None,

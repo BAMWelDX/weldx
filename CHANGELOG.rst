@@ -3,6 +3,56 @@
 ###############
 
 ********************
+ 0.6.2 (tba)
+********************
+
+added
+=====
+
+- New tutorial that demonstrates the usage of the CSM in conjunction with an existing WelDX file [:pull:`793`]
+- New tutorial about the ``MeasurementChain`` class using an existing WelDX file [:pull:`796`]
+
+changes
+=======
+
+-  Updated the outdated tutorial about the `LocalCoordinateSystem` [:pull:`775`]
+- ``weld_seam`` is now a required field in the ``multi_pass_weld`` schema [:pull:`790`]
+- Add section about time-dependent spatial data to the `CoordinateSystemManager` tutorial [:pull:`792`]
+
+fixes
+=====
+
+-  `MathematicalExpression` now uses SciPy and NumPy in numerical function evaluation. This enables it to use
+   advanced integration methods and fixes lengths computation of `DynamicShapeSegment` [:pull:`770`].
+-  Fix errors in tutorial about quality standards [:pull:`777`]
+-  Correct wrong handling of absolute times of the `TimeSeries` class [:pull:`791`]
+
+********************
+ 0.6.1 (19.05.2022)
+********************
+
+Release ``0.6.1`` moves advanced plotting functions over to the ``weldx-widgets`` package and includes minor bugfixes.
+
+changes
+=======
+
+-  `WeldxFile` now raises a `KeyError`, if the user tries to directly read or manipulate a protected ASDF keyword
+   within the file. [:pull:`759`]
+-  Updated the outdated tutorial about the `CoordinateSystemManager` [:pull:`767`]
+
+fixes
+=====
+
+-  Fix interactive ``view_tree`` display [:pull:`756`].
+-  Increase ``mypy`` coverage and update type hints and GH action [:pull:`753`].
+
+dependencies
+============
+
+-  ``weldx`` now (optionally) requires ``weldx_widgets`` to visualize coordinate systems/manager [:pull:`749`].
+-  NumPy is not required as a build time dependency anymore, as Bottleneck now provides binaries on PyPI [:pull:`749`].
+
+********************
  0.6.0 (29.04.2022)
 ********************
 
@@ -20,6 +70,7 @@ Furthermore, a new class called `GenericSeries` was added. It provides a common 
 data either by discrete values or mathematical expressions. A built-in mechanism lets you derive specialized series with
 specific requirements. For more information, have a look
 `at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0_a/tutorials/generic_series.html>`__ .
+
 
 added
 =====

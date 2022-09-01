@@ -387,7 +387,9 @@ class WeldxFile(_ProtectedViewDict):
 
     @property
     def mode(self) -> str:
-        """File operation mode: reading or reading/writing mode, one of "r" or "rw"."""
+        """File operation mode.
+
+        This is either reading or reading/writing mode, one of "r" or "rw"."""
         return self._mode
 
     @property
@@ -629,7 +631,7 @@ class WeldxFile(_ProtectedViewDict):
         super().update(mapping, **kwargs)
 
     def items(self) -> Set[tuple[Any, Any]]:
-        """Return a set-like object providing a view on this files items.
+        """Return a set-like object providing a view on this file's items.
 
         Returns
         -------

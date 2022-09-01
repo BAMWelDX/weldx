@@ -12,7 +12,7 @@ import pint
 from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
 from asdf.extension import Extension
-from asdf.tagged import TaggedDict
+from asdf.tagged import TaggedDict, TaggedList, TaggedString
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
 from packaging.version import Version
@@ -332,12 +332,23 @@ def view_tree(file: types_path_and_file_like, path: tuple = None, **kwargs):
     """
     from IPython.display import JSON
 
+    def _visit(p, k, v):
+        """Convert tagged types to base types."""
+        if isinstance(v, TaggedDict):
+            return k, dict(v)
+        if isinstance(v, TaggedList):
+            return k, list(v)
+        if isinstance(v, TaggedString):
+            return k, str(v)
+        return k, v
+
     if isinstance(file, str):
         root = file + "/"
     else:
         root = "/"
 
     yaml_dict = get_yaml_header(file, parse=True)
+    yaml_dict = dict(remap(yaml_dict, _visit))
     if path:
         root = root + "/".join(path)
         yaml_dict = get_path(yaml_dict, path)
@@ -576,29 +587,31 @@ def _get_instance_units(
 
 
 class _ProtectedViewDict(MutableMapping):
+    """A mutable mapping which protects given keys from manipulation."""
+
     def __init__(self, protected_keys, data=None):
         super(_ProtectedViewDict, self).__init__()
-        self.__data = data
+        self.__data = data if data is not None else dict()
         self.protected_keys = protected_keys
 
-    @property
-    def _data(self):
-        return self
+    def _wrap_protected_non_existent(self, key, method: str):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            raise KeyError(f"'{key}' is protected.")
+        elif key not in self.__data:
+            raise KeyError(f"'{key}' not contained.")
+
+        method_obj = getattr(self.__data, method)
+        return method_obj(key)
 
     def __len__(self) -> int:
         return len(self.keys())
 
     def __getitem__(self, key):
-        if key in self.protected_keys:
-            self._warn_protected_keys()
-            raise KeyError
-        return self.__data.get(key)
+        return self._wrap_protected_non_existent(key, "__getitem__")
 
     def __delitem__(self, key):
-        if key in self.protected_keys:
-            self._warn_protected_keys()
-            return
-        del self.__data[key]
+        return self._wrap_protected_non_existent(key, "__delitem__")
 
     def __setitem__(self, key, value):
         if key in self.protected_keys:
@@ -632,7 +645,7 @@ class _ProtectedViewDict(MutableMapping):
             if k not in self.protected_keys:
                 return k, self.pop(k)
 
-        raise KeyError
+        raise KeyError("empty")
 
     def clear(self):
         """Clear all data except the protected keys."""
