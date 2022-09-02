@@ -1,8 +1,9 @@
-{% set data = load_setup_py_data() %}
+{% set pyproject = load_file_data("../../pyproject.toml", from_recipe_dir=True)  %}
+{% set proj = pyproject.get('project') %}
 
 package:
   name: weldx
-  version: {{ data.get("version") }}
+  version: {{ environ.get('SETUPTOOLS_SCM_PRETEND_VERSION', 999) }}
 
 source:
     path: ../..
@@ -10,10 +11,14 @@ source:
 build:
   number: 0
   noarch: python
-  script: {{ PYTHON }} -m pip install . -vv
+  script_env:
+    - SETUPTOOLS_SCM_PRETEND_VERSION
+  script: "{{ PYTHON }} -m pip install . -vv"
   entry_points:
-  {% for e in data['entry_points']['console_scripts'] %}
-    - {{ e }}
+  {% for module, entrypoints in proj.get('entry-points').items() %}
+  {% for name, path in entrypoints.items() %}
+    - {{ name }} = {{ module }}.{{ path }}
+  {% endfor %}
   {% endfor %}
 requirements:
   host:
@@ -21,9 +26,9 @@ requirements:
     - setuptools_scm
     - python
   run:
-    - python >=3.8,<3.10
-    # dependencies are defined in setup.py
-    {% for dep in data['install_requires'] %}
+    - python {{ proj.get("requires-python") }}
+    # dependencies are defined in pyproject.toml
+    {% for dep in proj.get('dependencies') %}
     - {{ dep.lower() }}
     {% endfor %}
 
@@ -33,7 +38,7 @@ test:
     - pytest
     - pytest-xdist
     - black
-    # requires wx-widgets here, so we can properly load the visualization sub-package.
+    # require wx-widgets here, so we can properly load the visualization sub-package.
     - weldx_widgets
   files:
     - conftest.py

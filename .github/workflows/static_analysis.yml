@@ -36,6 +36,7 @@ jobs:
 
       - uses: CagtayFabry/pydeps2env@main
         with:
+          file: 'pyproject.toml'
           channels: 'conda-forge defaults'
           extras: ''
           setup_requires: 'include'

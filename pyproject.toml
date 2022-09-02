@@ -1,7 +1,192 @@
+[project]
+name = "weldx"
+dynamic = [  # see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
+    "version",  # version gets derived from git by setuptools_scm.
+]
+authors = [
+    {name="Cagtay Fabry", email="cagtay.fabry@bam.de"},
+    {name="Volker Hirthammer", email="volker.hirthammer@bam.de"},
+    {name="Martin K. Scherer", email="martin.scherer@bam.de"},
+]
+description = "Python API for the WelDX file format and standard"
+readme = {file = "README.rst", content-type="text/x-rst"}
+license = {file = "LICENSE", name="BSD License"}
+keywords = [
+    "welding",
+    "weldx",
+    "bam", # TODO: add more keywords here! think of them as in a journal article.
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Physics", # TODO: add more topics here!
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+]
+
+# Dependencies
+requires-python = ">=3.8,<3.11"
+dependencies = [
+    "numpy >=1.20",
+    "asdf >=2.8.2",
+    "pandas >=1.0",
+    "xarray >=0.19",
+    "scipy >=1.4,!=1.6.0,!=1.6.1",
+    "sympy >=1.6",
+    "pint >=0.18",
+    "pint-xarray >=0.2.1",
+    "bottleneck >=1.3.3",
+    "boltons",
+    "bidict",
+    "networkx >=2,!=2.7.0,!=2.8.1",
+    "fs",
+    "meshio",
+    "psutil",
+    "IPython",
+]
+
+[project.urls]
+documentation = "https://weldx.readthedocs.io"
+repository = "https://github.com/BAMweldx/weldx"
+bug_tracker = "https://github.com/BAMweldx/weldx/issues"
+changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.rst"
+
+[project.optional-dependencies]
+test = [
+    "pytest >=6",
+    "pytest-cov",
+    "pytest-xdist",
+    "nbval",
+  ]
+vis = [
+    "weldx_widgets >= 0.2",
+]
+
+# ASDF extension entry points.
+
+[project.entry-points."asdf.extensions"]
+weldx = "weldx.asdf.extension:get_extensions"
+weldx_validators = "weldx.asdf._extension:WeldxValidatorExtension"
+
+[project.entry-points."asdf.resource_mappings"]
+weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
+
+# console scripts
+[project.scripts]
+welding_schema = "weldx.asdf.cli.welding_schema:main"
+
+# Build system config, pip creates a temporary env with "requires" pkgs.
 [build-system]
 requires = [
   "wheel",
   "setuptools >= 40.9.0",
-  "setuptools_scm",
+  "setuptools_scm[toml]>=6.2",
 ]
 build-backend = "setuptools.build_meta"
+
+
+# Tool configs
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools_scm]
+write_to = "weldx/_version.py"
+write_to_template = '__version__ = "{version}"'
+
+[tool.pydocstyle]
+# convention numpy is currently equivalent to ignoring 'D107', 'D203', 'D212', 'D213', 'D402', 'D413'
+convention = "numpy"
+match = "(?!__)(?!_version)(?!conftest).*\\.py"
+match_dir = "^(?!(tests|tags|asdf)).*"
+
+[tool.pytest.ini_options]
+addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules"
+#addopts = --tb=short --color=yes -rs -p no:cov
+testpaths = "weldx"
+# custom test markers, see https://docs.pytest.org/en/latest/example/markers.html#mark-examples
+markers = "slow: marks tests as slow to run (skipped by default, enable with --runslow option)"
+asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn't we just use the entry points to resolve this?
+#asdf_schema_tests_enabled = true
+#asdf_schema_skip_tests =
+#    weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml
+norecursedirs = "doc"
+filterwarnings = [
+    "ignore::DeprecationWarning:traittypes.*:",
+    "ignore:Passing method to :FutureWarning:xarray.*:",
+    "error::pint.UnitStrippedWarning",
+]
+
+[tool.isort]
+profile = "black"
+default_section = "THIRDPARTY"
+known_first_party = "weldx"
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER" # TODO: or list?
+
+[tool.coverage.run]
+source = ["weldx"]
+
+[tool.coverage.report]
+omit = [
+    "weldx/_version.py",
+    "weldx/tests/*",
+]
+exclude_lines = [
+# Have to re-enable the standard pragma
+    "pragma: no cover",
+
+# ignore class __repr__-like functions:
+    "def __repr__",
+    "def __str__",
+    "def _ipython_display_",
+]
+
+[tool.mypy]
+python_version = "3.9"
+files = "weldx"
+ignore_missing_imports = true # TODO: this is bad!
+strict_optional = false
+pretty = true
+allow_redefinition = true
+show_error_context = true
+show_error_codes = true
+show_column_numbers = true
+sqlite_cache = true
+
+# MyPy per-module options:
+[[tool.mypy.overrides]]
+module = "weldx.asdf.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "weldx.tags.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "weldx.tests.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "weldx.welding.groove.*"
+ignore_errors = true
+
+# TODO: remove after refactoring the geometry module
+[[tool.mypy.overrides]]
+module = "weldx.geometry.*"
+ignore_errors = true
+
+# this is a workaround for an xarray related mypy bug
+# see https://github.com/python/mypy/pull/9495
+# and https://github.com/space-physics/msise00/commit/8b59a9383dd6fcc54b7dac74eb95a350308d7b62
+# TODO: is this still mandatory?
+[[tool.mypy.overrides]]
+module = "xarray"
+follow_imports = "skip"
+ignore_errors = true
