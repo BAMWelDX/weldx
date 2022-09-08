@@ -52,6 +52,9 @@ jobs:
       - name: conda list
         run: conda list
 
+      - name: set pkg version
+        run: echo "SETUPTOOLS_SCM_PRETEND_VERSION=$(python -m setuptools_scm)" >> $GITHUB_ENV
+
       - name: Build from local conda recipe
         run: conda mambabuild -c conda-forge .
 
@@ -83,11 +86,11 @@ jobs:
       - name: pip installs
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools setuptools_scm wheel twine
+          pip install setuptools setuptools_scm wheel twine build
 
-      - name: build package
+      - name: build package + create src archive (stored in dist folder)
         run: |
-          python setup.py sdist bdist_wheel
+          python -m build
 
       - uses: actions/upload-artifact@v3
         with:
