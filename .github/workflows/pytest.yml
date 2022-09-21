@@ -40,7 +40,7 @@ jobs:
         with:
           file: 'pyproject.toml'
           channels: 'conda-forge defaults'
-          extras: 'test vis'
+          extras: 'test vis media'
           setup_requires: 'include'
 
       - uses: mamba-org/provision-with-micromamba@main
@@ -136,7 +136,7 @@ jobs:
         with:
           file: 'pyproject.toml'
           channels: 'conda-forge defaults'
-          extras: 'test'
+          extras: 'test vis media'
           setup_requires: 'include'
 
       - uses: mamba-org/provision-with-micromamba@main
