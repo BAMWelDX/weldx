@@ -11,7 +11,7 @@ from weldx import Q_
 from weldx.tags.core.file import ExternalFile
 from weldx.types import types_path_like
 
-__all__ = ["types_media_input", "MediaFile"]
+__all__ = ["types_media_input", "MediaFile", "UnknownFormatError"]
 
 types_media_input = Union[
     types_path_like,
