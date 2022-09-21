@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
+from pims import UnknownFormatError as _UnknownFormatError
 
 from weldx import Q_
 from weldx.tags.core.file import ExternalFile
@@ -50,6 +51,10 @@ def _get_frame_count(f, stream):
         )
 
 
+class UnknownFormatError(Exception):
+    """File format could not be determined."""
+
+
 class MediaFile:
     """Encapsulates a media file, like video or image stacks making them accessible.
 
@@ -84,7 +89,11 @@ class MediaFile:
 
             path = Path(path_or_array)  # type: ignore[arg-type]
 
-            self._handle = imread(path_or_array)
+            try:
+                self._handle = imread(path_or_array)
+            except _UnknownFormatError as e:
+                # wrap in our exception type to hide impl detail.
+                raise UnknownFormatError(e)
             self._metadata = self._get_video_metadata(str(path))
             self._wrap_data_array(path_or_array)
 

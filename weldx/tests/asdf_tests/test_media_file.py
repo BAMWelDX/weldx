@@ -4,7 +4,7 @@ import pytest
 import xarray as xr
 
 from weldx import Q_, U_, WeldxFile
-from weldx.util.media_file import MediaFile
+from weldx.util.media_file import MediaFile, UnknownFormatError
 
 
 def write_rgb_rotate(output, width, height, n_frames, fps):
@@ -90,5 +90,5 @@ def test_media_file_external(external, tmp_path, create_video):
 def test_unknown_file_format(tmp_path):
     """Ensure video decoder cannot be determined from the file extension raises."""
     f = tmp_path / "some_file.bin"
-    with pytest.raises(Exception):
+    with pytest.raises(UnknownFormatError):
         MediaFile(f)
