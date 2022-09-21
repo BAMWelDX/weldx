@@ -29,7 +29,7 @@ properties:
     tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.*"
   fps:
     description: |
-      In case of time-dynamic media, the time resolution (frames per second).
+      In case of time-dynamic media, the constant time resolution (frames per second), e.g. a floating point number.
     tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0"
     wx_unit: "1/s"
   resolution:
