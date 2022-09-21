@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
-from pims import UnknownFormatError as _UnknownFormatError
 
 from weldx import Q_
 from weldx.tags.core.file import ExternalFile
@@ -87,6 +86,7 @@ class MediaFile:
     ):
         if isinstance(path_or_array, get_args(types_path_like)):
             from dask_image.imread import imread
+            from pims import UnknownFormatError as _UnknownFormatError
 
             path = Path(path_or_array)  # type: ignore[arg-type]
 
