@@ -41,14 +41,15 @@ def _get_frame_rate(stream):
 def _get_frame_count(f, stream):
     if stream.frames:
         return stream.frames
-    if stream.duration:
+    elif stream.duration:
         return _pts_to_frame(
             stream.duration, float(stream.time_base), _get_frame_rate(stream), 0
         )
-    if f.duration:
+    elif f.duration:
         return _pts_to_frame(
             f.duration, 1 / float(_AV_TIME_BASE), _get_frame_rate(stream), 0
         )
+    return float("nan")
 
 
 class UnknownFormatError(Exception):
