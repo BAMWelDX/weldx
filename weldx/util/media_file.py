@@ -21,7 +21,7 @@ types_media_input = Union[
 
 # _pts_to_frame, _get_frame_rate, _get_frame_count taken from
 # https://github.com/PyAV-Org/PyAV/blob/v9.1.1/scratchpad/frame_seek_example.py
-AV_TIME_BASE = 1000000
+_AV_TIME_BASE = 1000000
 
 
 def _pts_to_frame(pts, time_base, frame_rate, start_time):
@@ -46,7 +46,7 @@ def _get_frame_count(f, stream):
         )
     if f.duration:
         return _pts_to_frame(
-            f.duration, 1 / float(AV_TIME_BASE), _get_frame_rate(stream), 0
+            f.duration, 1 / float(_AV_TIME_BASE), _get_frame_rate(stream), 0
         )
 
 
@@ -111,7 +111,8 @@ class MediaFile:
                 resolution=(image.width, image.height),
                 nframes=len(path_or_array),
             )
-            if not isinstance(reference_time, (None, pd.Timestamp)):
+            _ref_time_types = MediaFile.__init__.__annotations__["reference_time"]
+            if not isinstance(reference_time, _ref_time_types):
                 raise ValueError(
                     f"unsupported type for reference_time {type(reference_time)}"
                 )
