@@ -65,9 +65,16 @@ test = [
     "pytest-cov",
     "pytest-xdist",
     "nbval",
-  ]
+]
 vis = [
     "weldx_widgets >= 0.2",
+]
+media = [
+    "pims",
+    "av",
+    "dask-image",
+    # this is actually required by dask-image, but not listed in their requirements:
+    "tifffile",
 ]
 
 # ASDF extension entry points.
