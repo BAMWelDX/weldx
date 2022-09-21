@@ -1,4 +1,6 @@
 """Media file."""
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Optional, Sequence, Union, get_args
 
@@ -178,7 +180,8 @@ class MediaFile:
         return AttrDict(self._metadata)
 
     @property
-    def resolution(self) -> tuple[int, int]:
+    # TODO: revisit type hint after https://github.com/BAMWelDX/weldx/issues/802
+    def resolution(self):  # -> tuple[int, int]:
         """Resolution in pixels (widths, height)."""
         return self._metadata["resolution"]
 
