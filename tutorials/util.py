@@ -8,10 +8,10 @@ def download_tutorial_input_file(print_status=True):
     from urllib.request import urlretrieve
 
     url = (
-        "https://github.com/BAMWelDX/IIW2021_AA_CXII/blob/weldx_0.5.0"
+        "https://github.com/BAMWelDX/IIW2021_AA_CXII/blob/weldx_0.6.0"
         "/single_pass_weld.weldx?raw=true "
     )
-    sha256sum = "29e4f11ef1185f818b4611860842ef52d386ad2866a2680257950f160e1e098a"
+    sha256sum = "d3329721e1eeb73fcaac2d5f5f649aa267d5c705abbc314bb31e53147e080297"
 
     def hash_path(path):
         import hashlib
