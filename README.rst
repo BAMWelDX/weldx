@@ -176,8 +176,8 @@ Documentation build
 .. |Anaconda-Server Badge| image:: https://anaconda.org/conda-forge/weldx/badges/version.svg
    :target: https://anaconda.org/conda-forge/weldx
 
-.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6504615.svg
-   :target: https://doi.org/10.5281/zenodo.6504615
+.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5565185.svg
+   :target: https://doi.org/10.5281/zenodo.5565185
 
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-orange.svg
    :target: https://opensource.org/licenses/BSD-3-Clause
