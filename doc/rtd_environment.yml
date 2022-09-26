@@ -20,6 +20,7 @@ dependencies:
   # documentation
   - sphinx>=4.1.1
   - jinja2=3.0
+  - nbformat<5.5.0 # pending https://github.com/BAMWelDX/weldx/actions/runs/3125636543/jobs/5070212013
   - nbsphinx
   - sphinx-copybutton
   - pydata-sphinx-theme
