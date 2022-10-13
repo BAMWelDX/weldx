@@ -34,7 +34,7 @@ repos:
     - id: upgrade-type-hints
       args: [ '--futures=true' ]
   - repo: https://github.com/psf/black
-    rev: 22.8.0
+    rev: 22.10.0
     hooks:
       - id: black
   - repo: https://github.com/pycqa/isort
@@ -69,7 +69,7 @@ repos:
           - --convention=numpy
   # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.5.0
+    rev: 1.5.2
     hooks:
       - id: nbqa-black
       - id: nbqa-isort
