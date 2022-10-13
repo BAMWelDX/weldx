@@ -46,8 +46,6 @@ test:
     {% for dep in proj.get('optional-dependencies')["test"] %}
     - {{ dep }}
     {% endfor %}
-    #- pytest
-    #- pytest-xdist
     - black
   files:
     - conftest.py
