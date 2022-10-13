@@ -281,7 +281,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "numpy": ("https://numpy.org/doc/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
-    "xarray": ("https://xarray.pydata.org/en/stable", None),
+    "xarray": ("https://docs.xarray.dev/en/stable/objects.inv", None),
     "scipy": (f"https://docs.scipy.org/doc/scipy-{_scipy_version}/", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
