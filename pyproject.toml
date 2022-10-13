@@ -67,7 +67,7 @@ test = [
     "nbval",
   ]
 vis = [
-    "weldx_widgets >= 0.2",
+    "weldx_widgets >=0.2",
 ]
 
 # ASDF extension entry points.
