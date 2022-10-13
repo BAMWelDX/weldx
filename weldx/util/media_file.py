@@ -18,7 +18,6 @@ __all__ = ["types_media_input", "MediaFile", "UnknownFormatError"]
 types_media_input = Union[
     types_path_like,
     Sequence[Sequence[int]],
-    # TODO: reconsider this, we want a list of shape x,y,(2 or 3)
 ]
 
 # _pts_to_frame, _get_frame_rate, _get_frame_count taken from
@@ -42,11 +41,11 @@ def _get_frame_rate(stream):
 def _get_frame_count(f, stream):
     if stream.frames:
         return stream.frames
-    elif stream.duration:
+    if stream.duration:
         return _pts_to_frame(
             stream.duration, float(stream.time_base), _get_frame_rate(stream), 0
         )
-    elif f.duration:
+    if f.duration:
         return _pts_to_frame(
             f.duration, 1 / float(_AV_TIME_BASE), _get_frame_rate(stream), 0
         )
@@ -62,11 +61,6 @@ class MediaFile:
 
     The underlying images are encapsulated to be loaded lazily (via Dask) and can be
     accessed by a time coordinate in case of videos.
-
-
-    Examples
-    --------
-    tODO: where to get example data?
 
     Parameters
     ----------
@@ -149,27 +143,26 @@ class MediaFile:
     def _get_video_metadata(fn: str) -> dict:
         import av
 
-        v = av.open(fn)
-        frame = next(v.decode(), None)
-        resolution = frame.width, frame.height
+        with av.open(fn) as v:
+            frame = next(v.decode(), None)
+            resolution = frame.width, frame.height
 
-        stream = next((s for s in v.streams if s.type == "video"), None)
+            stream = next((s for s in v.streams if s.type == "video"), None)
 
-        metadata = dict(
-            fps=_get_frame_rate(stream),
-            nframes=_get_frame_count(
-                frame,
-                stream,
-            ),
-            resolution=resolution,
-        )
+            metadata = dict(
+                fps=_get_frame_rate(stream),
+                nframes=_get_frame_count(
+                    frame,
+                    stream,
+                ),
+                resolution=resolution,
+            )
 
         return metadata
 
     @property
     def reference_time(self) -> Optional[pd.Timestamp]:
         """Time of recording of this media (if known)."""
-        # TODO: EXIF tag, plain m-time?
         return self._reference_time
 
     @property
@@ -180,8 +173,7 @@ class MediaFile:
         return AttrDict(self._metadata)
 
     @property
-    # TODO: revisit type hint after https://github.com/BAMWelDX/weldx/issues/802
-    def resolution(self):  # -> tuple[int, int]:
+    def resolution(self) -> tuple[int, int]:
         """Resolution in pixels (widths, height)."""
         return self._metadata["resolution"]
 
@@ -197,15 +189,14 @@ class MediaFile:
 
     def file(self) -> ExternalFile:
         """File reference to underlying file/directory."""
-        # TODO: this will rehash every time we serialize
+        # note: this will rehash every time we serialize
         # even if the underlying path is unchanged.
         if not self._from_file:
-            # TODO: why wrap in an array again?
             buffer = bytes(np.array(self._path_or_array))
             return ExternalFile(
                 buffer=buffer, filename="<in-memory-source>", asdf_save_content=True
             )
-        return ExternalFile(self._path_or_array)  # type: ignore[arg-type]
+        return ExternalFile(self._path_or_array)
 
     @property
     def data(self) -> xr.DataArray:
