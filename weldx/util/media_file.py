@@ -196,7 +196,7 @@ class MediaFile:
             return ExternalFile(
                 buffer=buffer, filename="<in-memory-source>", asdf_save_content=True
             )
-        return ExternalFile(self._path_or_array)
+        return ExternalFile(self._path_or_array)  # type: ignore[arg-type]
 
     @property
     def data(self) -> xr.DataArray:
