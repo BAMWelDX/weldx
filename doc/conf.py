@@ -274,7 +274,6 @@ def _get_intersphinx_mapping():
     from scipy import __version__ as scipy_version
     from xarray import __version__ as xarray_version
 
-    logger.error("xarray version: %s", xarray_version)
     intersphinx_mapping_ = {
         "python": ("https://docs.python.org/3/", None),
         "numpy": ("https://numpy.org/doc/stable", None),
