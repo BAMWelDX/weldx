@@ -271,20 +271,28 @@ html_context = {
 # Intersphinx mappings -----------------------------------------------------
 def _get_intersphinx_mapping():
     from asdf import __version__ as asdf_version
+
+    # from xarray import __version__ as xarray_version
+    from matplotlib import __version__ as matplotlib_version
+    from numpy import __version__ as numpy_version
+    from pandas import __version__ as pandas_version
+    from pint import __version__ as pint_version
     from scipy import __version__ as scipy_version
-    from xarray import __version__ as xarray_version
 
     intersphinx_mapping_ = {
         "python": ("https://docs.python.org/3/", None),
-        "numpy": ("https://numpy.org/doc/stable", None),
-        "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
-        "xarray": (f"https://docs.xarray.dev/en/v{xarray_version}", None),
-        # "xarray": (f"https://docs.xarray.dev/en/v2022.06.0/", None),
+        "numpy": (f"https://numpy.org/doc/{numpy_version[:4]}", None),
+        "pandas": (
+            f"https://pandas.pydata.org/pandas-docs/version/{pandas_version}/",
+            None,
+        ),
+        # "xarray": (f"https://docs.xarray.dev/en/v{xarray_version}", None),
+        "xarray": (f"https://docs.xarray.dev/en/v2022.06.0/", None),
         "scipy": (f"https://docs.scipy.org/doc/scipy-{scipy_version}/", None),
-        "matplotlib": ("https://matplotlib.org/stable", None),
+        "matplotlib": (f"https://matplotlib.org/{matplotlib_version}", None),
         # "dask": ("https://docs.dask.org/en/latest", None),
         # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
-        "pint": ("https://pint.readthedocs.io/en/stable", None),
+        "pint": (f"https://pint.readthedocs.io/en/{pint_version}", None),
         "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
         "asdf": (f"https://asdf.readthedocs.io/en/{asdf_version}/", None),
         "networkx": ("https://networkx.org/documentation/stable/", None),
