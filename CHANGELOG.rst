@@ -11,7 +11,7 @@ added
 
 - New tutorial that demonstrates the usage of the CSM in conjunction with an existing WelDX file [:pull:`793`]
 - New tutorial about the ``MeasurementChain`` class using an existing WelDX file [:pull:`796`]
-- New class to handle image sequence data and videos `weldx.util.MediaFile` [:pull:`727`].
+- New class to handle image sequence data and videos `weldx.util.media_file.MediaFile` [:pull:`727`].
 
 changes
 =======
