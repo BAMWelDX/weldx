@@ -69,7 +69,7 @@ repos:
           - --convention=numpy
   # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.5.2
+    rev: 1.5.3
     hooks:
       - id: nbqa-black
       - id: nbqa-isort
@@ -81,7 +81,7 @@ repos:
           - --remove-kernel-metadata
   # ----- spellchecking -----
   - repo: https://github.com/codespell-project/codespell/
-    rev: v2.2.1
+    rev: v2.2.2
     hooks:
       - id: codespell
         exclude: doc/legal-notice.rst
