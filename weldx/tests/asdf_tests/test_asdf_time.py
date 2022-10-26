@@ -27,7 +27,7 @@ def test_time_classes(inputs, time_ref):
     data = write_read_buffer({"root": inputs})
     assert np.all(data["root"] == inputs)
 
-    if isinstance(inputs, pd.Index) and not inputs.is_monotonic:
+    if isinstance(inputs, pd.Index) and not inputs.is_monotonic_increasing:
         # this is not valid for the time class, hence cancel here
         return
 
