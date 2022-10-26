@@ -10,8 +10,8 @@ import pint
 import xarray as xr
 
 from weldx import Q_
-from weldx.tags.core.file import ExternalFile
 from weldx.types import types_path_like
+from weldx.util.external_file import ExternalFile
 
 __all__ = ["types_media_input", "MediaFile", "UnknownFormatError"]
 

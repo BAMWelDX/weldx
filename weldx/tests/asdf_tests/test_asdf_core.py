@@ -19,9 +19,9 @@ from weldx.core import GenericSeries
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
-from weldx.tags.core.file import ExternalFile
 from weldx.tests._helpers import get_test_name
 from weldx.transformations import WXRotation
+from weldx.util.external_file import ExternalFile
 
 # WXRotation ---------------------------------------------------------------------
 _base_rotation = Rotation.from_euler(

@@ -1,6 +1,7 @@
 """Contains classes for the asdf serialization of media files."""
 
 from weldx.asdf.types import WeldxConverter
+from weldx.util.external_file import ExternalFile
 from weldx.util.media_file import MediaFile
 
 
@@ -24,8 +25,6 @@ class MediaFileConverter(WeldxConverter):
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct from tree."""
-        from weldx.tags.core.file import ExternalFile
-
         file: ExternalFile = node["file"]
         fps = node["fps"]
         reference_time = node["reference_time"]
