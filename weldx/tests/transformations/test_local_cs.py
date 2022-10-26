@@ -129,8 +129,15 @@ def test_time_warning(coordinates, orientation, time, warning):
         Expected warning
 
     """
-    with pytest.warns(warning):
+
+    def _call():
         LCS(coordinates=coordinates, orientation=orientation, time=time)
+
+    if warning is not None:  # pytest.warns does not allow passing None
+        with pytest.warns(warning):
+            _call()
+    else:
+        _call()
 
 
 # test_init_time_dsx -------------------------------------------------------------------
