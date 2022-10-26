@@ -2370,7 +2370,7 @@ def test_merge_unmerge_with_data(node_parent, node_child, data_parent, data_inde
     Parameters
     ----------
     node_parent :
-        The node of the parant system that is merged
+        The node of the parent system that is merged
     node_child :
         The node of the child system that is merged (will be renamed to match parent)
     data_parent :
