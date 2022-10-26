@@ -1,6 +1,7 @@
 """Test the `LocalCoordinateSystem` class."""
 from __future__ import annotations
 
+import warnings
 from copy import deepcopy
 
 import numpy as np
@@ -137,7 +138,9 @@ def test_time_warning(coordinates, orientation, time, warning):
         with pytest.warns(warning):
             _call()
     else:
-        _call()
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", category=UserWarning)
+            _call()
 
 
 # test_init_time_dsx -------------------------------------------------------------------
