@@ -1,7 +1,7 @@
 """Test all ASDF groove implementations."""
-
 import pytest
 from decorator import contextmanager
+from matplotlib import pylab
 
 from weldx.asdf.util import write_read_buffer
 from weldx.constants import Q_
@@ -50,7 +50,10 @@ def test_asdf_groove(groove: IsoBaseGroove, expected_dtype):
     ), f"Error calling plot function of {type(groove)} "
 
     # call plot function
-    groove.plot()
+    try:
+        groove.plot()
+    finally:
+        pylab.close()
 
 
 def test_asdf_groove_exceptions():
