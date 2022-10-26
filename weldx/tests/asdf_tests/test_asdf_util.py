@@ -197,19 +197,21 @@ class TestProtectedView(unittest.TestCase):
         self.view = _ProtectedViewDict(protected_keys=[self.protected_key], data=data)
 
     def test_protected_keys_hidden(self):
-        assert self.protected_key not in self.view.keys()
-        assert self.protected_key not in self.view
-        assert (self.protected_key, 42) not in self.view.items()
+        with pytest.warns(UserWarning, match="tried to manipulate"):
+            assert self.protected_key not in self.view.keys()
+            assert self.protected_key not in self.view
+            assert (self.protected_key, 42) not in self.view.items()
 
     def test_allowed_access(self):
         assert self.view["foo"] == "blub"
 
     def test_illegal_access(self):
-        with pytest.raises(KeyError):
-            _ = self.view["bar"]
+        with pytest.warns(UserWarning, match="tried to manipulate"):
+            with pytest.raises(KeyError):
+                _ = self.view["bar"]
 
-        with pytest.raises(KeyError):
-            del self.view["bar"]
+            with pytest.raises(KeyError):
+                del self.view["bar"]
 
     def test_access_non_existent(self):
         with pytest.raises(KeyError):
