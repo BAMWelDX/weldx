@@ -17,8 +17,9 @@ class PintQuantityConverter(WeldxConverter):
         "tag:stsci.edu:asdf/unit/quantity-1.*",
     ]
     types = [
-        "pint.quantity.build_quantity_class.<locals>.Quantity",
+        "pint.quantity.build_quantity_class.<locals>.Quantity",  # pint < 0.20
         "weldx.constants.Q_",
+        "pint.quantity.Quantity",  # pint >= 0.20
     ]
 
     def to_yaml_tree(self, obj: pint.Quantity, tag: str, ctx) -> dict:
@@ -54,8 +55,9 @@ class PintUnitConverter(WeldxConverter):
 
     tags = ["asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"]
     types = [
-        "pint.unit.build_unit_class.<locals>.Unit",
+        "pint.unit.build_unit_class.<locals>.Unit",  # pint < 0.20
         "weldx.constants.U_",
+        "pint.unit.Unit",  # pint >= 0.20
     ]
 
     def to_yaml_tree(self, obj: pint.Unit, tag: str, ctx) -> str:
