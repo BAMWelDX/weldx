@@ -60,8 +60,7 @@ try:
 except ModuleNotFoundError:  # fallback for local use
     sys.path.insert(0, os.path.abspath("../"))
     import weldx
-except Exception as ex:
-    raise
+
 
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
 
@@ -82,12 +81,6 @@ def _copy_tut_files():
 
 
 _copy_tut_files()
-
-
-# TODO: git move tutorial files to tutorials_dir!
-tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
-for f in tutorial_files:
-    shutil.copy(f, tutorials_dir)
 
 
 # -- Project information -----------------------------------------------------
@@ -292,7 +285,8 @@ def _get_intersphinx_mapping():
         "matplotlib": (f"https://matplotlib.org/{matplotlib_version}", None),
         # "dask": ("https://docs.dask.org/en/latest", None),
         # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
-        "pint": (f"https://pint.readthedocs.io/en/{pint_version}", None),
+        # "pint": (f"https://pint.readthedocs.io/en/{pint_version}", None),
+        "pint": (f"https://pint.readthedocs.io/en/latest", None),
         "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
         "asdf": (f"https://asdf.readthedocs.io/en/{asdf_version}/", None),
         "networkx": ("https://networkx.org/documentation/stable/", None),
