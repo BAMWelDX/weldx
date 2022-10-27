@@ -29,6 +29,7 @@ fixes
    advanced integration methods and fixes lengths computation of `DynamicShapeSegment` [:pull:`770`].
 -  Fix errors in tutorial about quality standards [:pull:`777`]
 -  Correct wrong handling of absolute times of the `TimeSeries` class [:pull:`791`]
+-  Added support for Pint 0.20 [:pull:`818`].
 
 ********************
  0.6.1 (19.05.2022)
