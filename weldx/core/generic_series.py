@@ -16,7 +16,6 @@ from xarray.core.coordinates import DataArrayCoordinates
 from weldx import Q_, U_, MathematicalExpression
 from weldx import util as ut
 from weldx.constants import UNITS_KEY
-from weldx.core import _quantity_to_coord_tuple, _quantity_to_xarray
 
 
 class GenericSeries:
@@ -867,3 +866,19 @@ class SeriesParameter:
             return _quantity_to_coord_tuple(self.values, self.dim)
         da: xr.DataArray = self.values.pint.dequantify()
         return self.dim, da.data, da.weldx.units
+
+
+def _quantity_to_coord_tuple(
+    v: pint.Quantity, dim
+) -> tuple[str, np.ndarray, dict[str, pint.Unit]]:
+    return (dim, v.m, {UNITS_KEY: v.u})
+
+
+def _quantity_to_xarray(v: pint.Quantity, dim: str = None) -> xr.DataArray:
+    """Convert a single quantity into a formatted xarray dataarray."""
+    return xr.DataArray(v, dims=dim)
+
+
+def _quantities_to_xarray(q_dict: dict[str, pint.Quantity]) -> dict[str, xr.DataArray]:
+    """Convert a str:Quantity mapping into a mapping of `xarray.DataArray`."""
+    return {k: _quantity_to_xarray(v, k) for k, v in q_dict.items()}

@@ -1,14 +1,17 @@
 """Contains the MathematicalExpression class."""
 from __future__ import annotations
 
-from typing import Any, Union
+from typing import Any, Tuple, Union
 
 import pint
 import sympy
 import xarray as xr
 
 from weldx import Q_
-from weldx.core import _me_parameter_types
+
+ExpressionParameterTypes = Union[
+    pint.Quantity, str, Tuple[pint.Quantity, str], xr.DataArray
+]
 
 
 class MathematicalExpression:
@@ -17,7 +20,7 @@ class MathematicalExpression:
     def __init__(
         self,
         expression: Union[sympy.Expr, str],
-        parameters: _me_parameter_types = None,
+        parameters: ExpressionParameterTypes = None,
     ):
         """Construct a MathematicalExpression.
 
@@ -143,7 +146,7 @@ class MathematicalExpression:
         self.set_parameters({name: value})
 
     # todo: Use kwargs here???
-    def set_parameters(self, params: _me_parameter_types):
+    def set_parameters(self, params: ExpressionParameterTypes):
         """Set the expressions parameters.
 
         Parameters
