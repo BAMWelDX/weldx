@@ -1,6 +1,6 @@
 """Collection of common classes and functions."""
 # isort:skip_file
-from .math_expression import MathematicalExpression
-from .generic_series import GenericSeries
-from .spatial_series import SpatialSeries
-from .time_series import TimeSeries
+from weldx.core.math_expression import MathematicalExpression
+from weldx.core.generic_series import GenericSeries
+from weldx.core.spatial_series import SpatialSeries
+from weldx.core.time_series import TimeSeries
