@@ -17,7 +17,7 @@ def _close_plot():
     try:
         from matplotlib import pylab
     except ImportError:
-        return
+        yield
     else:
         try:
             yield
