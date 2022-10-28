@@ -1,11 +1,9 @@
 """Test all ASDF groove implementations."""
 import pytest
 from decorator import contextmanager
-from matplotlib import pylab
 
 from weldx.asdf.util import write_read_buffer
-from weldx.constants import Q_
-from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.geometry import Profile
 from weldx.welding.groove.iso_9692_1 import (
     IsoBaseGroove,
@@ -13,7 +11,19 @@ from weldx.welding.groove.iso_9692_1 import (
     get_groove,
 )
 
-_DEFAULT_LEN_UNIT = UREG.millimeters
+
+@contextmanager
+def _close_plot():
+    try:
+        from matplotlib import pylab
+    except ImportError:
+        return
+    else:
+        try:
+            yield
+        finally:
+            pylab.close()
+
 
 test_params = _create_test_grooves()
 
@@ -50,10 +60,8 @@ def test_asdf_groove(groove: IsoBaseGroove, expected_dtype):
     ), f"Error calling plot function of {type(groove)} "
 
     # call plot function
-    try:
+    with _close_plot():
         groove.plot()
-    finally:
-        pylab.close()
 
 
 def test_asdf_groove_exceptions():
