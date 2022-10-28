@@ -6,8 +6,10 @@ from typing import Union
 import pint
 import xarray as xr
 
-from weldx import Q_, U_, MathematicalExpression
+from weldx import Q_, U_
 from weldx.core import GenericSeries
+
+from .math_expression import MathematicalExpression
 
 
 class SpatialSeries(GenericSeries):

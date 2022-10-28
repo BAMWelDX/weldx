@@ -13,9 +13,11 @@ import xarray as xr
 from bidict import bidict
 from xarray.core.coordinates import DataArrayCoordinates
 
-from weldx import Q_, U_, MathematicalExpression
+from weldx import Q_, U_
 from weldx import util as ut
 from weldx.constants import UNITS_KEY
+
+from .math_expression import MathematicalExpression
 
 
 class GenericSeries:

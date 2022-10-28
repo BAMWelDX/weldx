@@ -1,7 +1,7 @@
 """Contains TimeSeries class."""
 from __future__ import annotations
 
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -9,17 +9,23 @@ import pint
 import xarray as xr
 from _warnings import warn
 
-from weldx import Q_, MathematicalExpression, Time
+from weldx import Q_
 from weldx import util as ut
-from weldx.time import TimeDependent, types_time_like, types_timestamp_like
+from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.types import UnitLike
 from weldx.util import check_matplotlib_available
+
+from .math_expression import MathematicalExpression
+
+__all__ = [
+    "TimeSeries",
+]
 
 
 class TimeSeries(TimeDependent):
     """Describes the behaviour of a quantity in time."""
 
-    _valid_interpolations = [
+    _valid_interpolations = (
         "step",
         "linear",
         "nearest",
@@ -27,7 +33,7 @@ class TimeSeries(TimeDependent):
         "slinear",
         "quadratic",
         "cubic",
-    ]
+    )
 
     def __init__(
         self,
@@ -54,7 +60,7 @@ class TimeSeries(TimeDependent):
 
         """
         self._data: Union[MathematicalExpression, xr.DataArray] = None
-        self._time_var_name = None  # type: str
+        self._time_var_name: Optional[str] = None
         self._shape = None
         self._units = None
         self._interp_counter = 0
