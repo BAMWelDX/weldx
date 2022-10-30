@@ -1,7 +1,7 @@
 """Contains TimeSeries class."""
 from __future__ import annotations
 
-from typing import Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -16,6 +16,9 @@ from weldx.types import UnitLike
 from weldx.util import check_matplotlib_available
 
 from .math_expression import MathematicalExpression
+
+if TYPE_CHECKING:
+    import matplotlib.axes
 
 __all__ = [
     "TimeSeries",
