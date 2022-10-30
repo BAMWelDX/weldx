@@ -13,6 +13,8 @@ ExpressionParameterTypes = Union[
     pint.Quantity, str, Tuple[pint.Quantity, str], xr.DataArray
 ]
 
+__all__ = ["MathematicalExpression", "ExpressionParameterTypes"]
+
 
 class MathematicalExpression:
     """Mathematical expression using sympy syntax."""

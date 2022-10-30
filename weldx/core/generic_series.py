@@ -19,6 +19,8 @@ from weldx.constants import UNITS_KEY
 
 from .math_expression import MathematicalExpression
 
+__all__ = ["GenericSeries"]
+
 
 class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
@@ -42,20 +44,21 @@ class GenericSeries:
     _evaluation_preprocessor: dict[str, Callable] = {}
     """Mapping of variable names to functions that are applied prior to evaluation.
 
-    When calling `GenericSeries.evaluate`, the passed keyword arguments are checked
-    against the dictionaries keys. If a match is found, the corresponding preprocessor
-    function is called with the variables value and returns the updated value. As an
-    example, this can be used to support multiple time formats. The key might be ``t``
-    and the preprocessor function would turn the original time data into an equivalent
-    `xarray.DataArray`.
+    When calling `weldx.GenericSeries.evaluate`, the passed keyword arguments are
+    checked against the dictionaries keys. If a match is found, the corresponding
+    preprocessor function is called with the variables value and returns the
+    updated value. As an example, this can be used to support multiple time formats.
+    The key might be ``t`` and the preprocessor function would turn the original
+    time data into an equivalent `xarray.DataArray`.
     """
 
     _required_dimensions: list[str] = []
     """A list of required dimension names.
 
-    Explicit `GenericSeries` need all of the listed dimensions. Otherwise an exception
-    is raised. If the series is based on an expression, the dimension can either be
-    represented by a variable or be part of one of the expressions parameters.
+    Explicit `weldx.GenericSeries` need all of the listed dimensions.
+    Otherwise an exception is raised. If the series is based on an expression,
+    the dimension can either be represented by a variable or be part of one
+    of the expressions parameters.
     """
 
     _required_dimension_units: dict[str, pint.Unit] = {}
@@ -114,8 +117,8 @@ class GenericSeries:
             this parameter is optional. It can be used to have a dimension name that
             differs from the symbol of the expression. To do so, you need to provide a
             mapping between the symbol and the dimension name. For example, you could
-            use ``dict(t="time")`` to tell the `GenericSeries` that the symbol ``t``
-            refers to the dimension ``time``.
+            use ``dict(t="time")`` to tell the `weldx.GenericSeries` that
+            the symbol ``t`` refers to the dimension ``time``.
         coords :
             (Only for discrete values) A mapping that specifies the coordinate values
             for each dimension.
@@ -143,12 +146,12 @@ class GenericSeries:
             Can be raised for multiple reasons related to incompatible or invalid values
         pint.DimensionalityError
             If an expression can not be evaluated due to a unit conflict caused by
-            the provided parameters and and dimension units
+            the provided parameters and dimension units
 
         Examples
         --------
-        Create a `GenericSeries` representing a translation with 3 m/s in x-direction
-        starting at point ``[0, 2 ,2] cm``
+        Create a `weldx.GenericSeries` representing a translation with 3 m/s
+        in x-direction starting at point ``[0, 2 ,2] cm``
 
         >>> from weldx import GenericSeries, Q_
         >>> GenericSeries(  # doctest: +NORMALIZE_WHITESPACE
@@ -170,8 +173,8 @@ class GenericSeries:
             mm
 
 
-        The same `GenericSeries` from above but assigning the ``t`` parameter to the
-        output dimension ``time``.
+        The same `weldx.GenericSeries` from above but assigning the ``t`` parameter
+        to the output dimension ``time``.
 
         >>> GenericSeries(  # doctest: +NORMALIZE_WHITESPACE
         ...     "a*t + b",
@@ -192,8 +195,8 @@ class GenericSeries:
         Units:
             mm
 
-        A `GenericSeries` describing linear interpolation between the values 10 V and
-        20 V over a period of 5 seconds.
+        A `weldx.GenericSeries` describing linear interpolation between the values 10 V
+        and 20 V over a period of 5 seconds.
 
         >>> GenericSeries(  # doctest: +NORMALIZE_WHITESPACE
         ...     Q_([10, 20], "V"),
@@ -454,22 +457,24 @@ class GenericSeries:
     def evaluate(self, **kwargs) -> GenericSeries:
         """Evaluate the generic series at discrete coordinates.
 
-        If the `GenericSeries` is composed of discrete values, the data is interpolated
-        using the specified interpolation method.
+        If the `weldx.GenericSeries` is composed of discrete values, the data
+        is interpolated using the specified interpolation method.
 
         Expressions are simply evaluated if coordinates for all dimensions are provided
-        which results in a new discrete `GenericSeries`. In case that some dimensions
-        are left without coordinates, a new expression based `GenericSeries` is
-        returned. The provided coordinates are stored as parameters and the
-        corresponding dimensions are no longer variables of the new `GenericSeries`.
+        which results in a new discrete `weldx.GenericSeries`. In case that some
+        dimensions are left without coordinates, a new expression based
+        `weldx.GenericSeries` is returned. The provided coordinates are stored as
+        parameters and the corresponding dimensions are no longer variables of
+        the new `weldx.GenericSeries`.
 
         Parameters
         ----------
         kwargs:
             An arbitrary number of keyword arguments. The key must be a dimension name
-            of the `GenericSeries` and the values are the corresponding coordinates
-            where the `GenericSeries` should be evaluated. It is not necessary to
-            provide values for all dimensions. Partial evaluation is also possible.
+            of the `weldx.GenericSeries` and the values are the corresponding
+            coordinates where the `weldx.GenericSeries` should be evaluated. It is not
+            necessary to provide values for all dimensions.
+            Partial evaluation is also possible.
 
         Returns
         -------
@@ -569,7 +574,7 @@ class GenericSeries:
     def _get_expression_dims(
         expr: MathematicalExpression, symbol_dims: Mapping[str, str]
     ) -> list[str]:
-        """Get the dimensions of an expression based `GenericSeries`.
+        """Get the dimensions of an expression based `weldx.GenericSeries`.
 
         This is the union of parameter dimensions and free dimensions.
 
@@ -759,7 +764,7 @@ class GenericSeries:
     # not yet implemented ---------------------------------------------
 
     def __add__(self, other):
-        """Add two `GenericSeries`."""
+        """Add two `weldx.GenericSeries`."""
         # this should mostly be moved to the MathematicalExpression
         # todo:
         #   - for two expressions simply do: f"{exp_1} + f{exp_2}" and merge the
@@ -873,7 +878,7 @@ class SeriesParameter:
 def _quantity_to_coord_tuple(
     v: pint.Quantity, dim
 ) -> tuple[str, np.ndarray, dict[str, pint.Unit]]:
-    return (dim, v.m, {UNITS_KEY: v.u})
+    return dim, v.m, {UNITS_KEY: v.u}
 
 
 def _quantity_to_xarray(v: pint.Quantity, dim: str = None) -> xr.DataArray:
