@@ -804,7 +804,7 @@ changes
 -  `CoordinateSystemManager.plot_graph` now renders static and
    time-dependent edges differently [:pull:`291`]
 
--  use `pint` compatible array syntax in
+-  use ``pint`` compatible array syntax in
    `welding.groove.iso_9692_1.IsoBaseGroove.to_profile` methods [:pull:`189`]
 
 -  CSM and LCS plot function get a ``scale_vectors`` parameter. It
@@ -975,7 +975,7 @@ dependencies
 added
 =====
 
--  Added `util.ureg_check_class` class decorator to enable `pint`
+-  Added `util.ureg_check_class` class decorator to enable ``pint``
    dimensionality checks with ``@dataclass`` [:pull:`179`].
 
 -  Made coordinates and orientations optional for LCS schema. Missing
@@ -1070,7 +1070,7 @@ changes
 -  `util.xr_interp_like` now accepts non-iterable scalar inputs for
    interpolation. [:pull:`97`]
 
--  add `pint` compatibility to some `geometry` classes
+-  add ``pint`` compatibility to some `geometry` classes
    (**experimental**)
 
    -  when passing quantities to constructors (and some functions),
@@ -1128,7 +1128,7 @@ fixes
 -  fix propagating the ``name`` attribute when reading an ndarray
    `TimeSeries` object back from ASDF files [:pull:`104`]
 
--  fix `pint` regression in `TimeSeries` when mixing integer and float
+-  fix ``pint`` regression in `TimeSeries` when mixing integer and float
    values [:pull:`121`]
 
 ********************
