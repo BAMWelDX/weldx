@@ -1785,8 +1785,6 @@ def get_groove(
             The root face is the length of the Y-Groove which is not
             part of the V. It can be 0.
 
-    .. _UGroove:
-
     UGroove:
         t: workpiece_thickness
             The workpiece thickness is a length Quantity, e.g.: "mm".
