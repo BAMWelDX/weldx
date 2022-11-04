@@ -779,8 +779,10 @@ class GenericSeries:
         return NotImplemented
 
     @staticmethod
-    def interp_like(  # skipcq: PYL-W0613
-        obj: Any, dimensions: list[str] = None, accessor_mappings: dict = None
+    def interp_like(
+        obj: Any,  # skipcq: PYL-W0613
+        dimensions: list[str] = None,  # skipcq: PYL-W0613
+        accessor_mappings: dict = None,  # skipcq: PYL-W0613
     ) -> GenericSeries:
         """Interpolate using the coordinates of another object.
 
