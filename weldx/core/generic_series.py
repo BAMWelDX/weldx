@@ -314,7 +314,7 @@ class GenericSeries:
 
     def _init_expression(
         self,
-        expr: Union[str, MathematicalExpression],
+        expr: Union[str, MathematicalExpression, sympy.Expr],
         dims: dict[str, str],
         parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]],
         units: dict[str, pint.Unit],
