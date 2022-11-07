@@ -5,7 +5,7 @@ ci:
     for more information, see https://pre-commit.ci
   autofix_prs: false
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: weekly
+  autoupdate_schedule: monthly
   skip: []
   submodules: false
 exclude: '.*.weldx$|.*.wx$|.*.asdf$'
@@ -41,6 +41,7 @@ repos:
     rev: 5.10.1
     hooks:
       - id: isort
+        additional_dependencies: ["toml"]
   - repo: https://github.com/PyCQA/flake8
     rev: 5.0.4
     hooks:

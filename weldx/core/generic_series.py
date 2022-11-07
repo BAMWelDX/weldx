@@ -259,6 +259,10 @@ class GenericSeries:
             return False
         return self.data_array.identical(other._obj)
 
+    def __hash__(self):
+        """Implement as not hashable."""
+        return None
+
     def _init_discrete(
         self,
         data: Union[pint.Quantity, xr.DataArray],
@@ -314,7 +318,7 @@ class GenericSeries:
 
     def _init_expression(
         self,
-        expr: Union[str, MathematicalExpression],
+        expr: Union[str, MathematicalExpression, sympy.Expr],
         dims: dict[str, str],
         parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]],
         units: dict[str, pint.Unit],
@@ -775,9 +779,10 @@ class GenericSeries:
         return NotImplemented
 
     @staticmethod
-    # skipcq: PYL-W0613
     def interp_like(
-        obj: Any, dimensions: list[str] = None, accessor_mappings: dict = None
+        obj: Any,  # skipcq: PYL-W0613
+        dimensions: list[str] = None,  # skipcq: PYL-W0613
+        accessor_mappings: dict = None,  # skipcq: PYL-W0613
     ) -> GenericSeries:
         """Interpolate using the coordinates of another object.
 

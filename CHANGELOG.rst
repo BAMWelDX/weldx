@@ -3,8 +3,10 @@
 ###############
 
 ********************
- 0.6.2 (tba)
+ 0.6.2 (07.11.2022)
 ********************
+
+Release ``0.6.2`` comes with new and updated tutorials and some minor fixes and code improvements.
 
 added
 =====
