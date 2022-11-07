@@ -1678,18 +1678,18 @@ def get_groove(
     groove_type :
         String specifying the Groove type:
 
-        - VGroove_
-        - UGroove_
-        - IGroove_
-        - UVGroove_
-        - VVGroove_
-        - HVGroove_
-        - HUGroove_
-        - DVGroove_
-        - DUGroove_
-        - DHVGroove_
-        - DHUGroove_
-        - FFGroove_
+        - VGroove
+        - UGroove
+        - IGroove
+        - UVGroove
+        - VVGroove
+        - HVGroove
+        - HUGroove
+        - DVGroove
+        - DUGroove
+        - DHVGroove
+        - DHUGroove
+        - FFGroove
     workpiece_thickness :
         workpiece thickness (Default value = None)
     workpiece_thickness2 :
@@ -1759,8 +1759,6 @@ def get_groove(
     are in Quantity values from pint and related units are accepted.
     Required Groove attributes:
 
-    .. _IGroove:
-
     IGroove:
         t: workpiece_thickness
             The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -1768,8 +1766,6 @@ def get_groove(
         b: root_gap
             The root gap is the distance of the 2 workpieces.
             It can be 0 or None.
-
-    .. _VGroove:
 
     VGroove:
         t: workpiece_thickness
@@ -1784,8 +1780,6 @@ def get_groove(
         c: root_face
             The root face is the length of the Y-Groove which is not
             part of the V. It can be 0.
-
-    .. _UGroove:
 
     UGroove:
         t: workpiece_thickness
@@ -1803,8 +1797,6 @@ def get_groove(
             It can be 0 or None.
         c: root_face
             The root face is the height of the part below the U-segment.
-
-    .. _UVGroove:
 
     UVGroove:
         t: workpiece_thickness
@@ -1826,8 +1818,6 @@ def get_groove(
         h: root_face
             The root face is the height of the V-segment.
 
-    .. _VVGroove:
-
     VVGroove:
         t: workpiece_thickness
             The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -1848,8 +1838,6 @@ def get_groove(
             This root face is the height of the part of the lower V-segment
             and the root face c.
 
-    .. _HVGroove:
-
     HVGroove:
         t: workpiece_thickness
             The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -1862,8 +1850,6 @@ def get_groove(
             It can be 0 or None.
         c: root_face
             The root face is the height of the part below the V-segment.
-
-    .. _HUGroove:
 
     HUGroove:
         t: workpiece_thickness
@@ -1881,8 +1867,6 @@ def get_groove(
             It can be 0 or None.
         c: root_face
             The root face is the height of the part below the U-segment.
-
-    .. _DVGroove:
 
     DVGroove:
         t: workpiece_thickness
@@ -1905,8 +1889,6 @@ def get_groove(
         h2: root_face3
             The root face is the height of the lower V-segment.
             Only c is needed.
-
-    .. _DUGroove:
 
     DUGroove:
         t: workpiece_thickness
@@ -1938,21 +1920,15 @@ def get_groove(
             The root face is the height of the lower U-segment.
             Only c is needed.
 
-    .. _DHVGroove:
-
     DHVGroove:
-        This is a special case of the DVGroove_. The values of the angles are
+        This is a special case of the DVGroove. The values of the angles are
         interpreted here as bevel angel. So you have only half of the size.
         Accordingly the inputs beta1 (bevel angle) and beta2 (bevel angle 2)
         are used.
 
-    .. _DHUGroove:
-
     DHUGroove:
-        This is a special case of the DUGroove_.
+        This is a special case of the DUGroove.
         The parameters remain the same.
-
-    .. _FFGroove:
 
     FFGroove:
         These grooves are identified by their code number. These correspond to the

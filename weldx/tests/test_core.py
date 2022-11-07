@@ -1,5 +1,5 @@
 """Tests of the core package."""
-
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -503,9 +503,9 @@ class TestTimeSeries:
     def test_interp_time_warning():
         """Test if a warning is emitted when interpolating already interpolated data."""
         ts = TimeSeries(data=Q_([1, 2, 3], "m"), time=Q_([0, 1, 2], "s"))
-        with pytest.warns(None) as recorded_warnings:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", category=UserWarning)
             ts_interp = ts.interp_time(Q_([0.25, 0.5, 0.75, 1], "s"))
-        assert not any(w.category == UserWarning for w in recorded_warnings)
 
         with pytest.warns(UserWarning):
             ts_interp.interp_time(Q_([0.4, 0.6], "s"))

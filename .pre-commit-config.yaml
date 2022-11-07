@@ -5,7 +5,7 @@ ci:
     for more information, see https://pre-commit.ci
   autofix_prs: false
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: weekly
+  autoupdate_schedule: monthly
   skip: []
   submodules: false
 exclude: '.*.weldx$|.*.wx$|.*.asdf$'
@@ -41,6 +41,7 @@ repos:
     rev: 5.10.1
     hooks:
       - id: isort
+        additional_dependencies: ["toml"]
   - repo: https://github.com/PyCQA/flake8
     rev: 5.0.4
     hooks:
@@ -69,7 +70,7 @@ repos:
           - --convention=numpy
   # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.5.2
+    rev: 1.5.3
     hooks:
       - id: nbqa-black
       - id: nbqa-isort
@@ -81,7 +82,7 @@ repos:
           - --remove-kernel-metadata
   # ----- spellchecking -----
   - repo: https://github.com/codespell-project/codespell/
-    rev: v2.2.1
+    rev: v2.2.2
     hooks:
       - id: codespell
         exclude: doc/legal-notice.rst
