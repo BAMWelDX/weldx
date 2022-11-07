@@ -70,7 +70,7 @@ class MediaFile:
     reference_time :
         A reference time, when this media was recorded. Useful, when passing arrays.
     fps :
-        Frames per second in case of a video. Has to be passed in case `path_or_array`
+        Frames per second in case of a video. Has to be passed in case ``path_or_array``
         was given as list of frames.
     """
 
