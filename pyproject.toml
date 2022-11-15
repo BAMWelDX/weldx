@@ -190,3 +190,18 @@ ignore_errors = true
 module = "xarray"
 follow_imports = "skip"
 ignore_errors = true
+
+[tool.ruff]
+exclude = [
+    '__init__.py',
+    'doc/conf.py',
+]
+ignore = ['C408']
+line-length = 88
+select = [
+    'B',
+    'C',
+    'E',
+    'F',
+    'W',
+]
