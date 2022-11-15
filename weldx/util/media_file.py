@@ -145,6 +145,11 @@ class MediaFile:
 
         with av.open(fn) as v:
             frame = next(v.decode(), None)
+            if not frame:
+                raise RuntimeError(
+                    "could not determine video metadata, "
+                    "as no single frame could be read."
+                )
             resolution = frame.width, frame.height
 
             stream = next((s for s in v.streams if s.type == "video"), None)
