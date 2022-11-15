@@ -950,8 +950,10 @@ class WeldxFile(_ProtectedViewDict):
 class _HeaderVisualizer:
     def __init__(self, asdf_handle: AsdfFile):
         # TODO: this ain't thread-safe!
-        # take a copy of the handle to avoid side effects!
-        copy._deepcopy_dispatch[np.ndarray] = lambda x, y: x
+        def _fake_copy(x, _):  # take a copy of the handle to avoid side effects!
+            return x
+
+        copy._deepcopy_dispatch[np.ndarray] = _fake_copy
         try:
             # asdffile takes a deepcopy by default, so we fake the deep copy method of
             # ndarray to avoid bloating memory.

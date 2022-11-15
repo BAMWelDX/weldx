@@ -1748,7 +1748,7 @@ class CoordinateSystemManager:
         """Create a CSM from a yaml tree dictionary."""
         graph = node["graph"]
         for edge in graph.edges:
-            if not (edge[1], edge[0]) in graph.edges:
+            if (edge[1], edge[0]) not in graph.edges:
                 graph.add_edge(
                     edge[1],
                     edge[0],
