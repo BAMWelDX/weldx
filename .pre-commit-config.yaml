@@ -59,6 +59,7 @@ repos:
     hooks:
       - id: pydocstyle
         files: '^weldx/'
+        additional_dependencies: ["toml"]
         exclude: |
           (?x)^(
             ^weldx/tags|
@@ -73,13 +74,15 @@ repos:
     hooks:
       - id: ruff
         args:
+          - --quiet
           - --fix
   # ----- Jupyter Notebooks -----
-  - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.5.3
+  - repo: https://github.com/marscher/nbQA
+    rev: db86f8233998682e367d436eceec7cd4776cf334
     hooks:
       - id: nbqa-black
       - id: nbqa-isort
+      - id: nbqa-ruff
   - repo: https://github.com/roy-ht/pre-commit-jupyter
     rev: v1.2.1
     hooks:
