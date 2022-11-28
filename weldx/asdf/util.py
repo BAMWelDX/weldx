@@ -466,7 +466,7 @@ def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extensi
     from weldx import __version__ as imported_version
 
     if not all(e.package_version == imported_version for e in extensions):
-        mismatch = [e.package_version != imported_version for e in extensions]
+        mismatch = [e for e in extensions if e.package_version != imported_version]
         raise EnvironmentError(
             "Weldx extension version mismatch. Wanted extension "
             f"for version {imported_version}, but got: "
