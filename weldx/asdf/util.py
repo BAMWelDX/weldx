@@ -455,8 +455,12 @@ def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extensi
     extensions = [
         ext for ext in extensions if str(ext.extension_uri) == WELDX_EXTENSION_URI
     ]
-    if not len(extensions) == 1:
-        raise ValueError("Could not determine correct weldx extension.")
+    # Note: as of asdf-2.14.0 two extensions match the above expression. Prior to this
+    # version we just received one match. So we will just check for at least one.
+    if not extensions:
+        raise RuntimeError(
+            "could not find Weldx asdf extension. " "Check your installation."
+        )
     return extensions[0]
 
 
