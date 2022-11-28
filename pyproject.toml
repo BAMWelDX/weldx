@@ -13,8 +13,16 @@ readme = {file = "README.rst", content-type="text/x-rst"}
 license = {file = "LICENSE", name="BSD License"}
 keywords = [
     "welding",
-    "weldx",
-    "bam", # TODO: add more keywords here! think of them as in a journal article.
+    "measurement",
+    "experiment",
+    "coordinate transformations",
+    "time dependent coordinates",
+    "BAM",
+    "Bundesanstalt für Materialforschung- und Prüfung",
+    "scientific data format",
+    "asdf",
+    "advanced-scientific-data-format",
+    "iso-9692-1",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
