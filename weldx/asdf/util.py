@@ -445,7 +445,6 @@ def dataclass_serialization_class(
     return _SerializationClass
 
 
-@functools.cache
 def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extension:
     """Grab the weldx extension from list of current active extensions."""
     if isinstance(ctx, asdf.asdf.SerializationContext):
@@ -454,14 +453,20 @@ def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extensi
         extensions = ctx.extensions
     else:
         raise TypeError(f"unsupported context {ctx=}")
-    extensions = [
-        ext for ext in extensions if str(ext.extension_uri) == WELDX_EXTENSION_URI
-    ]
+    return _get_weldx_extension_impl(tuple(extensions))
+
+
+@functools.lru_cache(None)
+def _get_weldx_extension_impl(extensions: tuple):
+    # pass extensions as tuple, so we can use caching.
+    extensions = tuple(
+        (ext for ext in extensions if str(ext.extension_uri) == WELDX_EXTENSION_URI)
+    )
     # Note: as of asdf-2.14.0 two extensions match the above expression. Prior to this
     # version we just received one match. So we will just check for at least one.
     if not extensions:
         raise RuntimeError(
-            "could not find Weldx asdf extension. " "Check your installation."
+            "could not find Weldx asdf extension. Check your installation."
         )
     from weldx import __version__ as imported_version
 
