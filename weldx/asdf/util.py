@@ -1,6 +1,7 @@
 """Utilities for asdf files."""
 from __future__ import annotations
 
+import functools
 from collections.abc import Callable, Mapping, Set
 from io import BytesIO, TextIOBase
 from pathlib import Path
@@ -444,6 +445,7 @@ def dataclass_serialization_class(
     return _SerializationClass
 
 
+@functools.cache
 def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extension:
     """Grab the weldx extension from list of current active extensions."""
     if isinstance(ctx, asdf.asdf.SerializationContext):
@@ -461,6 +463,16 @@ def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extensi
         raise RuntimeError(
             "could not find Weldx asdf extension. " "Check your installation."
         )
+    from weldx import __version__ as imported_version
+
+    if not all(e.package_version == imported_version for e in extensions):
+        mismatch = [e.package_version != imported_version for e in extensions]
+        raise EnvironmentError(
+            "Weldx extension version mismatch. Wanted extension "
+            f"for version {imported_version}, but got: "
+            f"{[e.package_version for e in mismatch]}"
+        )
+
     return extensions[0]
 
 
