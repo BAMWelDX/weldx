@@ -30,6 +30,7 @@ jobs:
           pip install -e .[test]
       - name: run asdf schema pytest
         run: |
+          pip install git+https://github.com/asdf-format/asdf@master
           pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/
       - name: check manifest diff
         if: always()
