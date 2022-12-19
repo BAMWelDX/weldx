@@ -86,8 +86,7 @@ pygments_style = "sphinx"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "myst_parser",
-    # "myst_nb",
+    "myst_nb",
     "nbsphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
@@ -160,7 +159,7 @@ myst_footnote_transition = False
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = "src/index"
+master_doc = "index"
 
 # -- nbsphinx configuration -------------------------------------------------
 nbsphinx_execute = "always"
