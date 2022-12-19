@@ -2,6 +2,5 @@
 .. py:currentmodule:: weldx
 ```
 
-```{eval-rst}
-.. include:: ../../CHANGELOG.md
+```{include} ../../CHANGELOG.md
 ```
