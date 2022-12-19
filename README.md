@@ -1,10 +1,20 @@
-______________________________________________________________________
-
-## substitutions: Anaconda-Server Badge: |- `{image} https://anaconda.org/conda-forge/weldx/badges/version.svg     :target: https://anaconda.org/conda-forge/weldx     ` Binder: |- `{image} https://mybinder.org/badge_logo.svg     :target: https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/tutorials/welding_example_01_basics.ipynb     ` Codacy Badge: |- `{image} https://api.codacy.com/project/badge/Grade/5e7ede6d978249a781e5c580ed1c813f     :target: https://www.codacy.com/gh/BAMWelDX/weldx?utm_source=github.com&utm_medium=referral&utm_content=BAMWelDX/weldx&utm_campaign=Badge_Grade     ` DeepSource: |- `{image} https://static.deepsource.io/deepsource-badge-light-mini.svg     :target: https://deepsource.io/gh/BAMWelDX/weldx/?ref=repository-badge     ` Documentation: |- `{image} https://readthedocs.org/projects/weldx/badge/?version=latest     :target: https://weldx.readthedocs.io/en/latest/?badge=latest     ` License: |- `{image} https://img.shields.io/badge/License-BSD%203--Clause-orange.svg     :target: https://opensource.org/licenses/BSD-3-Clause     ` Zenodo: |- `{image} https://zenodo.org/badge/DOI/10.5281/zenodo.5565185.svg     :target: https://doi.org/10.5281/zenodo.5565185     ` codecov: |- `{image} https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg     :target: https://codecov.io/gh/BAMWelDX/weldx     ` conda build: |- `{image} https://github.com/BAMWelDX/weldx/workflows/conda%20build/badge.svg?branch=master     :target: https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22conda+build%22+branch%3Amaster     ` documentation-gh: |- `{image} https://github.com/BAMWelDX/weldx/workflows/documentation/badge.svg?branch=master     :target: https://github.com/BAMWelDX/weldx/actions?query=workflow%3Adocumentation+branch%3Amaster     ` pre-commit.ci status: |- `{image} https://results.pre-commit.ci/badge/github/BAMWelDX/weldx/master.svg     :target: https://results.pre-commit.ci/latest/github/BAMWelDX/weldx/master     ` pytest: |- `{image} https://github.com/BAMWelDX/weldx/workflows/pytest/badge.svg?branch=master     :target: https://github.com/BAMWelDX/weldx/actions?query=workflow%3Apytest+branch%3Amaster     ` static analysis: |- `{image} https://github.com/BAMWelDX/weldx/workflows/static%20analysis/badge.svg?branch=master     :target: https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22static+analysis%22+branch%3Amaster     `
-
 # WelDX - data and quality standards for welding research data
 
-{{ Documentation }} {{ Binder }} {{ Anaconda-Server Badge }} {{ Zenodo }} {{ License }}
+______________________________________________________________________
+
+[![CF](https://anaconda.org/conda-forge/weldx/badges/version.svg)](https://anaconda.org/conda-forge/weldx)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/tutorials/welding_example_01_basics.ipynb)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5e7ede6d978249a781e5c580ed1c813f)](https://www.codacy.com/gh/BAMWelDX/weldx)
+[![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/BAMWelDX/weldx/?ref=repository-badge)
+[![Documentation](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.5565185.svg)](https://doi.org/10.5281/zenodo.5565185)
+[![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
+[![conda build](https://github.com/BAMWelDX/weldx/workflows/conda%20build/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22conda+build%22+branch%3Amaster)
+[![documentation-gh](https://github.com/BAMWelDX/weldx/workflows/documentation/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Adocumentation+branch%3Amaster)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/BAMWelDX/weldx/master.svg)](https://results.pre-commit.ci/latest/github/BAMWelDX/weldx/master)
+[![pytest](https://github.com/BAMWelDX/weldx/workflows/pytest/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Apytest+branch%3Amaster)
+[![static analysis](https://github.com/BAMWelDX/weldx/workflows/static%20analysis/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22static+analysis%22+branch%3Amaster)
 
 ## Overview
 
@@ -26,7 +36,8 @@ published under an appropriate open source license. By using the file
 format objectivity, comparability and reproducibility across different
 experimental setups can be improved.
 
-The project is under active development by the [Welding Technology](https://www.bam.de/Navigation/EN/About-us/Organisation/Organisation-Chart/President/Department-9/Division-93/division93.html)
+The project is under active development by the \[Welding Technology\]
+(https://www.bam.de/Navigation/EN/About-us/Organisation/Organisation-Chart/President/Department-9/Division-93/division93.html)
 division at Bundesanstalt für Materialforschung und -prüfung (BAM).
 
 ## Features
@@ -124,18 +135,3 @@ the following links to get to the desired version:
 
 This research is funded by the Federal Ministry of Education and
 Research of Germany under project number 16QK12.
-
-## Repository status
-
-### Continuous Integration
-
-{{ pytest }} {{ conda build }}
-
-### Code Status
-
-{{ static analysis }} {{ pre-commit.ci status }} {{ Codacy Badge }} {{ codecov }}
-{{ DeepSource }}
-
-### Documentation build
-
-{{ Documentation }} {{ documentation-gh }}
