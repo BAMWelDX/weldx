@@ -10,13 +10,13 @@ Anaconda or Miniconda installed yet, we ask you to install
 After this step you have access to the conda command and can proceed to
 installing the WelDX package:
 
-```
+```shell
 conda create -n weldx -c conda-forge weldx weldx_widgets
 ```
 
 The package is also available on pypi and can be installed via *pip*:
 
-```
+```shell
 pip install weldx weldx-widgets
 ```
 
@@ -41,14 +41,14 @@ Here is a guide on howto setup different kernels for Jupyter [guide](https://ipy
 
 Create an environment named "jlab" via conda that installs `jupyterlab` and the `k3d` extension:
 
-```
+```shell
 conda create -n jlab jupyterlab k3d -c conda-forge
 ```
 
 Then we switch to the weldx environment created in the first step and
 make it available within Jupyter:
 
-```
+```shell
 conda activate weldx
 python -m ipykernel install --user --name weldx --display-name "Python (weldx)"
 ```
@@ -74,7 +74,7 @@ windows explorer and create a new file called `ipython_startup.py`.
 Open it with a text editor and paste the following commands into the
 file:
 
-```
+```python
 import sys
 import os
 from pathlib import Path
@@ -84,11 +84,11 @@ from pathlib import Path
 p_env = Path(sys.executable).parent
 
 # directory which should contain all the DLLs
-p_dlls = p_env / 'Library' / 'bin'
+p_dlls = p_env / "Library" / "bin"
 
 # effectively prepend this DLL directory to $PATH
 # semi-colon used here as sep on Windows
-os.environ['PATH'] = '{};{}'.format(p_dlls, os.environ['PATH'])
+os.environ["PATH"] = "{};{}".format(p_dlls, os.environ["PATH"])
 ```
 
 ## Everything in one-shot
@@ -99,7 +99,7 @@ not be executed.
 
 using conda:
 
-```
+```shell
 conda create -n weldx -c conda-forge weldx weldx_widgets
 conda activate weldx
 python -m ipykernel install --user --name weldx --display-name "Python (weldx)"
