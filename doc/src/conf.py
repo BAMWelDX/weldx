@@ -87,7 +87,6 @@ pygments_style = "sphinx"
 # ones.
 extensions = [
     "myst_nb",
-    "nbsphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
@@ -154,7 +153,10 @@ source_suffix = {
 }
 
 myst_footnote_transition = False
+nb_execution_timeout = 120
+import tempfile
 
+nb_execution_cache_path = tempfile.gettempdir() + "/wx-doc-jupyter-cache/"
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
