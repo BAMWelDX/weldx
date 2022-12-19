@@ -1,5 +1,4 @@
-```{eval-rst}
-.. include:: ../../README.md
+```{include} ../../README.md
 ```
 
 ```{toctree}
