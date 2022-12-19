@@ -6,7 +6,7 @@ SHELL := /bin/bash
 DOC = src/
 
 # You can set these variables from the command line.
-SPHINXOPTS    = -v -D nbsphinx_execute="always" --keep-going -W -n -w warn_err.log  -jauto
+SPHINXOPTS    = -v --keep-going -W -n -w warn_err.log  -jauto
 SPHINXBUILD   = LANG=C sphinx-build
 PAPER         =
 
