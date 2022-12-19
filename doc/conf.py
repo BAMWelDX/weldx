@@ -15,8 +15,6 @@
 
 import datetime
 import os
-import pathlib
-import shutil
 import sys
 import typing
 
@@ -34,6 +32,7 @@ def _workaround_imports_typechecking():
 
     So this workaround function has to be executed prior importing weldx.
     """
+
     import ipywidgets  # noqa
     import meshio  # noqa
     import pandas  # noqa
@@ -44,6 +43,13 @@ def _workaround_imports_typechecking():
 
 def _prevent_sphinx_circular_imports_bug():
     # https://github.com/sphinx-doc/sphinx/issues/9243
+    import markdown_it  # noqa
+    import mdit_py_plugins  # noqa
+    import myst_nb.core.execute  # noqa
+    import myst_nb.core.render  # noqa
+    import myst_nb.ext.eval  # noqa
+    import myst_parser  # noqa
+    import myst_parser.mdit_to_docutils.base  # noqa
     import sphinx.builders.html  # noqa
     import sphinx.builders.latex  # noqa
     import sphinx.builders.texinfo  # noqa
@@ -61,33 +67,11 @@ except ModuleNotFoundError:  # fallback for local use
     sys.path.insert(0, os.path.abspath("../"))
     import weldx
 
-
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
 
-tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
-logger.info("tutorials dir: %s", tutorials_dir)
-
-
-# -- copy tutorial files to doc folder -------------------------------------------------
-def _copy_tut_files():
-    # TODO: git move tutorial files to tutorials_dir, then delete this function
-    logger.info("tutorials dir: %s", tutorials_dir)
-    _exts = ("*.ipynb", "*.py")
-    tutorial_files = []
-    for ext in _exts:
-        tutorial_files.extend(pathlib.Path("./../tutorials/").glob(ext))
-    for f in tutorial_files:
-        shutil.copy(f, tutorials_dir)
-
-
-_copy_tut_files()
-
-
 # -- Project information -----------------------------------------------------
-_now = datetime.datetime.now().year
-
 project = "weldx"
-copyright = f"2020 - {_now}, BAM"
+copyright = f"2020 - {datetime.datetime.now().year}, BAM"
 author = "BAM"
 
 # The full version, including alpha/beta/rc tags
@@ -96,15 +80,16 @@ release = weldx.__version__ if weldx.__version__ else "undefined"
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx.ext.napoleon",
+    "myst_parser",
+    # "myst_nb",
     "nbsphinx",
+    "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
@@ -166,13 +151,14 @@ typehints_document_rtype = True
 # The suffix of source filenames.
 source_suffix = {
     ".rst": "restructuredtext",
+    # ".md": "",
 }
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = "index"
+master_doc = "src/index"
 
 # -- nbsphinx configuration -------------------------------------------------
 nbsphinx_execute = "always"
@@ -180,7 +166,6 @@ nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
     "--InlineBackend.rc <figure.dpi=96>",
 ]
-
 
 # This is processed by Jinja2 and inserted before each notebook
 nbsphinx_prolog = r"""
@@ -216,7 +201,6 @@ templates_path = ["_templates"]
 exclude_patterns = [
     "**.ipynb_checkpoints",
 ]
-
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -255,6 +239,7 @@ html_context = {
     "github_version": "master",
     "doc_path": "doc",
 }
+
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
