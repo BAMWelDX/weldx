@@ -35,7 +35,7 @@ class CoordinateSystemManager:
     Notes
     -----
     Learn how to use this class by reading the
-    :doc:`Tutorial <../tutorials/transformations_02_coordinate_system_manager>`.
+    :doc:`tutorial <tutorials/transformations_02_coordinate_system_manager>`.
 
     """
 
