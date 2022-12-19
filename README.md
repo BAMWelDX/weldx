@@ -1,6 +1,6 @@
 # WelDX - data and quality standards for welding research data
 
-______________________________________________________________________
+<hl/>
 
 [![CF](https://anaconda.org/conda-forge/weldx/badges/version.svg)](https://anaconda.org/conda-forge/weldx)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/tutorials/welding_example_01_basics.ipynb)
