@@ -18,5 +18,5 @@ per-file-ignores =
     aws_setup.py:E501
 exclude =
     __init__.py
-    doc/conf.py
+    doc/src/conf.py
 no-accept-encodings = True

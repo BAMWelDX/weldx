@@ -154,6 +154,8 @@ source_suffix = {
     # ".md": "",
 }
 
+myst_footnote_transition = False
+
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
