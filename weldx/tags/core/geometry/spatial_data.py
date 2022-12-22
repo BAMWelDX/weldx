@@ -1,7 +1,6 @@
 from copy import copy
 
 from weldx.asdf.types import WeldxConverter
-from weldx.asdf.util import get_highest_tag_version
 from weldx.geometry import SpatialData
 
 __all__ = ["SpatialDataConverter"]
@@ -27,7 +26,3 @@ class SpatialDataConverter(WeldxConverter):
         if tag == "asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.0":
             node["coordinates"] = Q_(node["coordinates"], "mm")  # legacy
         return SpatialData(**node)
-
-    def select_tag(self, obj, tags, ctx) -> str:
-        """Determine the output tag for serialization."""
-        return get_highest_tag_version(self.tags)
