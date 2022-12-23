@@ -16,18 +16,29 @@ jobs:
           fetch-depth: 0 # Fetch all history for all tags and branches
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/setup-python@v4
+      - uses: CagtayFabry/pydeps2env@main
         with:
-          python-version: '3.10'
-      - uses: actions/cache@v3
+          file: 'pyproject.toml'
+          channels: 'conda-forge defaults'
+          extras: 'test'
+          setup_requires: 'include'
+
+      - uses: mamba-org/provision-with-micromamba@main
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          environment-file: ./environment.yml
+          environment-name: weldx
+          cache-env: true
+          extra-specs: |
+            python=3.10
+            pip
+
+      - name: activate env
+        run: micromamba activate weldx
+
       - name: pip installs
         run: |
-          pip install -e .[test]
+          python -m pip install -e .
+
       - name: run asdf schema pytest
         run: |
           pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/
