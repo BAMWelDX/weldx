@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: '0 6 * * 1'
 
+# execute commands with conda aware shell by default:
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   pytest_asdf:
     name: pytest asdf
