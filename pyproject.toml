@@ -196,7 +196,7 @@ exclude = [
     '__init__.py',
     'doc/conf.py',
 ]
-ignore = ['C408']
+ignore = ['C408','E402']
 line-length = 88
 select = [
     'B',
