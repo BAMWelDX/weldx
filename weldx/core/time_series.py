@@ -193,12 +193,12 @@ class TimeSeries(TimeDependent):
                 self._shape = eval_data.shape
             else:
                 self._shape = (1,)
-        except pint.errors.DimensionalityError:
+        except pint.errors.DimensionalityError as de:
             raise Exception(
                 "Expression can not be evaluated with "
                 '"weldx.Quantity(1, "seconds")"'
                 ". Ensure that every parameter posses the correct unit."
-            )
+            ) from de
 
         # assign internal variables
         self._data = data
