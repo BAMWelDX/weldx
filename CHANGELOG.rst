@@ -11,6 +11,12 @@ dependencies
 
 -  pin ``asdf<2.14`` due to changes in the extension mechanism [:pull:`828`].
 
+
+changes
+=======
+
+-  use Ruff in pre-commit-action [:pull:`824`].
+
 ********************
  0.6.2 (07.11.2022)
 ********************
