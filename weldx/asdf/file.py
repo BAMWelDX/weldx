@@ -545,7 +545,7 @@ class WeldxFile(_ProtectedViewDict):
         KeysView :
             all keys stored at the root of this file.
         """
-        return super(WeldxFile, self).keys()
+        return super().keys()
 
     @classmethod
     def fromkeys(cls, iterable, default=None) -> "WeldxFile":
@@ -702,7 +702,7 @@ class WeldxFile(_ProtectedViewDict):
         object :
             the last item.
         """
-        return super(WeldxFile, self).popitem()
+        return super().popitem()
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.

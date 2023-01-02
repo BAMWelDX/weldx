@@ -590,7 +590,7 @@ class _ProtectedViewDict(MutableMapping):
     """A mutable mapping which protects given keys from manipulation."""
 
     def __init__(self, protected_keys, data=None):
-        super(_ProtectedViewDict, self).__init__()
+        super().__init__()
         self.__data = data if data is not None else dict()
         self.protected_keys = protected_keys
 
