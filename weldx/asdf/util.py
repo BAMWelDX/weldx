@@ -664,7 +664,8 @@ class _ProtectedViewDict(MutableMapping):
         )
 
 
-def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
+# fmt: off
+def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:  # noqa: C901, E501
     """Get a dictionary representation of a weldx schema file with custom formatting.
 
     Parameters
@@ -680,7 +681,7 @@ def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
         The property keys are formatted to reflect the associated Python class.
         Some keys are dropped or reformatted for readability.
     """
-
+    # fmt: on
     if drop is None:
         drop = {}
     if isinstance(schemafile, str):
@@ -692,7 +693,7 @@ def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
     remapped = [header]
 
     def resolve_python_classes(path, key, value):
-        """Parse the tag or type information information to the key string.
+        """Parse the tag or type information to the key string.
 
         This tries to resolves to python class names from 'tag' fields."""
         if not isinstance(value, dict):
