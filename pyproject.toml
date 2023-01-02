@@ -196,6 +196,10 @@ exclude = [
     '__init__.py',
     'doc/conf.py',
 ]
+# TODO: should be the following list, but Ruff does not yet impl all of them.
+#    W503,W504
+#    E203
+#    C408
 ignore = ['C408','E402']
 line-length = 88
 select = [
@@ -204,9 +208,14 @@ select = [
     'E',
     'F',
     'W',
-    'UP',
+    'UP', # pyupgrade
+    'T',  # flake8-print
     #'B950'  # not yet implemented by Ruff.
 ]
+#extend-select = ["D"]
+
+external = ["B950"]
+pydocstyle = {convention = "numpy"}
 pyupgrade = {keep-runtime-typing = true}
 mccabe = {max-complexity = 15}
 target-version = "py38"

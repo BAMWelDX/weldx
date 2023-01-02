@@ -20,15 +20,13 @@ dependencies:
   # graph packages
   - networkx
   # Code quality
-  - black
   - codecov
-  - flake8
-  - isort>=5.1
-  - pydocstyle=5
   - pytest
   - pytest-cov
   - pytest-xdist
   - nbval
+  - ruff
+  - nbqa
   # Plotting
   - ipykernel
   - ipympl
