@@ -336,10 +336,10 @@ class WeldxFile(_ProtectedViewDict):
             if not _custom_schema_path.exists():
                 try:
                     schema = get_schema_path(schema)
-                except ValueError:
+                except ValueError as ve:
                     raise ValueError(
                         f"provided custom_schema '{schema}' " "does not exist."
-                    )
+                    ) from ve
             return schema
 
         if isinstance(custom_schema, (list, tuple)):
@@ -493,7 +493,7 @@ class WeldxFile(_ProtectedViewDict):
                 test = AsdfFile(tree=dict(software=Software(value)))
                 test.validate()
             except ValidationError as ve:
-                raise ValueError(f"Given value has invalid format: {ve}")
+                raise ValueError(f"Given value has invalid format: {ve}") from ve
             self._DEFAULT_SOFTWARE_ENTRY = value
 
     def __enter__(self):
