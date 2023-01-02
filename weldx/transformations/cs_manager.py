@@ -1195,7 +1195,7 @@ class CoordinateSystemManager:
         from networkx import shortest_path
 
         path = shortest_path(self.graph, coordinate_system_name, reference_system_name)
-        path_edges = list(zip(path[:-1], path[1:]))
+        path_edges = list(zip(path[:-1], path[1:]))  # noqa: B905
 
         # handle time inputs
         if time_ref is None:
