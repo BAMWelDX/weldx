@@ -131,7 +131,7 @@ class TimeSeries(TimeDependent):
                 "needs to have a dimension called 'time' with coordinates of type "
                 "'timedelta64[ns]'. The error reported by the comparison function was:"
                 f"\n{e}"
-            )
+            ) from e
 
         if not isinstance(data_array.data, pint.Quantity):
             raise TypeError("The data of the 'DataArray' must be a 'pint.Quantity'.")
@@ -215,9 +215,9 @@ class TimeSeries(TimeDependent):
                 "The expression can not be evaluated with arrays of time deltas. "
                 "Ensure that all parameters that are multiplied with the time "
                 "variable have an outer dimension of size 1. This dimension is "
-                "broadcasted during multiplication. The original error message was:"
+                "broadcast during multiplication. The original error message was:"
                 f' "{str(e)}"'
-            )
+            ) from e
 
     def _interp_time_discrete(self, time: Time) -> xr.DataArray:
         """Interpolate the time series if its data is composed of discrete values."""
