@@ -1206,14 +1206,16 @@ class CoordinateSystemManager:
         elif isinstance(time, str):
             try:
                 time = Time(time, time_ref)
-            except TypeError:
+            except TypeError as e:
                 parent_name = self.get_parent_system_name(time)
                 if parent_name is None:
-                    raise ValueError("The root system has no time dependency.")
+                    raise ValueError("The root system has no time dependency.") from e
 
                 time = self.get_cs(time, parent_name).time  # type: ignore[arg-type]
                 if time is None:
-                    raise ValueError(f'The system "{time}" is not time dependent')
+                    raise ValueError(
+                        f'The system "{time}" is not time dependent'
+                    ) from e
 
         if time is not None:
             time = Time(time, time_ref)

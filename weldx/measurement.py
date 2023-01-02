@@ -548,7 +548,7 @@ class MeasurementChain:
                 raise ValueError(
                     "The provided function is incompatible with the input signals unit."
                     f" \nThe test raised the following exception:\n{e}"
-                )
+                ) from e
             return test_output.data.units
 
         return input_unit
