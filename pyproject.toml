@@ -204,4 +204,6 @@ select = [
     'E',
     'F',
     'W',
+    #'B950'  # not yet implemented by Ruff.
 ]
+mccabe = {max-complexity=15}
