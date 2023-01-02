@@ -278,26 +278,7 @@ class Time:
         time: types_time_like,
         time_ref: types_timestamp_like = None,
     ):
-        # todo: update type hints (see: https://stackoverflow.com/q/46092104/6700329)
-        # problem: ring dependency needs to be solved
-        if issubclass(type(time), TimeDependent):
-            time = time.time  # type: ignore[union-attr] # mypy doesn't filter correctly
-        if isinstance(time, Time):
-            time_ref = time_ref if time_ref is not None else time._time_ref
-            time = time._time
-
-        if isinstance(time, _data_base_types):
-            pass
-        elif isinstance(time, pint.Quantity):
-            time = Time._convert_quantity(time)
-        elif isinstance(time, (xr.DataArray, xr.Dataset)):
-            time = Time._convert_xarray(time)
-        else:
-            time = Time._convert_other(time)
-
-        # catch scalar Index-objects
-        if isinstance(time, pd.Index) and len(time) == 1:
-            time = time[0]
+        time, time_ref = self._get_time_input(time, time_ref)
 
         # sanity check
         if not isinstance(time, _data_base_types):
@@ -308,7 +289,7 @@ class Time:
             if isinstance(time, pd.Timedelta):
                 time = time + time_ref
 
-        if isinstance(time, pd.TimedeltaIndex) & (time_ref is not None):
+        if isinstance(time, pd.TimedeltaIndex) and (time_ref is not None):
             time = time + time_ref
 
         if isinstance(time, pd.Index) and not time.is_monotonic_increasing:
@@ -316,6 +297,28 @@ class Time:
 
         self._time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = time
         self._time_ref: pd.Timestamp = time_ref
+
+    @staticmethod
+    def _get_time_input(time, time_ref):
+        # todo: update type hints (see: https://stackoverflow.com/q/46092104/6700329)
+        # problem: ring dependency needs to be solved
+        if issubclass(type(time), TimeDependent):
+            time = time.time  # type: ignore[union-attr] # mypy doesn't filter correctly
+        if isinstance(time, Time):
+            time_ref = time_ref if time_ref is not None else time._time_ref
+            time = time._time
+        if isinstance(time, _data_base_types):
+            pass
+        elif isinstance(time, pint.Quantity):
+            time = Time._convert_quantity(time)
+        elif isinstance(time, (xr.DataArray, xr.Dataset)):
+            time = Time._convert_xarray(time)
+        else:
+            time = Time._convert_other(time)
+        # catch scalar Index-objects
+        if isinstance(time, pd.Index) and len(time) == 1:
+            time = time[0]
+        return time, time_ref
 
     def __add__(self, other: types_time_like) -> Time:
         """Element-wise addition between `Time` object and compatible types."""
@@ -374,10 +377,10 @@ class Time:
             raise AttributeError(f"Dunder method '{item}' not implemented for 'Time'.")
         try:
             return getattr(self.as_pandas_index(), item)
-        except AttributeError:
+        except AttributeError as ae:
             raise AttributeError(
                 f"Neither 'Time' object nor its pandas index has attribute '{item}'"
-            )
+            ) from ae
 
     def __repr__(self):
         """Console info."""
