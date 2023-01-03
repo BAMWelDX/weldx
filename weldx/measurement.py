@@ -281,6 +281,8 @@ class MeasurementChain:
             and self._graph.edges == other._graph.edges
         )
 
+    __hash__ = None
+
     @classmethod
     def from_dict(cls, dictionary: dict) -> "MeasurementChain":
         """Create a measurement chain from a dictionary.

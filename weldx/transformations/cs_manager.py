@@ -185,6 +185,8 @@ class CoordinateSystemManager:
 
         return True
 
+    __hash__ = None
+
     @property
     def lcs(self) -> list[LocalCoordinateSystem]:
         """Get a list of all attached `LocalCoordinateSystem` instances.

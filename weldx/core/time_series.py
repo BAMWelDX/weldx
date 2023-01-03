@@ -102,6 +102,8 @@ class TimeSeries(TimeDependent):
 
         return self._data == other.data
 
+    __hash__ = None
+
     def __repr__(self):
         """Give __repr__ output."""
         representation = "<TimeSeries>"

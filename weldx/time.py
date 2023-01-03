@@ -351,6 +351,8 @@ class Time:
         """
         return self._time == Time(other).as_pandas()
 
+    __hash__ = None
+
     def __len__(self):
         """Return the length of the data."""
         return self.as_pandas_index().__len__()
