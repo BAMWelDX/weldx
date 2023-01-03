@@ -124,12 +124,7 @@ filterwarnings = [
     "error::pint.UnitStrippedWarning",
 ]
 
-# TODO: migrate this to ruff section
-[tool.isort]
-profile = "black"
-default_section = "THIRDPARTY"
-known_first_party = "weldx"
-sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER" # TODO: or list?
+
 
 [tool.coverage.run]
 source = ["weldx"]
@@ -237,7 +232,16 @@ pyupgrade = {keep-runtime-typing = true}
 
 mccabe = {max-complexity = 15}  # max branches inside a function.
 
+[tool.ruff.isort]
+# TODO: the lack of support for these former options does not affect the current import ordering
+#profile = "black"
+#default_section = "THIRDPARTY"
+known-first-party = ['weldx']
+#sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER" # TODO: or list?
 
-# TODO: fix
-#[flake8_import_conventions.aliases]
-#xarray = 'xr'
+[tool.ruff.flake8-import-conventions.aliases]
+'xarray' = 'xr'
+'numpy' = 'np'
+'matplotlib.pyplot' = 'plt'
+'pandas' = 'pd'
+'seaborn' = 'sns'
