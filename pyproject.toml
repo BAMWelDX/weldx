@@ -205,6 +205,7 @@ line-length = 88
 select = [
     'B',
     'C',
+    'D',
     'E',
     'F',
     'W',
@@ -219,3 +220,6 @@ pydocstyle = {convention = "numpy"}
 pyupgrade = {keep-runtime-typing = true}
 mccabe = {max-complexity = 15}
 target-version = "py38"
+
+
+per-file-ignores = {"**/{tests,tags,asdf}/**" = ["D"]}
