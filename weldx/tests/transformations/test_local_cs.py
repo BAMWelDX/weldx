@@ -9,8 +9,8 @@ import pandas as pd
 import pint
 import pytest
 import xarray as xr
-from pandas import TimedeltaIndex as TDI  # noqa
-from pandas import Timestamp as TS  # noqa
+from pandas import TimedeltaIndex as TDI
+from pandas import Timestamp as TS
 from pandas import date_range
 from pint import DimensionalityError
 
@@ -20,7 +20,7 @@ from weldx.constants import Q_
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
 from weldx.time import Time
-from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
+from weldx.transformations import LocalCoordinateSystem as LCS
 from weldx.transformations import WXRotation
 
 from ._util import check_coordinate_system, check_cs_close, r_mat_y, r_mat_z

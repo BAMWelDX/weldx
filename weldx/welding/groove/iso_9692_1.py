@@ -55,7 +55,7 @@ def _get_bounds(points):
 
 def _compute_cross_sect_shape_points(
     points: list[list[Union[Point2D, tuple]]]
-) -> pint.Quantity:  # noqa
+) -> pint.Quantity:
     # Assumes that we have two separate shapes for each workpiece
     # 1. compute the total area of all workpieces
     # 2. compute bounding box of all pieces (this includes the rift)

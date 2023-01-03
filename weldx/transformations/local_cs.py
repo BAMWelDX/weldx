@@ -792,7 +792,7 @@ class LocalCoordinateSystem(TimeDependent):
 
     def plot(
         self,
-        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
+        axes: "matplotlib.axes.Axes" = None,
         color: str = None,
         label: str = None,
         time: types_time_like = None,

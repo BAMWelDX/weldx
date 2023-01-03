@@ -209,7 +209,8 @@ select = [
     'T2',  # flake8-print
     'I001',  # isort
     'ICN', # import conventions, e.g. import numpy as np
-    #'B950'  # not yet implemented by Ruff.
+    #'B950',  # not yet implemented by Ruff.
+    'RUF100', # ensure 'noqa' declarations are still valid.
 ]
 
 # Allow pydocstyle violations in certain areas.

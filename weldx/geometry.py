@@ -1453,7 +1453,7 @@ class Profile:
         if isinstance(color, str):  # single color
             color = [color] * len(raster_data)
 
-        for segment, c in zip(raster_data, color):  # noqa: B905
+        for segment, c in zip(raster_data, color):
             ax.plot(segment[0], segment[1], line_style, label=label, color=c)
 
     @property
@@ -2511,13 +2511,13 @@ class Geometry:
         self,
         profile_raster_width: QuantityLike = "1mm",
         trace_raster_width: QuantityLike = "50mm",
-        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
+        axes: "matplotlib.axes.Axes" = None,
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         limits: "weldx.visualization.types.types_limits" = None,
         show_wireframe: bool = True,
         backend: str = "mpl",
-    ) -> "matplotlib.axes.Axes":  # noqa: F821
+    ) -> "matplotlib.axes.Axes":
         """Plot the geometry.
 
         Parameters
@@ -2874,13 +2874,13 @@ class SpatialData:
 
     def plot(
         self,
-        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
+        axes: "matplotlib.axes.Axes" = None,
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
         limits: "weldx.visualization.types.types_limits" = None,
         backend: str = "mpl",
-    ) -> "matplotlib.axes.Axes":  # noqa: F821
+    ) -> "matplotlib.axes.Axes":
         """Plot the spatial data.
 
         Parameters

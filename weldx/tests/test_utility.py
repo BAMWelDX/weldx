@@ -465,7 +465,7 @@ class TestCompareNested:
             (1, 2),
         ],
     )
-    def test_compare_nested_raise(a, b):  # noqa: D102
+    def test_compare_nested_raise(a, b):
         """non-nested types should raise TypeError."""
         with pytest.raises(TypeError):
             ut.compare_nested(a, b)
@@ -583,7 +583,7 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         self.b["equipment"][0].name = "broken device"
         assert not ut.compare_nested(self.a, self.b)
 
-    def test_coordinate_systems_modified(self):  # noqa: D102
+    def test_coordinate_systems_modified(self):
         """Manipulate one CSM and check if it gets picked up by comparison."""
         csm_org = self.a["coordinate_systems"]
         csm_copy = self.b["coordinate_systems"]
