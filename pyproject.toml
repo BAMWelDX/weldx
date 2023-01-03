@@ -222,7 +222,7 @@ select = [
     'T2',  # flake8-print
     #'B950'  # not yet implemented by Ruff.
 ]
-kaputt
+
 # Allow pydocstyle violations in certain areas.
 per-file-ignores."**/{tests,tags,asdf,devtools}/**" = ["D"]
 per-file-ignores."conftest.py" = ["D"]
