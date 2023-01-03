@@ -15,9 +15,8 @@ from scipy.spatial.transform import Rotation
 import weldx.transformations as tf
 from weldx.asdf.util import write_buffer, write_read_buffer
 from weldx.constants import META_ATTR, Q_
-from weldx.core import GenericSeries
+from weldx.core import GenericSeries, TimeSeries
 from weldx.core import MathematicalExpression as ME  # nopep8
-from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 from weldx.tags.core.file import ExternalFile
 from weldx.tests._helpers import get_test_name
