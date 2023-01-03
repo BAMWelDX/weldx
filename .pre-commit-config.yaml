@@ -40,9 +40,7 @@ repos:
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.6.0
     hooks:
-      - id: nbqa-black
-      - id: nbqa-isort
-      - id: nbqa-ruff
+      - id: nbqa-ruff  # ruff does isort and black
         args:
          - --fix
          - --force-exclude
