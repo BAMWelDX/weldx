@@ -295,6 +295,7 @@ class TimeSeries(TimeDependent):
 
     @interpolation.setter
     def interpolation(self, interpolation):
+        """Set the interpolation."""
         if isinstance(self._data, xr.DataArray):
             if interpolation not in self._valid_interpolations:
                 raise ValueError(

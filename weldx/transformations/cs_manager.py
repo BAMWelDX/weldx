@@ -187,8 +187,7 @@ class CoordinateSystemManager:
 
     @property
     def lcs(self) -> list[LocalCoordinateSystem]:
-        """Get a list of all attached `LocalCoordinateSystem` \
-        instances.
+        """Get a list of all attached `LocalCoordinateSystem` instances.
 
         Only the defined systems and not the automatically generated inverse systems
         are included.

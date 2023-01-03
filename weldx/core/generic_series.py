@@ -605,7 +605,8 @@ class GenericSeries:
 
     @interpolation.setter
     def interpolation(self, val: str):
-        if val not in [
+        """Set the interpolation."""
+        if val not in (
             "linear",
             "step",
             "nearest",
@@ -613,7 +614,7 @@ class GenericSeries:
             "slinear",
             "quadratic",
             "cubic",
-        ]:
+        ):
             raise ValueError(f"'{val}' is not a supported interpolation method.")
         self._interpolation = val
 

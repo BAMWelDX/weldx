@@ -66,7 +66,6 @@ class WXRotation(_Rotation):
 
         See `scipy.spatial.transform.Rotation.from_euler` docs for details.
         """
-
         if isinstance(angles, pint.Quantity):
             if angles.u == U_(""):
                 angles = angles.to("rad")

@@ -1337,7 +1337,7 @@ class Profile:
 
     def _ipython_display_(self):
         """Use __str__ output in notebooks."""
-        print(str(self))
+        print(str(self))  # noqa: T201
 
     @property
     def num_shapes(self) -> int:
