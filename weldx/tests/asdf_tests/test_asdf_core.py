@@ -632,7 +632,6 @@ class TestExternalFile:
         if hostname is not None:
             assert hostname == ef.hostname
         else:
-            print(hostname)
             assert isinstance(ef.hostname, str)
 
     # test_init_exceptions -------------------------------------------------------------
