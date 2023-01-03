@@ -5,7 +5,6 @@ import pint
 from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxConverter
-from weldx.asdf.util import get_highest_tag_version
 from weldx.constants import Q_
 from weldx.core import TimeSeries
 
@@ -45,10 +44,6 @@ class TimeSeriesConverter(WeldxConverter):
             return TimeSeries(values, time, interpolation)
 
         return TimeSeries(node["expression"])  # mathexpression
-
-    def select_tag(self, obj, tags, ctx) -> str:
-        """Determine the output tag for serialization."""
-        return get_highest_tag_version(self.tags)
 
     @staticmethod
     def shape_from_tagged(node: TaggedDict) -> list[int]:
