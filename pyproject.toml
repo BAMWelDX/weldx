@@ -124,6 +124,7 @@ filterwarnings = [
     "error::pint.UnitStrippedWarning",
 ]
 
+# TODO: migrate this to ruff section
 [tool.isort]
 profile = "black"
 default_section = "THIRDPARTY"
@@ -192,6 +193,7 @@ follow_imports = "skip"
 ignore_errors = true
 
 [tool.ruff]
+target-version = "py38"  # designated Python version
 exclude = [
     '__init__.py',
     'doc/conf.py',
@@ -200,26 +202,42 @@ exclude = [
 #    W503,W504
 #    E203
 #    C408
-ignore = ['C408','E402']
+ignore = [
+    'C408',
+    #'E203',
+    'E402',
+    #'W503',
+    #'W504',
+    "D203", "D211", "D213"
+]
 line-length = 88
 select = [
     'B',
     'C',
-    'D',
+    #'D', # note: all relevant D's will be set by setting pydocstyle.convention=numpy!
     'E',
     'F',
     'W',
     'UP', # pyupgrade
-    'T',  # flake8-print
+    'T2',  # flake8-print
     #'B950'  # not yet implemented by Ruff.
 ]
-#extend-select = ["D"]
+kaputt
+# Allow pydocstyle violations in certain areas.
+per-file-ignores."**/{tests,tags,asdf,devtools}/**" = ["D"]
+per-file-ignores."conftest.py" = ["D"]
+per-file-ignores."tutorials/util.py" = ["D"]
+# Allow prints in certain areas.
+per-file-ignores."**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = ["T2"]
 
 external = ["B950"]
 pydocstyle = {convention = "numpy"}
+#extend-ignore = ["D203", "D211", "D213"]
 pyupgrade = {keep-runtime-typing = true}
-mccabe = {max-complexity = 15}
-target-version = "py38"
+
+mccabe = {max-complexity = 15}  # max branches inside a function.
 
 
-per-file-ignores = {"**/{tests,tags,asdf}/**" = ["D"]}
+# TODO: fix
+#[flake8_import_conventions.aliases]
+#xarray = 'xr'
