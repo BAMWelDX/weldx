@@ -101,12 +101,6 @@ where = ["."]
 write_to = "weldx/_version.py"
 write_to_template = '__version__ = "{version}"'
 
-[tool.pydocstyle]
-# convention numpy is currently equivalent to ignoring 'D107', 'D203', 'D212', 'D213', 'D402', 'D413'
-convention = "numpy"
-match = "(?!__)(?!_version)(?!conftest).*\\.py"
-match_dir = "^(?!(tests|tags|asdf)).*"
-
 [tool.pytest.ini_options]
 addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules"
 #addopts = --tb=short --color=yes -rs -p no:cov
@@ -123,8 +117,6 @@ filterwarnings = [
     "ignore:Passing method to :FutureWarning:xarray.*:",
     "error::pint.UnitStrippedWarning",
 ]
-
-
 
 [tool.coverage.run]
 source = ["weldx"]
@@ -207,14 +199,16 @@ ignore = [
 ]
 line-length = 88
 select = [
-    'B',
-    'C',
+    'B',  # flake8-bugbear
+    'C',  # flake8-comprehensions
     #'D', # note: all relevant D's will be set by setting pydocstyle.convention=numpy!
-    'E',
-    'F',
-    'W',
+    'E',  # pycodestyles
+    'F',  # pyflakes
+    'W',  # pycodestyle warnings
     'UP', # pyupgrade
     'T2',  # flake8-print
+    'I001',  # isort
+    'ICN', # import conventions, e.g. import numpy as np
     #'B950'  # not yet implemented by Ruff.
 ]
 
@@ -233,15 +227,7 @@ pyupgrade = {keep-runtime-typing = true}
 mccabe = {max-complexity = 15}  # max branches inside a function.
 
 [tool.ruff.isort]
-# TODO: the lack of support for these former options does not affect the current import ordering
-#profile = "black"
-#default_section = "THIRDPARTY"
 known-first-party = ['weldx']
-#sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER" # TODO: or list?
 
-[tool.ruff.flake8-import-conventions.aliases]
-'xarray' = 'xr'
-'numpy' = 'np'
-'matplotlib.pyplot' = 'plt'
-'pandas' = 'pd'
-'seaborn' = 'sns'
+[tool.ruff.flake8-import-conventions]
+extend-aliases = {xarray = 'xr'}
