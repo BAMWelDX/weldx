@@ -1005,4 +1005,4 @@ class _HeaderVisualizer:
 
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
-        print(get_yaml_header(buff))
+        print(get_yaml_header(buff))  # noqa: T201
