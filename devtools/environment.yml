@@ -26,6 +26,7 @@ dependencies:
   - pytest-xdist
   - nbval
   - ruff
+  - black
   - nbqa
   # Plotting
   - ipykernel
