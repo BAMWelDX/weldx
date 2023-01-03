@@ -664,8 +664,9 @@ class _ProtectedViewDict(MutableMapping):
         )
 
 
-# fmt: off
-def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:  # noqa: C901, E501
+def get_schema_tree(  # noqa: C901  # ignore too high complexity
+    schemafile: Union[str, Path], *, drop: set = None
+) -> dict:
     """Get a dictionary representation of a weldx schema file with custom formatting.
 
     Parameters
@@ -681,7 +682,6 @@ def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict: 
         The property keys are formatted to reflect the associated Python class.
         Some keys are dropped or reformatted for readability.
     """
-    # fmt: on
     if drop is None:
         drop = {}
     if isinstance(schemafile, str):
