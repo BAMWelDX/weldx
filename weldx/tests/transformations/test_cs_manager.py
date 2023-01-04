@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import TimedeltaIndex as TDI  # noqa
-from pandas import Timestamp as TS  # noqa
+from pandas import TimedeltaIndex as TDI
+from pandas import Timestamp as TS
 
 import weldx.transformations as tf
 from weldx.constants import Q_
@@ -16,8 +16,8 @@ from weldx.core import MathematicalExpression, TimeSeries
 from weldx.geometry import SpatialData
 from weldx.tests._helpers import get_test_name, matrix_is_close
 from weldx.time import Time, types_time_like, types_timestamp_like
-from weldx.transformations import CoordinateSystemManager as CSM  # noqa
-from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
+from weldx.transformations import CoordinateSystemManager as CSM
+from weldx.transformations import LocalCoordinateSystem as LCS
 from weldx.transformations import WXRotation
 
 from ._util import check_coordinate_system, check_cs_close, r_mat_x, r_mat_y, r_mat_z

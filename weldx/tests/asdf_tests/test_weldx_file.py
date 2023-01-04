@@ -25,43 +25,43 @@ SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 class _ReadOnlyFile:
     """Simulate a read-only file."""
 
-    def __init__(self, tmpdir):  # noqa: D107
+    def __init__(self, tmpdir):
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
         with open(fn, "wb") as fh:
             asdf.AsdfFile(tree=dict(hi="there")).write_to(fh)
         self.mode = "rb"
         self.file_read_only = open(fn, mode=self.mode)
 
-    def read(self, *args, **kwargs):  # noqa: D102
+    def read(self, *args, **kwargs):
         return self.file_read_only.read(*args, **kwargs)
 
-    def readline(self, limit=-1):  # noqa: D102
+    def readline(self, limit=-1):
         return self.file_read_only.readline(limit)
 
     @staticmethod
-    def readable():  # noqa: D102
+    def readable():
         return True
 
 
 class _WritableFile:
     """Example of a class implementing SupportsFileReadWrite."""
 
-    def __init__(self):  # noqa: D107
+    def __init__(self):
         self.to_wrap = BytesIO()
 
-    def read(self, *args, **kwargs):  # noqa: D102
+    def read(self, *args, **kwargs):
         return self.to_wrap.read(*args, **kwargs)
 
-    def readline(self, *args, **kwargs):  # noqa: D102
+    def readline(self, *args, **kwargs):
         return self.to_wrap.readline(*args, **kwargs)
 
-    def write(self, *args, **kwargs):  # noqa: D102
+    def write(self, *args, **kwargs):
         return self.to_wrap.write(*args, **kwargs)
 
-    def tell(self):  # noqa: D102
+    def tell(self):
         return self.to_wrap.tell()
 
-    def seek(self, *args, **kwargs):  # noqa: D102
+    def seek(self, *args, **kwargs):
         return self.to_wrap.seek(*args, **kwargs)
 
     def flush(self):

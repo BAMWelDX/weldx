@@ -15,6 +15,7 @@ changes
 =======
 
 - remove outdated calls to ``weldx.asdf.util.get_highest_tag_version`` in ``TimeSeries`` and ``SpatialData`` converters [:pull:`831`]
+-  use Ruff in pre-commit-action [:pull:`824`].
 
 ********************
  0.6.2 (07.11.2022)

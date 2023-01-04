@@ -15,9 +15,8 @@ from scipy.spatial.transform import Rotation
 import weldx.transformations as tf
 from weldx.asdf.util import write_buffer, write_read_buffer
 from weldx.constants import META_ATTR, Q_
-from weldx.core import GenericSeries
+from weldx.core import GenericSeries, TimeSeries
 from weldx.core import MathematicalExpression as ME  # nopep8
-from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 from weldx.tags.core.file import ExternalFile
 from weldx.tests._helpers import get_test_name
@@ -632,7 +631,6 @@ class TestExternalFile:
         if hostname is not None:
             assert hostname == ef.hostname
         else:
-            print(hostname)
             assert isinstance(ef.hostname, str)
 
     # test_init_exceptions -------------------------------------------------------------

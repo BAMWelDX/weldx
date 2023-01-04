@@ -101,12 +101,6 @@ where = ["."]
 write_to = "weldx/_version.py"
 write_to_template = '__version__ = "{version}"'
 
-[tool.pydocstyle]
-# convention numpy is currently equivalent to ignoring 'D107', 'D203', 'D212', 'D213', 'D402', 'D413'
-convention = "numpy"
-match = "(?!__)(?!_version)(?!conftest).*\\.py"
-match_dir = "^(?!(tests|tags|asdf)).*"
-
 [tool.pytest.ini_options]
 addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules"
 #addopts = --tb=short --color=yes -rs -p no:cov
@@ -123,12 +117,6 @@ filterwarnings = [
     "ignore:Passing method to :FutureWarning:xarray.*:",
     "error::pint.UnitStrippedWarning",
 ]
-
-[tool.isort]
-profile = "black"
-default_section = "THIRDPARTY"
-known_first_party = "weldx"
-sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER" # TODO: or list?
 
 [tool.coverage.run]
 source = ["weldx"]
@@ -190,3 +178,57 @@ ignore_errors = true
 module = "xarray"
 follow_imports = "skip"
 ignore_errors = true
+
+[tool.ruff]
+target-version = "py38"  # designated Python version
+exclude = [
+    '__init__.py',
+    'doc/conf.py',
+]
+# TODO: should be the following list, but Ruff does not yet impl all of them.
+#    W503,W504
+#    E203
+#    C408
+ignore = [
+    'C408',
+    #'E203',
+    'E402',
+    #'W503',
+    #'W504',
+    "D203", "D211", "D213"
+]
+line-length = 88
+select = [
+    'B',  # flake8-bugbear
+    'C',  # flake8-comprehensions
+    #'D', # note: all relevant D's will be set by setting pydocstyle.convention=numpy!
+    'E',  # pycodestyles
+    'F',  # pyflakes
+    'W',  # pycodestyle warnings
+    'UP', # pyupgrade
+    'T2',  # flake8-print
+    'I001',  # isort
+    'ICN', # import conventions, e.g. import numpy as np
+    #'B950',  # not yet implemented by Ruff.
+    'RUF100', # ensure 'noqa' declarations are still valid.
+]
+
+# Allow pydocstyle violations in certain areas.
+per-file-ignores."**/{tests,tags,asdf,devtools}/**" = ["D"]
+per-file-ignores."conftest.py" = ["D"]
+per-file-ignores."tutorials/*" = ["D"]
+# Allow prints in certain areas.
+per-file-ignores."**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = ["T2"]
+
+external = ["B950"]
+pydocstyle = {convention = "numpy"}
+#extend-ignore = ["D203", "D211", "D213"]
+pyupgrade = {keep-runtime-typing = true}
+
+mccabe = {max-complexity = 15}  # max branches inside a function.
+
+[tool.ruff.isort]
+known-first-party = ['weldx']
+
+[tool.ruff.flake8-import-conventions]
+extend-aliases = {xarray = 'xr'}

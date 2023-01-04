@@ -298,8 +298,10 @@ class _EqCompareNested:
         # Key not found in b, values not equal, more elements in a than in b
         except (KeyError, RuntimeError, IndexError):
             return False
-        except TypeError:
-            raise TypeError("One of a or b is not a nested data structure (or a set).")
+        except TypeError as e:
+            raise TypeError(
+                "One of a or b is not a nested data structure (or a set)."
+            ) from e
 
         return True
 
@@ -402,7 +404,7 @@ def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
 def check_matplotlib_available(func, *args, **kwargs):
     """Emit a warning if matplotlib is not available."""
     try:
-        import matplotlib.pyplot as _  # noqa: F401
+        import matplotlib.pyplot as plt  # noqa: F401
     except ModuleNotFoundError:
         warnings.warn(
             "Matplotlib unavailable! Cannot plot. "

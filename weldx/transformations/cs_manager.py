@@ -185,10 +185,11 @@ class CoordinateSystemManager:
 
         return True
 
+    __hash__ = None
+
     @property
     def lcs(self) -> list[LocalCoordinateSystem]:
-        """Get a list of all attached `LocalCoordinateSystem` \
-        instances.
+        """Get a list of all attached `LocalCoordinateSystem` instances.
 
         Only the defined systems and not the automatically generated inverse systems
         are included.
@@ -1206,14 +1207,16 @@ class CoordinateSystemManager:
         elif isinstance(time, str):
             try:
                 time = Time(time, time_ref)
-            except TypeError:
+            except TypeError as e:
                 parent_name = self.get_parent_system_name(time)
                 if parent_name is None:
-                    raise ValueError("The root system has no time dependency.")
+                    raise ValueError("The root system has no time dependency.") from e
 
                 time = self.get_cs(time, parent_name).time  # type: ignore[arg-type]
                 if time is None:
-                    raise ValueError(f'The system "{time}" is not time dependent')
+                    raise ValueError(
+                        f'The system "{time}" is not time dependent'
+                    ) from e
 
         if time is not None:
             time = Time(time, time_ref)
@@ -1512,7 +1515,7 @@ class CoordinateSystemManager:
     def plot(
         self,
         backend: str = "mpl",
-        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
+        axes: "matplotlib.axes.Axes" = None,
         reference_system: str = None,
         coordinate_systems: list[str] = None,
         data_sets: list[str] = None,
@@ -1748,7 +1751,7 @@ class CoordinateSystemManager:
         """Create a CSM from a yaml tree dictionary."""
         graph = node["graph"]
         for edge in graph.edges:
-            if not (edge[1], edge[0]) in graph.edges:
+            if (edge[1], edge[0]) not in graph.edges:
                 graph.add_edge(
                     edge[1],
                     edge[0],
