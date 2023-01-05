@@ -23,7 +23,6 @@ jobs:
           - "2.12"
           - "2.13"
           - "2.14"
-          #- TODO: this will grow in the future...
     name: pytest asdf
     runs-on: ubuntu-latest
     steps:
@@ -51,9 +50,9 @@ jobs:
       - name: activate env
         run: micromamba activate weldx
 
-      - name: pip installs
+      - name: pip install weldx-dev and asdf-matrix-version
         run: |
-          python -m pip install -e . asdf~=${{ matrix.asdf_version }}  # TODO: how can we avoid trouble with Conda pkg and pip install?
+          python -m pip install -e . asdf~=${{ matrix.asdf_version }}
 
       - name: run asdf schema pytest
         run: |
