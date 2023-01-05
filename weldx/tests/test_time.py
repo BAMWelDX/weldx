@@ -8,9 +8,8 @@ import pandas as pd
 import pytest
 import xarray as xr
 from pandas import DatetimeIndex as DTI
-from pandas import Timedelta
+from pandas import Timedelta, Timestamp, date_range
 from pandas import TimedeltaIndex as TDI
-from pandas import Timestamp, date_range
 from pint import DimensionalityError
 
 from weldx.constants import Q_

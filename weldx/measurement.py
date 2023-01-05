@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Union  # noqa: F401
+from typing import TYPE_CHECKING, Union
 from warnings import warn
 
 import pint
@@ -48,11 +48,11 @@ class Signal:
     def plot(
         self,
         time: Union[TimedeltaIndex, Quantity] = None,
-        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
+        axes: "matplotlib.axes.Axes" = None,
         data_name: str = "values",
         time_unit: Union[str, Unit] = None,
         **mpl_kwargs,
-    ) -> "matplotlib.axes.Axes":  # noqa: F821
+    ) -> "matplotlib.axes.Axes":
         """Plot the time dependent data of the `Signal`.
 
         Parameters
@@ -280,6 +280,8 @@ class MeasurementChain:
             and self._graph.nodes == other._graph.nodes
             and self._graph.edges == other._graph.edges
         )
+
+    __hash__ = None
 
     @classmethod
     def from_dict(cls, dictionary: dict) -> "MeasurementChain":
@@ -548,7 +550,7 @@ class MeasurementChain:
                 raise ValueError(
                     "The provided function is incompatible with the input signals unit."
                     f" \nThe test raised the following exception:\n{e}"
-                )
+                ) from e
             return test_output.data.units
 
         return input_unit

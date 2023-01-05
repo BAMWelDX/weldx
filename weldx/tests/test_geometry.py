@@ -2465,7 +2465,6 @@ def test_trace_rasterization():
     data = trace.rasterize("1000mm")
 
     assert data.shape[1] == 2
-    print(data[:, 0])
     assert vector_is_close([-3, 2.5, 5], data[:, 0].m)
     assert vector_is_close([-3, 4.5, 4], data[:, 1].m)
 
@@ -2953,7 +2952,6 @@ def get_test_geometry_variable_profile():
 
     """
     profile = get_test_profile()
-    print(Q_([0, 1], "cm")[0])
     variable_profile = geo.VariableProfile(
         [profile, profile], Q_([0, 1], "cm"), [geo.linear_profile_interpolation_sbs]
     )

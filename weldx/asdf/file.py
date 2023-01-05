@@ -253,6 +253,43 @@ class WeldxFile(_ProtectedViewDict):
         self.sync_upon_close = bool(sync) & (self.mode == "rw")
         self.software_history_entry = software_history_entry
 
+        file_like, new_file_created = self._handle_file_input(
+            filename_or_file_like, mode
+        )
+
+        # If we have data to write, we do it first, so a WeldxFile is always in sync.
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                category=AsdfWarning,
+                action="error",
+                message="asdf.extensions plugin from package weldx.*",
+            )  # we turn asdf warnings about loading the weldx extension into an error.
+            if tree or new_file_created:
+                if self._schema_on_write:
+                    asdffile_kwargs["custom_schema"] = self._schema_on_write
+                asdf_file = self._write_tree(
+                    file_like,
+                    tree,
+                    asdffile_kwargs,
+                    write_kwargs,
+                    new_file_created,
+                )
+                if isinstance(file_like, SupportsFileReadWrite):
+                    file_like.seek(0)
+            else:
+                if self._schema_on_read:
+                    asdffile_kwargs["custom_schema"] = self._schema_on_read
+                asdf_file = open_asdf(
+                    file_like,
+                    mode=self.mode,
+                    **asdffile_kwargs,
+                )
+        self._asdf_handle: AsdfFile = asdf_file
+
+        # initialize protected key interface.
+        super().__init__(protected_keys=_PROTECTED_KEYS, data=self._asdf_handle.tree)
+
+    def _handle_file_input(self, filename_or_file_like, mode):
         new_file_created = False
         if filename_or_file_like is None:
             filename_or_file_like = BytesIO()
@@ -264,7 +301,7 @@ class WeldxFile(_ProtectedViewDict):
                 filename_or_file_like, mode
             )
             self._in_memory = False
-            self._close = True
+            self._close = True  # close our own buffer 
         elif isinstance(filename_or_file_like, get_args(types_file_like)):
             if isinstance(filename_or_file_like, BytesIO):
                 self._in_memory = True
@@ -286,38 +323,7 @@ class WeldxFile(_ProtectedViewDict):
                 f"Unsupported input type '{type(filename_or_file_like)}'."
                 f" Should be one of {_supported}."
             )
-
-        # If we have data to write, we do it first, so a WeldxFile is always in sync.
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                category=AsdfWarning,
-                action="error",
-                message="asdf.extensions plugin from package weldx.*",
-            )  # we turn asdf warnings about loading the weldx extension into an error.
-            if tree or new_file_created:
-                if self._schema_on_write:
-                    asdffile_kwargs["custom_schema"] = self._schema_on_write
-                asdf_file = self._write_tree(
-                    filename_or_file_like,
-                    tree,
-                    asdffile_kwargs,
-                    write_kwargs,
-                    new_file_created,
-                )
-                if isinstance(filename_or_file_like, SupportsFileReadWrite):
-                    filename_or_file_like.seek(0)
-            else:
-                if self._schema_on_read:
-                    asdffile_kwargs["custom_schema"] = self._schema_on_read
-                asdf_file = open_asdf(
-                    filename_or_file_like,
-                    mode=self.mode,
-                    **asdffile_kwargs,
-                )
-        self._asdf_handle: AsdfFile = asdf_file
-
-        # initialize protected key interface.
-        super().__init__(protected_keys=_PROTECTED_KEYS, data=self._asdf_handle.tree)
+        return filename_or_file_like, new_file_created
 
     def _handle_custom_schema(self, custom_schema):
         self._schema_on_read = self._schema_on_write = None
@@ -330,10 +336,10 @@ class WeldxFile(_ProtectedViewDict):
             if not _custom_schema_path.exists():
                 try:
                     schema = get_schema_path(schema)
-                except ValueError:
+                except ValueError as ve:
                     raise ValueError(
                         f"provided custom_schema '{schema}' " "does not exist."
-                    )
+                    ) from ve
             return schema
 
         if isinstance(custom_schema, (list, tuple)):
@@ -487,7 +493,7 @@ class WeldxFile(_ProtectedViewDict):
                 test = AsdfFile(tree=dict(software=Software(value)))
                 test.validate()
             except ValidationError as ve:
-                raise ValueError(f"Given value has invalid format: {ve}")
+                raise ValueError(f"Given value has invalid format: {ve}") from ve
             self._DEFAULT_SOFTWARE_ENTRY = value
 
     def __enter__(self):
@@ -539,7 +545,7 @@ class WeldxFile(_ProtectedViewDict):
         KeysView :
             all keys stored at the root of this file.
         """
-        return super(WeldxFile, self).keys()
+        return super().keys()
 
     @classmethod
     def fromkeys(cls, iterable, default=None) -> "WeldxFile":
@@ -696,7 +702,7 @@ class WeldxFile(_ProtectedViewDict):
         object :
             the last item.
         """
-        return super(WeldxFile, self).popitem()
+        return super().popitem()
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -950,8 +956,10 @@ class WeldxFile(_ProtectedViewDict):
 class _HeaderVisualizer:
     def __init__(self, asdf_handle: AsdfFile):
         # TODO: this ain't thread-safe!
-        # take a copy of the handle to avoid side effects!
-        copy._deepcopy_dispatch[np.ndarray] = lambda x, y: x
+        def _fake_copy(x, _):  # take a copy of the handle to avoid side effects!
+            return x
+
+        copy._deepcopy_dispatch[np.ndarray] = _fake_copy
         try:
             # asdffile takes a deepcopy by default, so we fake the deep copy method of
             # ndarray to avoid bloating memory.
@@ -997,4 +1005,4 @@ class _HeaderVisualizer:
 
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
-        print(get_yaml_header(buff))
+        print(get_yaml_header(buff))  # noqa: T201
