@@ -53,7 +53,7 @@ jobs:
 
       - name: pip installs
         run: |
-          python -m pip install -e . asdf==${{ asdf_version }}  # TODO: how can we avoid trouble with Conda pkg and pip install?
+          python -m pip install -e . asdf==${{ matrix.asdf_version }}  # TODO: how can we avoid trouble with Conda pkg and pip install?
 
       - name: run asdf schema pytest
         run: |
