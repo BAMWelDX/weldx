@@ -1,0 +1,42 @@
+
+name: 'checkout_create_env'
+description: 'Checkout, then create conda environment file from python project dependencies.'
+inputs:
+  extras:
+    description: >-
+      extra features to pass to "pip install ."
+    required: false
+    default: ""
+  python_version:
+    description: Python version inside the created env.
+    required: true
+runs:
+# TODO: checkout seems mandatory to even have this local action...
+#- uses: actions/checkout@v3
+#  with:
+#    fetch-depth: 0 # Fetch all history for all tags and branches
+#    repository: ${{ github.event.pull_request.head.repo.full_name }}
+#    ref: ${{ github.event.pull_request.head.ref }}
+- uses: CagtayFabry/pydeps2env@main
+  with:
+    file: 'pyproject.toml'
+    channels: 'conda-forge defaults'
+    extras: ${{ inputs.extras }}
+    setup_requires: 'include'
+
+- uses: mamba-org/provision-with-micromamba@main
+  with:
+    environment-file: ./environment.yml
+    environment-name: weldx
+    cache-env: true
+    extra-specs: |
+      python=${{ input.python_version }}
+      pip
+
+- name: activate env
+  run: micromamba activate weldx
+
+- name: pip installs
+  run: |
+    python -m pip install -e .[${{ inputs.extras }}]
+    micromamba list
