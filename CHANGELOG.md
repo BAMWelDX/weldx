@@ -2,13 +2,13 @@
 
 ## 0.6.3 (unreleased)
 
-## Dependencies
+### Dependencies
 
 - Pin `asdf<2.14` due to changes in the extension mechanism \[{pull}`828`\].
 - Unpin `asdf` due to fix in `asdf 2.14.3` release \[{pull}`834`\].
 - Unpin maximum Python version (again). \[{pull}`837`\].
 
-## Changes
+### Changes
 
 - Remove outdated calls to `weldx.asdf.util.get_highest_tag_version` in
   `TimeSeries` and `SpatialData` converters \[{pull}`831`\].
@@ -18,12 +18,12 @@
 
 Release `0.6.2` comes with new and updated tutorials and some minor fixes and code improvements.
 
-### added
+### Added
 
 - New tutorial that demonstrates the usage of the CSM in conjunction with an existing WelDX file \[{pull}`793`\]
 - New tutorial about the `MeasurementChain` class using an existing WelDX file \[{pull}`796`\]
 
-### changes
+### Changes
 
 - `weldx` now requires pip to install (previously it could be installed by directly invoking setup.py) \[{pull}`774`\].
   From a users perspective nothing changes here, as the package was always recommended to be installed via pip.
@@ -31,7 +31,7 @@ Release `0.6.2` comes with new and updated tutorials and some minor fixes and co
 - `weld_seam` is now a required field in the `multi_pass_weld` schema \[{pull}`790`\]
 - Add section about time-dependent spatial data to the `CoordinateSystemManager` tutorial \[{pull}`792`\]
 
-### fixes
+### Fixes
 
 - `MathematicalExpression` now uses SciPy and NumPy in numerical function evaluation. This enables it to use
   advanced integration methods and fixes lengths computation of `DynamicShapeSegment` \[{pull}`770`\].
@@ -43,18 +43,18 @@ Release `0.6.2` comes with new and updated tutorials and some minor fixes and co
 
 Release `0.6.1` moves advanced plotting functions over to the `weldx-widgets` package and includes minor bugfixes.
 
-### changes
+### Changes
 
 - `WeldxFile` now raises a `KeyError`, if the user tries to directly read or manipulate a protected ASDF keyword
   within the file. \[{pull}`759`\]
 - Updated the outdated tutorial about the `CoordinateSystemManager` \[{pull}`767`\]
 
-### fixes
+### Fixes
 
 - Fix interactive `view_tree` display \[{pull}`756`\].
 - Increase `mypy` coverage and update type hints and GH action \[{pull}`753`\].
 
-### dependencies
+### Dependencies
 
 - `weldx` now (optionally) requires `weldx_widgets` to visualize coordinate systems/manager \[{pull}`749`\].
 - NumPy is not required as a build time dependency anymore, as Bottleneck now provides binaries on PyPI \[{pull}`749`\].
@@ -76,7 +76,7 @@ data either by discrete values or mathematical expressions. A built-in mechanism
 specific requirements. For more information, have a look
 [at the new tutorial](https://weldx.readthedocs.io/en/v0.6.0_a/tutorials/generic_series.html) .
 
-### added
+### Added
 
 - `DynamicShapeSegment` \[{pull}`713`\]
 - `SpatialSeries` and `DynamicTraceSegment` \[{pull}`699`\]
@@ -87,11 +87,11 @@ specific requirements. For more information, have a look
   step by step based on a full example file \[{pull}`555`\]
 - add `path` option to `WeldxFile.info` and `WeldxFile.show_asdf_header` \[{pull}`555`\]
 
-### removed
+### Removed
 
 - removed access to `WeldxFile.data` \[{pull}`744`\]
 
-### changes
+### Changes
 
 - The `wx_property_tag` validator now also accepts lists of different tags. \[{pull}`670`\]
   When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
@@ -105,11 +105,11 @@ specific requirements. For more information, have a look
 - Reshape `SpatialData` coordinates to `(-1, 3)` before exporting with `meshio` for compatibility. \[{pull}`723`\]
 - `SpatialData`, `LocalCoordinateSystem` and `CoordinateSystemManager` now require units \[{pull}`731`\]
 
-### fixes
+### Fixes
 
 - `TimeSeries` can now be serialized correctly when using absolute times \[{pull}`677`\]
 
-### documentation
+### Documentation
 
 - update PR link format in the changelog \[{pull}`658`\]
 - new tutorial that describes how to work with workpiece data from a WelDX file \[{pull}`681`\]
@@ -129,7 +129,7 @@ specific requirements. For more information, have a look
 
 - Coordinates without units for `LocalCoordinateSystem` and `CoordinateSystemManager`
 
-### dependencies
+### Dependencies
 
 - `weldx` now works with Python-3.10. \[{pull}`696`\]
 - bump to `asdf >=2.8.2` \[{pull}`668`\]
@@ -142,7 +142,7 @@ specific requirements. For more information, have a look
 
 ## 0.5.2 (18.11.2021)
 
-### added
+### Added
 
 - `CoordinateSystemManager` can now delete already assigned data with
   `CoordinateSystemManager.delete_data`. {issue}`644` \[{pull}`645`\]
@@ -151,7 +151,7 @@ specific requirements. For more information, have a look
   block. Note that this does not affect arrays, which are being shared
   across several objects in the same file. \[{pull}`643`\]
 
-### changes
+### Changes
 
 - `WeldxFile` now raises an exception, if a warning is emitted during
   loading the weldx ASDF extension, this should prevent erroneous data
@@ -162,12 +162,12 @@ specific requirements. For more information, have a look
 - Allow handling of `time` values as singular coordinates without
   dimensions in some classes \[{pull}`635`\].
 
-### fixes
+### Fixes
 
 - Fix wrong dimension order being passed through in `SpatialData`
   \[{pull}`635`\].
 
-### dependencies
+### Dependencies
 
 - Removed `ipykernel` dependency. \[{pull}`634`\]
 - The `K3D` implementation now uses the experimental
@@ -175,7 +175,7 @@ specific requirements. For more information, have a look
 
 ## 0.5.1 (04.11.2021)
 
-### added
+### Added
 
 - `Time.duration` to get the covered duration of the data and
   `Time.resample` to get a new `Time` instance with resampled time data
@@ -185,7 +185,7 @@ specific requirements. For more information, have a look
 - Added `weldx.asdf.util.get_schema_tree` utility to display schema
   files. \[{pull}`610`\]
 
-### changes
+### Changes
 
 - All public interfaces of the `weldx.geometry` module classes now
   require the usage of units and support unit strings as inputs.
@@ -205,13 +205,13 @@ specific requirements. For more information, have a look
   longer required to have an extra dimension that represents time.
   \[{pull}`621`\]
 
-### fixes
+### Fixes
 
 - fix broken `Time.all_close` to now work as intended \[{pull}`603`\]
 - fix `weldx.asdf.util.get_yaml_header` to work correctly with windows
   line endings. \[{pull}`609`\]
 
-### documentation
+### Documentation
 
 - move the schema documentation to [BAMWelDX/weldx-standard](https://github.com/BAMWelDX/weldx-standard) \[{pull}`594`\]
 
@@ -224,7 +224,7 @@ specific requirements. For more information, have a look
 
 - removed `welding.util.lcs_coords_from_ts` \[{pull}`620`\]
 
-### dependencies
+### Dependencies
 
 - adjust code to support pint 0.18 unit formatting. \[{pull}`616`\]
 
@@ -251,7 +251,7 @@ API improvements:
   naming schema on save. Support for the old schemas will be dropped in
   the `0.6` release.
 
-### added
+### Added
 
 - added "units" (exact) and "dimensionality" (dimensionality
   compatible) checking options to `util.xr_check_coords` \[{pull}`442`\]
@@ -272,7 +272,7 @@ API improvements:
 - `WeldxFile.info` to print a quick content overview to the stdout.
   \[{pull}`576`\].
 
-### removed
+### Removed
 
 - removed functions now covered by `Time`:
   `pandas_time_delta_to_quantity`, `to_pandas_time_index`,
@@ -294,7 +294,7 @@ API improvements:
   `triangulate_geometry` from `weldx.util` \[{pull}`490`\]
 - remove the `:` syntax from `wx_shape` validation \[{pull}`537`\]
 
-### changes
+### Changes
 
 - move `welding.util.sine` utility function to `weldx.welding.util`
   \[{pull}`439`\]
@@ -331,7 +331,7 @@ API improvements:
   this case the value will be used to create a linear trace of the
   given length \[{pull}`583`\].
 
-### fixes
+### Fixes
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only
   returned the header as parsed dict and string representation. Also
@@ -342,7 +342,7 @@ API improvements:
 - `WeldxFile` respects `mode` argument also for BytesIO and file
   handles \[{pull}`539`\].
 
-### documentation
+### Documentation
 
 - added installation guide with complete environment setup (Jupyterlab
   with extensions) and possible problems and solutions \[{pull}`450`\]
@@ -401,21 +401,21 @@ API improvements:
 
 - reworked the optional syntax for `wx_shape` validation \[{pull}`571`\].
 
-### dependencies
+### Dependencies
 
 - set `k3d!=2.10` because of conda dependency bugs \[{issue}`474`, {pull}`577`\]
 - Python 3.10 is not supported in this version. \[{pull}`575`\]
 
 ## 0.4.1 (20.07.2021)
 
-### added
+### Added
 
 - `closed_mesh` parameter to `Geometry.spatial_data` and
   `SpatialData.from_geometry_raster` \[{pull}`414`\]
 - `TimeSeries.plot` and `measurement.Signal.plot` \[{pull}`420`\]
 - abstract base class `time.TimeDependent` \[{pull}`460`\]
 
-### changes
+### Changes
 
 - `TimeSeries` `__init__` accepts `xarray.DataArray` as `data`
   parameter \[{pull}`429`\]
@@ -458,7 +458,7 @@ Release `0.4.0` brings many new major features to `weldx`
 
 full changelog below:
 
-### added
+### Added
 
 - add support for quality standards. Further information can be found
   in the corresponding new tutorial. \[{pull}`211`\]
@@ -481,7 +481,7 @@ full changelog below:
   returns the output signal of the `measurement.MeasurementChain`
   \[{pull}`394`\]
 
-### changes
+### Changes
 
 - `WXRotation.from_euler` now accepts a `pint.Quantity` as input.
   \[{pull}`318`\]
@@ -527,7 +527,7 @@ full changelog below:
 - During the creation of a `WeldxFile` the path of a passed custom
   schema is resolved automatically \[{pull}`412`\].
 
-### documentation
+### Documentation
 
 - Add new tutorial about the `measurement.MeasurementChain` \[{pull}`326`\]
 - Updated the measurement tutorial \[{pull}`326`\]
@@ -557,7 +557,7 @@ full changelog below:
 - use asdf tag validation pattern for `wx_property_tag` \[{pull}`410`\]
 - update `MathematicalExpression` schema \[{pull}`410`\]
 
-### fixes
+### Fixes
 
 - added check for symmetric key difference for mappings with
   `util.compare_nested` \[{pull}`377`\]
@@ -579,16 +579,16 @@ conda builds. \[{pull}`314`\]
 
 ## 0.3.2 (29.03.2021)
 
-### added
+### Added
 
 - `util.deprecated` decorator \[{pull}`295`\]
 
-### removed
+### Removed
 
 - `rotation_matrix_x`, `rotation_matrix_y` and
   `rotation_matrix_z` \[{pull}`317`\]
 
-### dependencies
+### Dependencies
 
 - restrict `scipy!=1.6.0,scipy!=1.6.1` \[{pull}`300`\]
 
@@ -598,14 +598,14 @@ conda builds. \[{pull}`314`\]
   `gas_component-1.0.0.yaml` \[{pull}`303`\]
 - update descriptions in `single-pass-weldx.1.0.0.schema` \[{pull}`308`\]
 
-### fixes
+### Fixes
 
 - prevent creation of `welding.groove.iso_9692_1.IsoBaseGroove` with
   negative parameters \[{pull}`306`\]
 
 ## 0.3.1 (21.03.2021)
 
-### added
+### Added
 
 - plot function for `measurement.MeasurementChain` \[{pull}`288`\]
 
@@ -617,7 +617,7 @@ conda builds. \[{pull}`314`\]
   `time_series-1.0.0.yaml` to fix \[{pull}`282`, {pull}`286`\]
 - add examples to schema files \[{pull}`274`\]
 
-### changes
+### Changes
 
 - `CoordinateSystemManager.plot_graph` now renders static and
   time-dependent edges differently \[{pull}`291`\]
@@ -627,7 +627,7 @@ conda builds. \[{pull}`314`\]
   scales the plotted coordinate system vectors when using matplotlib as
   backend \[{pull}`293`\]
 
-### fixes
+### Fixes
 
 - A warning is now emitted if a `LocalCoordinateSystem` drops a
   provided time during construction. This usually happens if the
@@ -635,7 +635,7 @@ conda builds. \[{pull}`314`\]
 
 ## 0.3.0 (12.03.2021)
 
-### added
+### Added
 
 - add `CoordinateSystemManager.relabel` function \[{pull}`219`\]
 - add `SpatialData` class for storing 3D point data with optional
@@ -679,13 +679,13 @@ conda builds. \[{pull}`314`\]
 - add file schema describing a simple linear welding application
   `datamodels/single_pass_weld-1.0.0.schema` \[{pull}`256`\]
 
-### documentation
+### Documentation
 
 - Simplify tutorial code and enhance plots by using newly implemented
   plot functions \[{pull}`231`\] \[{pull}`251`\]
 - add AWS shielding gas descriptions to documentation \[{pull}`270`\]
 
-### changes
+### Changes
 
 - pass variable names as tuple to `sympy.lambdify` in
   `MathematicalExpression` to prevent sympy deprecation \[{pull}`214`\]
@@ -712,7 +712,7 @@ conda builds. \[{pull}`314`\]
   into another `CoordinateSystemManager` instance if the parent
   instance has set an explicit reference time \[{pull}`268`\]
 
-### fixes
+### Fixes
 
 - don not inline time dependent `LocalCoordinateSystem.coordinates`
   \[{pull}`222`\]
@@ -730,7 +730,7 @@ conda builds. \[{pull}`314`\]
   with mixed `pandas.DatetimeIndex` and `pandas.TimedeltaIndex` types
   \[{pull}`268`\]
 
-### dependencies
+### Dependencies
 
 - Add [PyFilesystem](https://docs.pyfilesystem.org/en/latest/)
   (`fs`) as new dependency
@@ -744,7 +744,7 @@ conda builds. \[{pull}`314`\]
 
 ## 0.2.2 (30.11.2020)
 
-### added
+### Added
 
 - Added `util.ureg_check_class` class decorator to enable `pint`
   dimensionality checks with `@dataclass` \[{pull}`179`\].
@@ -756,7 +756,7 @@ conda builds. \[{pull}`314`\]
   interpolation with different TCP movements and distance calculations
   \[{pull}`199`\]
 
-### changes
+### Changes
 
 - refactor welding groove classes \[{pull}`181`\]
 
@@ -795,7 +795,7 @@ conda builds. \[{pull}`314`\]
 
 ## 0.2.1 (26.10.2020)
 
-### changes
+### Changes
 
 - Documentation
 
@@ -881,7 +881,7 @@ conda builds. \[{pull}`314`\]
 - allow optional properties for validation with `wx_shape` by putting
   the name in brackets like `(optional_prop)` \[{pull}`176`\]
 
-### fixes
+### Fixes
 
 - fix propagating the `name` attribute when reading an ndarray
   `TimeSeries` object back from ASDF files \[{pull}`104`\]
