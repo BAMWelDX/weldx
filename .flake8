@@ -14,8 +14,6 @@ ignore =
 
 max-line-length = 88
 select = C,E,F,W,B,B950 # black formatting options
-per-file-ignores =
-    aws_setup.py:E501
 exclude =
     __init__.py
     doc/src/conf.py

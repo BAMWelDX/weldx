@@ -590,7 +590,7 @@ class _ProtectedViewDict(MutableMapping):
     """A mutable mapping which protects given keys from manipulation."""
 
     def __init__(self, protected_keys, data=None):
-        super(_ProtectedViewDict, self).__init__()
+        super().__init__()
         self.__data = data if data is not None else dict()
         self.protected_keys = protected_keys
 
@@ -664,7 +664,9 @@ class _ProtectedViewDict(MutableMapping):
         )
 
 
-def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
+def get_schema_tree(  # noqa: C901  # ignore too high complexity
+    schemafile: Union[str, Path], *, drop: set = None
+) -> dict:
     """Get a dictionary representation of a weldx schema file with custom formatting.
 
     Parameters
@@ -680,7 +682,6 @@ def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
         The property keys are formatted to reflect the associated Python class.
         Some keys are dropped or reformatted for readability.
     """
-
     if drop is None:
         drop = {}
     if isinstance(schemafile, str):
@@ -692,7 +693,7 @@ def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
     remapped = [header]
 
     def resolve_python_classes(path, key, value):
-        """Parse the tag or type information information to the key string.
+        """Parse the tag or type information to the key string.
 
         This tries to resolves to python class names from 'tag' fields."""
         if not isinstance(value, dict):

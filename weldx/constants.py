@@ -2,7 +2,7 @@
 from pathlib import Path as _Path
 
 import pint
-import pint_xarray  # noqa: F401 # pylint: disable=W0611
+import pint_xarray
 
 META_ATTR = "wx_metadata"
 """The default attribute to store weldx metadata."""

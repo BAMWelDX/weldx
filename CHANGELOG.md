@@ -1,5 +1,19 @@
 # Release Notes
 
+## 0.6.3 (unreleased)
+
+## Dependencies
+
+- Pin `asdf<2.14` due to changes in the extension mechanism \[{pull}`828`\].
+- Unpin `asdf` due to fix in `asdf 2.14.3` release \[{pull}`834`\].
+- Unpin maximum Python version (again). \[{pull}`837`\].
+
+## Changes
+
+- Remove outdated calls to `weldx.asdf.util.get_highest_tag_version` in
+  `TimeSeries` and `SpatialData` converters \[{pull}`831`\].
+- Use Ruff in pre-commit-action \[{pull}`824`\].
+
 ## 0.6.2 (07.11.2022)
 
 Release `0.6.2` comes with new and updated tutorials and some minor fixes and code improvements.

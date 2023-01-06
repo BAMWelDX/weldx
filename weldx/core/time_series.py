@@ -102,6 +102,8 @@ class TimeSeries(TimeDependent):
 
         return self._data == other.data
 
+    __hash__ = None
+
     def __repr__(self):
         """Give __repr__ output."""
         representation = "<TimeSeries>"
@@ -131,7 +133,7 @@ class TimeSeries(TimeDependent):
                 "needs to have a dimension called 'time' with coordinates of type "
                 "'timedelta64[ns]'. The error reported by the comparison function was:"
                 f"\n{e}"
-            )
+            ) from e
 
         if not isinstance(data_array.data, pint.Quantity):
             raise TypeError("The data of the 'DataArray' must be a 'pint.Quantity'.")
@@ -193,12 +195,12 @@ class TimeSeries(TimeDependent):
                 self._shape = eval_data.shape
             else:
                 self._shape = (1,)
-        except pint.errors.DimensionalityError:
+        except pint.errors.DimensionalityError as de:
             raise Exception(
                 "Expression can not be evaluated with "
                 '"weldx.Quantity(1, "seconds")"'
                 ". Ensure that every parameter posses the correct unit."
-            )
+            ) from de
 
         # assign internal variables
         self._data = data
@@ -215,9 +217,9 @@ class TimeSeries(TimeDependent):
                 "The expression can not be evaluated with arrays of time deltas. "
                 "Ensure that all parameters that are multiplied with the time "
                 "variable have an outer dimension of size 1. This dimension is "
-                "broadcasted during multiplication. The original error message was:"
+                "broadcast during multiplication. The original error message was:"
                 f' "{str(e)}"'
-            )
+            ) from e
 
     def _interp_time_discrete(self, time: Time) -> xr.DataArray:
         """Interpolate the time series if its data is composed of discrete values."""
@@ -295,6 +297,7 @@ class TimeSeries(TimeDependent):
 
     @interpolation.setter
     def interpolation(self, interpolation):
+        """Set the interpolation."""
         if isinstance(self._data, xr.DataArray):
             if interpolation not in self._valid_interpolations:
                 raise ValueError(
@@ -387,11 +390,11 @@ class TimeSeries(TimeDependent):
     def plot(
         self,
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
-        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
+        axes: "matplotlib.axes.Axes" = None,
         data_name: str = "values",
         time_unit: UnitLike = None,
         **mpl_kwargs,
-    ) -> "matplotlib.axes.Axes":  # noqa: F821
+    ) -> "matplotlib.axes.Axes":
         """Plot the `TimeSeries`.
 
         Parameters

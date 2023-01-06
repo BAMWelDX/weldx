@@ -6,8 +6,23 @@ on:
   schedule:
     - cron: '0 6 * * 1'
 
+# execute commands with conda aware shell by default:
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   pytest_asdf:
+    strategy:
+      matrix:
+        asdf_version:
+          - "2.8"
+          - "2.9"
+          - "2.10"
+          - "2.11"
+          - "2.12"
+          - "2.13"
+          - "2.14"
     name: pytest asdf
     runs-on: ubuntu-latest
     steps:
@@ -16,18 +31,29 @@ jobs:
           fetch-depth: 0 # Fetch all history for all tags and branches
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/setup-python@v4
+      - uses: CagtayFabry/pydeps2env@main
         with:
-          python-version: '3.10'
-      - uses: actions/cache@v3
+          file: 'pyproject.toml'
+          channels: 'conda-forge defaults'
+          extras: 'test'
+          setup_requires: 'include'
+
+      - uses: mamba-org/provision-with-micromamba@main
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      - name: pip installs
+          environment-file: ./environment.yml
+          environment-name: weldx
+          cache-env: true
+          extra-specs: |
+            python=3.10
+            pip
+
+      - name: activate env
+        run: micromamba activate weldx
+
+      - name: pip install weldx-dev and asdf-matrix-version
         run: |
-          pip install -e .[test]
+          python -m pip install -e . asdf~=${{ matrix.asdf_version }}
+
       - name: run asdf schema pytest
         run: |
           pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/
