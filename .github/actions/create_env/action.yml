@@ -1,5 +1,5 @@
 
-name: 'checkout_create_env'
+name: 'create_env'
 description: 'Checkout, then create conda environment file from python project dependencies.'
 inputs:
   extras:
