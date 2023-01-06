@@ -32,10 +32,33 @@ jobs:
         os: [ubuntu-latest]
         py: ['3.8', '3.9', '3.10', '3.11']
     steps:
-      - uses: ./github/actions/checkout_create_env
+      - uses: actions/checkout@v3
         with:
-          python_version: ${{ matrix.py }}
+          fetch-depth: '0' # Fetch all history for all tags and branches
+
+      - uses: CagtayFabry/pydeps2env@main
+        with:
+          file: 'pyproject.toml'
+          channels: 'conda-forge defaults'
           extras: 'test vis'
+          setup_requires: 'include'
+
+      - uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: ./environment.yml
+          environment-name: weldx
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.py }}
+            wheel
+            pip
+
+      - name: activate env
+        run: micromamba activate weldx
+
+      - name: pip installs
+        run: |
+          python -m pip install -e .
 
       - name: install cookiecutter
         if: matrix.py == '3.8'
