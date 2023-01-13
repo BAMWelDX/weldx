@@ -1,20 +1,40 @@
 [project]
 name = "weldx"
-dynamic = [  # see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
-    "version",  # version gets derived from git by setuptools_scm.
+description = "Python API for the WelDX file format and standard"
+readme = {file = "README.rst", content-type="text/x-rst"}
+keywords = [
+  "bam", # TODO: add more keywords here! think of them as in a journal article.
+  "welding",
+  "weldx",
 ]
+license = {file = "LICENSE", name="BSD License"}
 authors = [
     {name="Cagtay Fabry", email="cagtay.fabry@bam.de"},
     {name="Volker Hirthammer", email="volker.hirthammer@bam.de"},
     {name="Martin K. Scherer", email="martin.scherer@bam.de"},
 ]
-description = "Python API for the WelDX file format and standard"
-readme = {file = "README.rst", content-type="text/x-rst"}
-license = {file = "LICENSE", name="BSD License"}
-keywords = [
-    "welding",
-    "weldx",
-    "bam", # TODO: add more keywords here! think of them as in a journal article.
+requires-python = ">=3.8"
+dependencies = [
+  "asdf!=2.14.0,!=2.14.1,!=2.14.2,>=2.8.2",
+  "bidict",
+  "boltons",
+  "bottleneck>=1.3.3",
+  "fs",
+  "IPython",
+  "meshio",
+  "networkx!=2.7.0,!=2.8.1,>=2",
+  "numpy>=1.20",
+  "pandas>=1",
+  "pint>=0.18",
+  "pint-xarray>=0.2.1",
+  "psutil",
+  "scipy!=1.6.0,!=1.6.1,>=1.4",
+  "sympy>=1.6",
+  "xarray<2022.09.0,>=0.19",
+]
+dynamic = [
+  # see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
+  "version", # version gets derived from git by setuptools_scm.
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -31,46 +51,25 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Education",
 ]
-
-# Dependencies
-requires-python = ">=3.8"
-dependencies = [
-    "numpy >=1.20",
-    "asdf >=2.8.2,!=2.14.0,!=2.14.1,!=2.14.2",
-    "pandas >=1.0",
-    "xarray >=0.19,<2022.09.0",
-    "scipy >=1.4,!=1.6.0,!=1.6.1",
-    "sympy >=1.6",
-    "pint >=0.18",
-    "pint-xarray >=0.2.1",
-    "bottleneck >=1.3.3",
-    "boltons",
-    "bidict",
-    "networkx >=2,!=2.7.0,!=2.8.1",
-    "fs",
-    "meshio",
-    "psutil",
-    "IPython",
+[project.optional-dependencies]
+test = [
+  "nbval",
+  "pytest>=6",
+  "pytest-cov",
+  "pytest-xdist",
+]
+vis = [
+  "weldx_widgets>=0.2",
 ]
 
 [project.urls]
-documentation = "https://weldx.readthedocs.io"
-repository = "https://github.com/BAMweldx/weldx"
 bug_tracker = "https://github.com/BAMweldx/weldx/issues"
 changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.rst"
+documentation = "https://weldx.readthedocs.io"
+repository = "https://github.com/BAMweldx/weldx"
 
-[project.optional-dependencies]
-test = [
-    "pytest >=6",
-    "pytest-cov",
-    "pytest-xdist",
-    "nbval",
-  ]
-vis = [
-    "weldx_widgets >=0.2",
-]
-
-# ASDF extension entry points.
+[project.scripts]
+welding_schema = "weldx.asdf.cli.welding_schema:main"
 
 [project.entry-points."asdf.extensions"]
 weldx = "weldx.asdf.extension:get_extensions"
@@ -79,21 +78,16 @@ weldx_validators = "weldx.asdf._extension:WeldxValidatorExtension"
 [project.entry-points."asdf.resource_mappings"]
 weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
 
-# console scripts
-[project.scripts]
-welding_schema = "weldx.asdf.cli.welding_schema:main"
 
-# Build system config, pip creates a temporary env with "requires" pkgs.
+
 [build-system]
-requires = [
-  "wheel",
-  "setuptools >= 40.9.0",
-  "setuptools_scm[toml]>=6.2",
-]
 build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=40.9",
+  "setuptools_scm[toml]>=6.2",
+  "wheel",
+]
 
-
-# Tool configs
 [tool.setuptools.packages.find]
 where = ["."]
 
