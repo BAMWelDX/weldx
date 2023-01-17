@@ -268,7 +268,7 @@ def _get_intersphinx_mapping():
             None,
         ),
         # "xarray": (f"https://docs.xarray.dev/en/v{xarray_version}", None),
-        "xarray": (f"https://docs.xarray.dev/en/v2022.06.0/", None),
+        "xarray": ("https://docs.xarray.dev/en/v2022.06.0/", None),
         "scipy": (f"https://docs.scipy.org/doc/scipy-{scipy_version}/", None),
         "matplotlib": (f"https://matplotlib.org/{matplotlib_version}", None),
         # "dask": ("https://docs.dask.org/en/latest", None),
