@@ -10,6 +10,8 @@ dependencies
 ============
 
 -  pin ``asdf<2.14`` due to changes in the extension mechanism [:pull:`828`].
+-  Unpin ``asdf`` due to fix in ``asdf 2.14.3`` release [:pull:`834`].
+-  Unpin maximum Python version (again). [:pull:`837`].
 
 changes
 =======

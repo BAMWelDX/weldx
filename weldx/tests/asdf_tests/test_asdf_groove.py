@@ -115,7 +115,7 @@ def test_asdf_groove_exceptions():
 
 
 @pytest.mark.parametrize("groove", test_params.values(), ids=test_params.keys())
-def test_cross_section(groove):  # noqa
+def test_cross_section(groove):
     @contextmanager
     def temp_attr(obj, attr, new_value):
         old_value = getattr(obj, attr)
@@ -143,7 +143,7 @@ def test_cross_section(groove):  # noqa
     assert A > 0
 
 
-def test_igroove_area():  # noqa
+def test_igroove_area():
     groove, _ = test_params["i_groove"]
     A = groove.cross_sect_area
     assert A == groove.t * groove.b

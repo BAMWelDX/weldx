@@ -25,7 +25,9 @@ class UnitValidatorTestClass:
     simple_prop: dict = field(default_factory=lambda: dict(value=float(3), units="m"))
     delta_prop: dict = Q_(100, "Δ°C")
     dimensionless: Union[float, int, np.ndarray, pint.Quantity, xr.DataArray] = 3.14
-    custom_object: Any = TimeSeries(Q_([0, 5], "A"), Q_([0, 1], "s"))
+    custom_object: Any = field(
+        default_factory=lambda: TimeSeries(Q_([0, 5], "A"), Q_([0, 1], "s"))
+    )
 
 
 UnitValidatorTestClassConverter = dataclass_serialization_class(

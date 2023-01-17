@@ -482,65 +482,65 @@ class TestCompareNested:
             ({"x": [1, 2]}, {"y": [1, 2]}, False),
         ],
     )
-    def test_compare_nested(a, b, expected):  # noqa: D102
+    def test_compare_nested(a, b, expected):
         assert ut.compare_nested(a, b) == expected
 
     @staticmethod
-    def test_eq_(_default_dicts):  # noqa: D102
+    def test_eq_(_default_dicts):
         a, b = _default_dicts
         assert ut.compare_nested(a, b)
 
     @staticmethod
-    def test_missing_values(_default_dicts):  # noqa: D102
+    def test_missing_values(_default_dicts):
         a, b = _default_dicts
         b["x"][0].pop(-1)
         assert not ut.compare_nested(a, b)
 
     @staticmethod
-    def test_added_value(_default_dicts):  # noqa: D102
+    def test_added_value(_default_dicts):
         a, b = _default_dicts
         b["x"][0].append(4)
         assert not ut.compare_nested(a, b)
 
     @staticmethod
-    def test_added_value_left(_default_dicts):  # noqa: D102
+    def test_added_value_left(_default_dicts):
         a, b = _default_dicts
         a["x"][0].append(4)
         assert not ut.compare_nested(a, b)
 
     @staticmethod
-    def test_value_changed(_default_dicts):  # noqa: D102
+    def test_value_changed(_default_dicts):
         a, b = _default_dicts
         b["bar"] = False
         assert not ut.compare_nested(a, b)
 
     @staticmethod
-    def test_key_changed1(_default_dicts):  # noqa: D102
+    def test_key_changed1(_default_dicts):
         a, b = _default_dicts
         del b["x"]
         assert not ut.compare_nested(a, b)
 
     @staticmethod
-    def test_key_changed2(_default_dicts):  # noqa: D102
+    def test_key_changed2(_default_dicts):
         a, b = _default_dicts
         x = b.pop("x")
         b["y"] = x
         assert not ut.compare_nested(a, b)
 
     @staticmethod
-    def test_key_added(_default_dicts):  # noqa: D102
+    def test_key_added(_default_dicts):
         a, b = (dict(a=1), dict(a=1, b=1))
         assert not ut.compare_nested(a, b)
         assert not ut.compare_nested(b, a)
 
     @staticmethod
-    def test_array_accessible_by_two_roots():  # noqa: D102
+    def test_array_accessible_by_two_roots():
         a = {"l1": {"l2": np.arange(5)}}
         b = {"l1": {"l2": np.arange(5)}}
         assert ut.compare_nested(a, b)
 
     @staticmethod
-    def test_arrays_in_lists():  # noqa: D102
+    def test_arrays_in_lists():
         a = {"l1": [np.arange(1), "foo"]}
         b = {"l1": [np.arange(2), "foo"]}
         assert not ut.compare_nested(a, b)
@@ -564,22 +564,22 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
     This includes cases of xarray.DataArrays, np.ndarrays and so forth.
     """
 
-    def setUp(self):  # noqa: D102
+    def setUp(self):
         self.a = self.single_pass_weld_tree
         self.b = copy.deepcopy(self.a)
 
-    def test_equal(self):  # noqa: D102
+    def test_equal(self):
         assert ut.compare_nested(self.a, self.b)
 
-    def test_metadata_modified(self):  # noqa: D102
+    def test_metadata_modified(self):
         self.b[META_ATTR]["welder"] = "anonymous"
         assert not ut.compare_nested(self.a, self.b)
 
-    def test_measurements_modified(self):  # noqa: D102
+    def test_measurements_modified(self):
         self.b["welding_current"].data[-1] = Q_(500, "A")
         assert not ut.compare_nested(self.a, self.b)
 
-    def test_equip_modified(self):  # noqa: D102
+    def test_equip_modified(self):
         self.b["equipment"][0].name = "broken device"
         assert not ut.compare_nested(self.a, self.b)
 
