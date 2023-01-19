@@ -301,7 +301,7 @@ class WeldxFile(_ProtectedViewDict):
                 filename_or_file_like, mode
             )
             self._in_memory = False
-            self._close = True  # close our own buffer 
+            self._close = True  # close our own buffer
         elif isinstance(filename_or_file_like, get_args(types_file_like)):
             if isinstance(filename_or_file_like, BytesIO):
                 self._in_memory = True
