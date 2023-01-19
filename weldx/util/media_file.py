@@ -90,7 +90,7 @@ class MediaFile:
                 self._handle = imread(path_or_array)
             except _UnknownFormatError as e:
                 # wrap in our exception type to hide impl detail.
-                raise UnknownFormatError(e)
+                raise UnknownFormatError(e) from e
             self._metadata = self._get_video_metadata(str(path))
             self._wrap_data_array(path_or_array)
 
