@@ -15,7 +15,7 @@ __all__ = ["ExternalFile"]
 class ExternalFile:
     """Handles the asdf serialization of external files."""
 
-    path: Union[str, Path] = None
+    path: Union[Path] = None
 
     filename: str = None
     suffix: str = None
