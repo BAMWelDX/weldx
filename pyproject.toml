@@ -99,7 +99,7 @@ where = ["."]
 
 [tool.setuptools_scm]
 write_to = "weldx/_version.py"
-write_to_template = "__version__ = "{version}""
+write_to_template = '__version__ = "{version}"'
 
 [tool.pytest.ini_options]
 addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules"
