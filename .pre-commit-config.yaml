@@ -33,13 +33,12 @@ repos:
     hooks:
       - id: black
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.213
+    rev: v0.0.230
     hooks:
       - id: ruff
         args:
           - --quiet
           - --fix
-          - --force-exclude
   # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.6.0
