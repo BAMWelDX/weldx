@@ -15,18 +15,18 @@ examples:
     - Full description of a video file
     - |
       !<tag:stsci.edu:asdf/core/asdf-1.1.0>
-        file: !weldx!core/file-0.1.1
+        file: !<asdf://weldx.bam.de/weldx/tags/core/file-0.1.1>
           filename: 221006-180026-WID492_N3.avi
           suffix: avi
           hostname: localhost
           directory: .
           size: 15408040
-          created: !weldx!time/timestamp-0.1.0 2022-10-25T15:57:26.982713650
-          modified: !weldx!time/timestamp-0.1.0 2022-10-25T15:06:19.380294143
+          created: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> 2022-10-25T15:57:26.982713650
+          modified: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> 2022-10-25T15:06:19.380294143
           content_hash: {algorithm: SHA-256, value: 6758006cd439cdb3374105393d83198432a6e1638cce37e73afbbab850287e0f}
           mimetype: video/x-msvideo
-        reference_time: !weldx!time/timestamp-0.1.0 2022-10-25T15:06:19.380294143
-        fps: !weldx!units/quantity-0.1.0 {value: 55.0, units: !weldx!units/units-0.1.0 1
+        reference_time: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> 2022-10-25T15:06:19.380294143
+        fps: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 55.0, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> 1
             / second}
         n_frames: 436
         resolution: [700, 576]
@@ -65,7 +65,7 @@ properties:
     type: integer
 
 
-propertyOrder: [file, reference_time, fps]
+propertyOrder: [file, data, reference_time, fps]
 # TODO: in case of in memory data, we require: data, fps, resolution
 # TODO: in case of a file, we require: file, fps, resolution
 #required: [anyOf(file, data), fps, resolution]
