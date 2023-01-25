@@ -65,8 +65,9 @@ def test_media_file_external(external, tmp_path, create_video):
     args = dict(fps=fps, reference_time=None) if not external else {}
     mf = MediaFile(data, **args)
 
-    wf = WeldxFile(tree=dict(mf=mf), mode="rw")
-    restored = wf["mf"]
+    WeldxFile(tmp_path / "mf.wx", tree=dict(mf=mf), mode="rw")
+    wf_readonly = WeldxFile(tmp_path / "mf.wx", mode="r")
+    restored = wf_readonly["mf"]
     assert restored.fps.u == U_("1/s")
     assert mf.fps.m == restored.fps.m == fps
 

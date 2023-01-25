@@ -12,8 +12,24 @@ description: |
 
 examples:
   -
-    - foo
-    - bar
+    - Full description of a video file
+    - |
+      !<tag:stsci.edu:asdf/core/asdf-1.1.0>
+        file: !weldx!core/file-0.1.1
+          filename: 221006-180026-WID492_N3.avi
+          suffix: avi
+          hostname: localhost
+          directory: .
+          size: 15408040
+          created: !weldx!time/timestamp-0.1.0 2022-10-25T15:57:26.982713650
+          modified: !weldx!time/timestamp-0.1.0 2022-10-25T15:06:19.380294143
+          content_hash: {algorithm: SHA-256, value: 6758006cd439cdb3374105393d83198432a6e1638cce37e73afbbab850287e0f}
+          mimetype: video/x-msvideo
+        reference_time: !weldx!time/timestamp-0.1.0 2022-10-25T15:06:19.380294143
+        fps: !weldx!units/quantity-0.1.0 {value: 55.0, units: !weldx!units/units-0.1.0 1
+            / second}
+        n_frames: 436
+        resolution: [700, 576]
 
 type: object
 properties:
@@ -23,6 +39,10 @@ properties:
     tag: "asdf://weldx.bam.de/weldx/tags/core/file-0.1.1"
     mime_type:
       pattern: "image\/.*|video\/|application/mp4|application/mpeg4-.*"
+  data:
+    description: |
+      A DataArray containing the frames. Given in case this has been initialized from
+      in memory data.
   reference_time:
     description: |
       Time when this media was recorded.
@@ -46,6 +66,8 @@ properties:
 
 
 propertyOrder: [file, reference_time, fps]
-required: [file, fps, resolution]
+# TODO: in case of in memory data, we require: data, fps, resolution
+# TODO: in case of a file, we require: file, fps, resolution
+#required: [anyOf(file, data), fps, resolution]
 flowStyle: block
 ...

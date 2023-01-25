@@ -1,4 +1,5 @@
 """Contains classes for the asdf serialization of media files."""
+import pathlib
 
 from weldx.asdf.types import WeldxConverter
 from weldx.util.external_file import ExternalFile
@@ -15,18 +16,27 @@ class MediaFileConverter(WeldxConverter):
     def to_yaml_tree(self, obj: MediaFile, tag: str, ctx) -> dict:
         """Convert to python dict."""
         tree = dict(
-            file=obj.file(),
             reference_time=obj.reference_time,
             fps=obj.fps,
             n_frames=len(obj),
             resolution=obj.resolution,
         )
+        if obj.from_file:
+            tree["file"] = obj.file()
+        else:
+            tree["data"] = obj.data
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct from tree."""
-        file: ExternalFile = node["file"]
+        if "data" in node:
+            data = node["data"]
+        elif "file" in node:
+            file: ExternalFile = node["file"]
+            data = pathlib.Path(file.directory) / file.filename
+        else:
+            raise RuntimeError("malformed media file. Lacking keys 'data' or 'file'.")
         fps = node["fps"]
-        reference_time = node["reference_time"]
-        result = MediaFile(file.path, fps=fps, reference_time=reference_time)
+        reference_time = node["reference_time"] if "reference_time" in node else None
+        result = MediaFile(data, fps=fps, reference_time=reference_time)
         return result

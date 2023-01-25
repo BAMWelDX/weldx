@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Sequence, Union, get_args, get_type_hints
+from typing import Optional, Union, get_args, get_type_hints
 
 import numpy as np
 import pandas as pd
@@ -15,9 +15,17 @@ from weldx.util.external_file import ExternalFile
 
 __all__ = ["types_media_input", "MediaFile", "UnknownFormatError"]
 
+
+types_sequence_like = Union[
+    xr.DataArray,
+    np.ndarray,
+    list,
+    tuple,
+]
+
 types_media_input = Union[
     types_path_like,
-    Sequence[Sequence[int]],
+    types_sequence_like,
 ]
 
 # _pts_to_frame, _get_frame_rate, _get_frame_count taken from
@@ -103,7 +111,7 @@ class MediaFile:
                     f"unsupported type for reference_time {type(reference_time)}"
                 )
             self._from_file = True
-        elif isinstance(path_or_array, list):
+        elif isinstance(path_or_array, types_sequence_like):
             self._handle = path_or_array
             if fps is None:
                 raise ValueError(
@@ -111,7 +119,10 @@ class MediaFile:
                 )
             from PIL.Image import fromarray
 
-            image = fromarray(self._handle[0])
+            first_frame = self._handle[0]
+            if not hasattr(first_frame, "__array_interface__"):
+                first_frame = first_frame.data
+            image = fromarray(first_frame)
             self._metadata = dict(
                 fps=fps,
                 resolution=(image.width, image.height),
@@ -124,20 +135,28 @@ class MediaFile:
                 )
             self._reference_time = reference_time
             self._from_file = False
-            self._wrap_data_array("from_buffer")
+            self._wrap_data_array(array_name="from_buffer")
         else:
             raise ValueError(f"unsupported input: {path_or_array}")
 
         self._path_or_array = path_or_array
 
-    def _wrap_data_array(self, path_or_array):
-        t_s = np.linspace(0, self.duration.m, len(self._handle))
+    def _wrap_data_array(self, array_name):
+        if isinstance(self._handle, xr.DataArray):
+            self._array = self._handle  # TODO: this is kinda ugly!
+        else:
+            t_s = np.linspace(0, self.duration.m, len(self._handle))
 
-        da = xr.DataArray(self._handle, name=path_or_array).rename(
-            dict(dim_0="frames", dim_1="height", dim_2="width", dim_3="color")
-        )
-        self._array = da.assign_coords(frames=t_s)
-        self._array.frames.attrs["units"] = "s"
+            da = xr.DataArray(self._handle, name=array_name).rename(
+                dict(dim_0="frames", dim_1="height", dim_2="width", dim_3="color")
+            )
+            self._array = da.assign_coords(frames=t_s)
+            self._array.frames.attrs["units"] = "s"
+
+    @property
+    def from_file(self) -> bool:
+        """Initialized from file or not?"""
+        return self._from_file
 
     @staticmethod
     def _get_video_metadata(fn: str) -> dict:
