@@ -111,7 +111,7 @@ class MediaFile:
                     f"unsupported type for reference_time {type(reference_time)}"
                 )
             self._from_file = True
-        elif isinstance(path_or_array, types_sequence_like):
+        elif isinstance(path_or_array, get_args(types_sequence_like)):
             self._handle = path_or_array
             if fps is None:
                 raise ValueError(
