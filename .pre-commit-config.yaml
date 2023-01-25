@@ -33,7 +33,7 @@ repos:
     hooks:
       - id: black
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.230
+    rev: v0.0.233
     hooks:
       - id: ruff
         args:
@@ -41,7 +41,7 @@ repos:
           - --fix
   # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.6.0
+    rev: 1.6.1
     hooks:
       - id: nbqa-black
       - id: nbqa-ruff  # ruff handles isort
