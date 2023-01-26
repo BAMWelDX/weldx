@@ -30,3 +30,4 @@ dependencies:
   - pip
   - pip:
     - ../
+    - json_mime_renderer_plugin/
