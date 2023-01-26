@@ -35,7 +35,7 @@ class CoordinateSystemManager:
     Notes
     -----
     Learn how to use this class by reading the
-    tutorial <tutorials/transformations_02_coordinate_system_manager>.
+    {doc}`tutorials/transformations_02_coordinate_system_manager`.
 
     """
 
