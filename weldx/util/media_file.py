@@ -89,57 +89,61 @@ class MediaFile:
         fps: Optional[float] = None,
     ):
         if isinstance(path_or_array, get_args(types_path_like)):
-            from dask_image.imread import imread
-            from pims import UnknownFormatError as _UnknownFormatError
-
-            path = Path(path_or_array)  # type: ignore[arg-type]
-
-            try:
-                self._handle = imread(path_or_array)
-            except _UnknownFormatError as e:
-                # wrap in our exception type to hide impl detail.
-                raise UnknownFormatError(e) from e
-            self._metadata = self._get_video_metadata(str(path))
-            self._wrap_data_array(path_or_array)
-
-            if reference_time is None:
-                self._reference_time = pd.Timestamp(path.stat().st_mtime_ns)
-            elif isinstance(reference_time, pd.Timestamp):
-                self._reference_time = reference_time
-            else:
-                raise ValueError(
-                    f"unsupported type for reference_time {type(reference_time)}"
-                )
-            self._from_file = True
+            self._init_from_path(path_or_array, reference_time)
         elif isinstance(path_or_array, get_args(types_sequence_like)):
-            self._handle = path_or_array
-            if fps is None:
-                raise ValueError(
-                    "fps is needed to determine duration, but was not given."
-                )
-            from PIL.Image import fromarray
-
-            first_frame = self._handle[0]
-            if not hasattr(first_frame, "__array_interface__"):
-                first_frame = first_frame.data
-            image = fromarray(first_frame)
-            self._metadata = dict(
-                fps=fps,
-                resolution=(image.width, image.height),
-                nframes=len(path_or_array),
-            )
-            _ref_time_types = get_type_hints(MediaFile.__init__)["reference_time"]
-            if not isinstance(reference_time, get_args(_ref_time_types)):
-                raise ValueError(
-                    f"unsupported type for reference_time {type(reference_time)}"
-                )
-            self._reference_time = reference_time
-            self._from_file = False
-            self._wrap_data_array(array_name="from_buffer")
+            self._init_from_sequence(fps, path_or_array, reference_time)
         else:
             raise ValueError(f"unsupported input: {path_or_array}")
 
         self._path_or_array = path_or_array
+
+    def _init_from_path(self, path_: types_path_like, reference_time):
+        from dask_image.imread import imread
+        from pims import UnknownFormatError as _UnknownFormatError
+
+        path = Path(path_)  # type: ignore[arg-type]
+        try:
+            self._handle = imread(path_)
+        except _UnknownFormatError as e:
+            # wrap in our exception type to hide impl detail.
+            raise UnknownFormatError(e) from e
+        self._metadata = self._get_video_metadata(str(path))
+        self._wrap_data_array(path_)
+        if reference_time is None:
+            self._reference_time = pd.Timestamp(path.stat().st_mtime_ns)
+        elif isinstance(reference_time, pd.Timestamp):
+            self._reference_time = reference_time
+        else:
+            raise ValueError(
+                f"unsupported type for reference_time {type(reference_time)}"
+            )
+        self._from_file = True
+
+    def _init_from_sequence(
+        self, fps, path_or_array: types_sequence_like, reference_time
+    ):
+        self._handle = path_or_array
+        if fps is None:
+            raise ValueError("fps is needed to determine duration, but was not given.")
+        from PIL.Image import fromarray
+
+        first_frame = self._handle[0]
+        if not hasattr(first_frame, "__array_interface__"):
+            first_frame = first_frame.data
+        image = fromarray(first_frame)
+        self._metadata = dict(
+            fps=fps,
+            resolution=(image.width, image.height),
+            nframes=len(path_or_array),
+        )
+        _ref_time_types = get_type_hints(MediaFile.__init__)["reference_time"]
+        if not isinstance(reference_time, get_args(_ref_time_types)):
+            raise ValueError(
+                f"unsupported type for reference_time {type(reference_time)}"
+            )
+        self._reference_time = reference_time
+        self._from_file = False
+        self._wrap_data_array(array_name="from_buffer")
 
     def _wrap_data_array(self, array_name):
         if isinstance(self._handle, xr.DataArray):
