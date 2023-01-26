@@ -155,7 +155,7 @@ source_suffix = {
 }
 
 myst_footnote_transition = False
-nb_execution_timeout = 120
+nb_execution_timeout = 480
 
 nb_execution_cache_path = tempfile.gettempdir() + "/wx-doc-jupyter-cache/"
 # The encoding of source files.
