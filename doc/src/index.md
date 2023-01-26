@@ -1,27 +1,28 @@
-.. include:: ../README.rst
+```{include} ../../README.md
+```
 
-.. toctree::
-   :hidden:
-   :maxdepth: 1
+```{toctree}
+:hidden: true
+:maxdepth: 1
 
-   install
-   tutorials
-   api
-   changelog_link
-   legal-notice
+install
+tutorials
+api
+changelog_link
+legal-notice
+```
 
-############
- Python API
-############
+# Python API
 
-The first core component of the ``WelDX`` project is the Python API. The
+The first core component of the `WelDX` project is the Python API. The
 API aims to provide a framework for describing welding experiments as
 well as working and analysing welding research data in Python.
 
-Head over to the :doc:`tutorials` section to see some examples.
+Head over to the {doc}`tutorials` section to see some examples.
 
-
+```{eval-rst}
 .. meta::
     :description lang=en: Scientific data format and Python API for welding research data. Setup your experiment and capture data in a single file.
     :keywords: welding, weld, data format, archive, scientific data, experiment, visualization, GMAW, quality standard, objectivity, comparability, reproducibility, measurement chain, research data management
     :google-site-verification: YvWuHWCE9tERkKT7KQejAwHM2cJVSfDewd5IzGZxDsU
+```
