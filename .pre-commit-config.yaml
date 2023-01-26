@@ -63,6 +63,6 @@ repos:
     rev: v2.2.2
     hooks:
       - id: codespell
-        exclude: doc/legal-notice.rst
+        exclude: doc/src/legal-notice.md
         args:
           - -L ro

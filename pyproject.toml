@@ -216,13 +216,15 @@ select = [
 # Allow pydocstyle violations in certain areas.
 per-file-ignores."**/{tests,tags,asdf,devtools}/**" = ["D"]
 per-file-ignores."conftest.py" = ["D"]
-per-file-ignores."tutorials/*" = ["D"]
+per-file-ignores."doc/src/tutorials/*" = ["D"]
+per-file-ignores."doc/src/conf.py" = ["E501",  # ignore long lines.
+    "RUF100",  # do no check if 'noqa' is needed (circular import workaround)
+]
 # Allow prints in certain areas.
 per-file-ignores."**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = ["T2"]
 
 external = ["B950"]
 pydocstyle = {convention = "numpy"}
-#extend-ignore = ["D203", "D211", "D213"]
 pyupgrade = {keep-runtime-typing = true}
 
 mccabe = {max-complexity = 15}  # max branches inside a function.

@@ -16,5 +16,5 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Grep for PR number in CHANGELOG.rst
-        run: grep -P ':pull:`${{github.event.number}}`' CHANGELOG.rst
+      - name: Grep for PR number in CHANGELOG.md
+        run: grep -P '{pull}`${{github.event.number}}`' CHANGELOG.md

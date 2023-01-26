@@ -1,5 +1,0 @@
-###############
- Documentation
-###############
-
-.. automodule:: weldx
