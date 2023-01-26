@@ -20,11 +20,11 @@ dependencies:
   - weldx_widgets >=0.2.1
   # documentation
   - sphinx>=4.1.1
-  - jinja2=3.0
+  #- jinja2=3.0
   - sphinx-copybutton
   - pydata-sphinx-theme
   - numpydoc>=0.5
-  - sphinx-autodoc-typehints
+  - sphinx-autodoc-typehints=1.21.8
   - typing_extensions
   # pip packages
   - pip
