@@ -32,7 +32,7 @@ class LocalCoordinateSystem(TimeDependent):
     Notes
     -----
     Learn how to use this class by reading the
-    :doc:`tutorial <tutorials/transformations_01_coordinate_systems>`.
+    tutorial <tutorials/transformations_01_coordinate_systems>.
 
     """
 
