@@ -102,7 +102,7 @@ jobs:
 
       - name: pip dist install
         run: |
-          pip install ${{ env.SDIST_FILE }}[test]
+          pip install ${{ env.SDIST_FILE }}[test,media]
 
       - name: run pytest
         run: |

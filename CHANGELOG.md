@@ -2,6 +2,10 @@
 
 ## 0.6.3 (unreleased)
 
+### Added
+
+- New class to handle image sequence data and videos `weldx.util.media_file.MediaFile` \[{pull}`727`\].
+
 ### Dependencies
 
 - Pin `asdf<2.14` due to changes in the extension mechanism \[{pull}`828`\].

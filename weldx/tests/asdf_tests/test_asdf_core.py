@@ -18,9 +18,9 @@ from weldx.constants import META_ATTR, Q_
 from weldx.core import GenericSeries, TimeSeries
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.geometry import SpatialData
-from weldx.tags.core.file import ExternalFile
 from weldx.tests._helpers import get_test_name
 from weldx.transformations import WXRotation
+from weldx.util.external_file import ExternalFile
 
 # WXRotation ---------------------------------------------------------------------
 _base_rotation = Rotation.from_euler(
@@ -135,8 +135,7 @@ def test_xarray_data_array(copy_arrays, lazy_load, select):
 
 # xarray.Dataset ---------------------------------------------------------------------
 def get_xarray_example_dataset():
-    """
-    Get an xarray.Dataset for test purposes.
+    """Get a xarray.Dataset for test purposes.
 
     Returns
     -------
@@ -770,6 +769,7 @@ class TestExternalFile:
 
         assert ef.filename == ef_file.filename
         assert ef.suffix == ef_file.suffix
+        assert ef.mimetype == ef_file.mimetype == "image/svg+xml"
         assert ef.directory == ef_file.directory
         assert ef.hostname == ef_file.hostname
 

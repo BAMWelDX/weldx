@@ -1,0 +1,73 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/media_file-0.1.0"
+
+title: |
+  Schema for a media file (time-based and single shot).
+description: |
+  This schema describes a media file by compiling all its meta data.
+  Optionally, the whole file can also be stored in the
+  binary block of an asdf file.
+
+examples:
+  -
+    - Full description of a video file
+    - |
+      !<tag:stsci.edu:asdf/core/asdf-1.1.0>
+        file: !<asdf://weldx.bam.de/weldx/tags/core/file-0.1.1>
+          filename: 221006-180026-WID492_N3.avi
+          suffix: avi
+          hostname: localhost
+          directory: .
+          size: 15408040
+          created: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> 2022-10-25T15:57:26.982713650
+          modified: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> 2022-10-25T15:06:19.380294143
+          content_hash: {algorithm: SHA-256, value: 6758006cd439cdb3374105393d83198432a6e1638cce37e73afbbab850287e0f}
+          mimetype: video/x-msvideo
+        reference_time: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> 2022-10-25T15:06:19.380294143
+        fps: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 55.0, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> 1
+            / second}
+        n_frames: 436
+        resolution: [700, 576]
+
+type: object
+properties:
+  file:
+    description: |
+      The basic file information/content.
+    tag: "asdf://weldx.bam.de/weldx/tags/core/file-0.1.1"
+    mime_type:
+      pattern: "image\/.*|video\/|application/mp4|application/mpeg4-.*"
+  data:
+    description: |
+      A DataArray containing the frames. Given in case this has been initialized from
+      in memory data.
+  reference_time:
+    description: |
+      Time when this media was recorded.
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.*"
+  fps:
+    description: |
+      In case of time-dynamic media, the constant time resolution (frames per second), e.g. a floating point number.
+    tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0"
+    wx_unit: "1/s"
+  resolution:
+    description: |
+      Media resolution in pixels.
+    type: array
+    items:
+      type: integer
+      number: 2
+  n_frames:
+    description: |
+      Number of frames.
+    type: integer
+
+
+propertyOrder: [file, data, reference_time, fps]
+# TODO: in case of in memory data, we require: data, fps, resolution
+# TODO: in case of a file, we require: file, fps, resolution
+#required: [anyOf(file, data), fps, resolution]
+flowStyle: block
+...

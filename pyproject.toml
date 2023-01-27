@@ -65,9 +65,16 @@ test = [
     "pytest-cov",
     "pytest-xdist",
     "nbval",
-  ]
+]
 vis = [
     "weldx_widgets >=0.2",
+]
+media = [
+    "pims",
+    "av",
+    "dask-image",
+    # this is actually required by dask-image, but not listed in their requirements:
+    "tifffile",
 ]
 
 # ASDF extension entry points.
@@ -150,24 +157,7 @@ sqlite_cache = true
 
 # MyPy per-module options:
 [[tool.mypy.overrides]]
-module = "weldx.asdf.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "weldx.tags.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "weldx.tests.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "weldx.welding.groove.*"
-ignore_errors = true
-
-# TODO: remove after refactoring the geometry module
-[[tool.mypy.overrides]]
-module = "weldx.geometry.*"
+module = ["weldx.asdf.*", "weldx.tags.*", "weldx.tests.*", "weldx.welding.groove.*",  "weldx.geometry.*" ]
 ignore_errors = true
 
 # this is a workaround for an xarray related mypy bug

@@ -9,3 +9,5 @@ __all__ = _util_all + _util_xarray
 del _util_all, _util_xarray
 
 _patch_mod_all("weldx.util")  # noqa
+
+from . import external_file, media_file
