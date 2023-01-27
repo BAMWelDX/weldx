@@ -89,9 +89,9 @@ class MediaFile:
         fps: Optional[float] = None,
     ):
         if isinstance(path_or_array, get_args(types_path_like)):
-            self._init_from_path(path_or_array, reference_time)
+            self._init_from_path(path_or_array, reference_time)  # type: ignore
         elif isinstance(path_or_array, get_args(types_sequence_like)):
-            self._init_from_sequence(fps, path_or_array, reference_time)
+            self._init_from_sequence(fps, path_or_array, reference_time)  # type: ignore
         else:
             raise ValueError(f"unsupported input: {path_or_array}")
 
@@ -129,7 +129,7 @@ class MediaFile:
 
         first_frame = self._handle[0]
         if not hasattr(first_frame, "__array_interface__"):
-            first_frame = first_frame.data
+            first_frame = first_frame.data  # type: ignore
         image = fromarray(first_frame)
         self._metadata = dict(
             fps=fps,
