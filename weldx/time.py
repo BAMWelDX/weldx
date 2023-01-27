@@ -58,7 +58,7 @@ class Time:
           calculating a time delta between two dates.
 
     This class solves the mentioned problems for many cases. It can be created
-    from many different data types and offers methods to convert back to one of the
+    from many data types and offers methods to convert back to one of the
     supported types. Most of its methods also support the date types that can be used to
     create an instance of this class. Therefore, you do not need to perform any
     conversions yourself.

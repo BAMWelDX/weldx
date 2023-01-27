@@ -16,5 +16,5 @@ max-line-length = 88
 select = C,E,F,W,B,B950 # black formatting options
 exclude =
     __init__.py
-    doc/conf.py
+    doc/src/conf.py
 no-accept-encodings = True
