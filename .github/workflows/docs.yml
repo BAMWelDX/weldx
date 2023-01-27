@@ -57,12 +57,8 @@ jobs:
       - name: install weldx kernel
         run: ipython kernel install --user --name=weldx
 
-      - name: set notebook execution
-        if: (github.event_name == 'workflow_dispatch')
-        run: echo "nbsphinx_execute=${{ github.event.inputs.nbsphinx_execute }}" >> $GITHUB_ENV
-
       - name: Build docs
-        run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -j 2 -D nbsphinx_execute=${{ env.nbsphinx_execute }}
+        run: sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2
 
       - uses: actions/upload-artifact@v3
         if: |

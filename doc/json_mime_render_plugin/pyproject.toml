@@ -1,0 +1,6 @@
+[project]
+name = "myst_nb_json_renderer"
+version = "1"
+
+[project.entry-points."myst_nb.mime_renderers"]
+json_mime = "myst_nb_json_render_plugin:MimeRenderPlugin"

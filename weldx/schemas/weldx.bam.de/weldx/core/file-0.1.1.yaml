@@ -1,0 +1,88 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/file-0.1.1"
+
+title: |
+  Schema for a file.
+description: |
+  This schema describes a file by compiling all its meta data. Optionally, the whole file can also be stored in the
+  binary block of an asdf file.
+
+examples:
+  -
+    - Full description of a pdf-file without its content
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/file-0.1.1>
+        filename: file.pdf
+        suffix: pdf
+        mimetype: application/pdf
+        hostname: my_computer
+        directory: C:/Users/some_user/my_files
+        size: 90571
+        created: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-12-09T12:51:20.653744500'
+        modified: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-12-10T13:14:17.362481500'
+        content_hash: {algorithm: SHA-256, value: 5a6270ea5e2662c6489ee9e9c2201645e1b3cdadf0e3a621cca213a29ff4ae32}
+
+type: object
+properties:
+  filename:
+    description: |
+      The name of the file including the suffix.
+    type: string
+  suffix:
+    description: |
+      The suffix of the file.
+    type: string
+  mime:
+    description: |
+      MIME type associated with file extension.
+    type: string
+  size:
+    description: |
+      The files size in bytes.
+    type: number
+  created:
+    description: |
+      The timestamp when the file was created.
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.*"
+  modified:
+    description: |
+      The timestamp when the file was modified last.
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.*"
+  hostname:
+    description: |
+      The name of the host machine accessing the file.
+    type: string
+  directory:
+    description: |
+      The directory of the file as seen from the host machine.
+    type: string
+  content:
+    description: |
+      The content of the file. It is stored in the binary block of the file.
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+  content_hash:
+    description: |
+      Hash data for the files content.
+    type: object
+    properties:
+      algorithm:
+        description: |
+          The utilized hashing algorithm.
+        type: string
+        enum: [MD5, SHA-256]
+      value:
+        description: |
+          The calculated hash.
+        type: string
+    required: [algorithm,  value]
+
+
+propertyOrder: [filename, suffix, mime, hostname, directory, size, created, modified, content, content_hash]
+anyOf:
+  - required: [filename, content, content_hash]
+  - required: [filename, hostname]
+
+flowStyle: block
+...

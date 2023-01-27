@@ -6,6 +6,7 @@ from . import (
     generic_series,
     geometry,
     mathematical_expression,
+    media_file,
     time_series,
     transformations,
 )
