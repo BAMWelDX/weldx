@@ -916,10 +916,12 @@ class WeldxFile(_ProtectedViewDict):
         return self.header(*args, **kwargs)
 
     def _ipython_display_(self):
-        # this will be called in Jupyter Lab, but not in a plain notebook.
+        # This will be called in Jupyter Lab, and myst-nb execution,
+        # but not in a plain notebook.
         from IPython.core.display import display
 
-        display(self.header(use_widgets=True, _interactive=True))
+        # Determine widget usage by runtime environment, by passing None.
+        display(self.header(use_widgets=None, _interactive=True))
 
     def info(
         self,
