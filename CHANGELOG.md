@@ -18,6 +18,7 @@
   `TimeSeries` and `SpatialData` converters \[{pull}`831`\].
 - Use Ruff in pre-commit-action \[{pull}`824`\].
 - Use MyST-NB for documentation building \[{pull}`830`\].
+- `WeldxFile` correctly determines whether to display the header via widgets or text \[{pull}`848`\].
 
 ## 0.6.2 (07.11.2022)
 
