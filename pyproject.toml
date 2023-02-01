@@ -118,7 +118,10 @@ asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn"t we just 
 #asdf_schema_tests_enabled = true
 #asdf_schema_skip_tests =
 #    weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml
-norecursedirs = "doc"
+norecursedirs = [
+    "doc",
+    ".ipynb_checkpoints",
+]
 filterwarnings = [
     "ignore::DeprecationWarning:traittypes.*:",
     "ignore:Passing method to :FutureWarning:xarray.*:",
