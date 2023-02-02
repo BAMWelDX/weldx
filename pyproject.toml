@@ -57,7 +57,7 @@ dependencies = [
 documentation = "https://weldx.readthedocs.io"
 repository = "https://github.com/BAMweldx/weldx"
 bug_tracker = "https://github.com/BAMweldx/weldx/issues"
-changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.rst"
+changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
 test = [
