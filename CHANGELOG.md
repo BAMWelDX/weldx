@@ -25,6 +25,7 @@ with updates to the documentation structure and a new schema for video files.
 
 ### ASDF
 
+- update to `asdf://weldx.bam.de/weldx/schemas/core/file-0.1.1` \[{pull}`727`\]
 - add `asdf://weldx.bam.de/weldx/schemas/core/media_file-0.1.0` \[{pull}`727`\]
 
 ## 0.6.2 (07.11.2022)
