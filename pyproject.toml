@@ -176,7 +176,7 @@ ignore_errors = true
 target-version = "py38"  # designated Python version
 exclude = [
     "__init__.py",
-    "doc/conf.py",
+    "doc/src/conf.py",
 ]
 # TODO: should be the following list, but Ruff does not yet impl all of them.
 #    W503,W504

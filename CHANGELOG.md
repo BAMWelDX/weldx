@@ -5,7 +5,6 @@
 Version `0.6.3` is a minor release to increase compatibility with Python 3.11 and `asdf 2.14`
 with updates to the documentation structure and a new schema for video files.
 
-
 ### Added
 
 - New class to handle image sequence data and videos `weldx.util.media_file.MediaFile` \[{pull}`727`\].
