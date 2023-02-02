@@ -7,7 +7,7 @@ A short primer in the steps needed to release a new version of the `weldx` packa
 - [ ] create a PR that finalizes the code for the next version
   - [ ] name the PR according to the version `vX.Y.Z` and add the `release`
     tag ([example here](https://github.com/BAMWelDX/weldx/pull/419))
-  - [ ] make sure `CHANGELOG.rst` is up-to-date and enter current date to the release version
+  - [ ] make sure `CHANGELOG.md` is up-to-date and enter current date to the release version
   - [ ] add summarized release highlights where appropriate
   - [ ] update the `CITATION.cff` version number and date
   - [ ] search the project for `deprecated` and remove deprecated code
@@ -28,7 +28,7 @@ A short primer in the steps needed to release a new version of the `weldx` packa
     ([this website](https://mystyc.herokuapp.com/) can be used to convert rST -> MD)
 - [ ] wait for all Github Actions to finish
 
-## ReadTheDocs update
+## ReadTheDocs updates
 
 - [ ] check the build processes for `latest`, `stable` and `vX.Y.Z` get triggered on RTD (the tag build can get
   triggered twice, resulting in a failed/duplicated build, no need to worry)

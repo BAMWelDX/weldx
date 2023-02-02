@@ -1,6 +1,9 @@
 # Release Notes
 
-## 0.6.3 (unreleased)
+## 0.6.3 (02.02.2023)
+
+Version `0.6.3` is a minor release to increase compatibility with Python 3.11 and `asdf 2.14`
+with updates to the documentation structure and a new schema for video files.
 
 ### Added
 
@@ -19,6 +22,11 @@
 - Use Ruff in pre-commit-action \[{pull}`824`\].
 - Use MyST-NB for documentation building \[{pull}`830`\].
 - `WeldxFile` correctly determines whether to display the header via widgets or text \[{pull}`848`\].
+
+### ASDF
+
+- update to `asdf://weldx.bam.de/weldx/schemas/core/file-0.1.1` \[{pull}`727`\]
+- add `asdf://weldx.bam.de/weldx/schemas/core/media_file-0.1.0` \[{pull}`727`\]
 
 ## 0.6.2 (07.11.2022)
 

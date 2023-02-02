@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
-id: asdf://weldx.bam.de/weldx/manifests/weldx-0.1.1
-extension_uri: asdf://weldx.bam.de/weldx/extensions/weldx-0.1.1
+id: asdf://weldx.bam.de/weldx/manifests/weldx-0.1.2
+extension_uri: asdf://weldx.bam.de/weldx/extensions/weldx-0.1.2
 title: weldx extension manifest for tag mapping
 description: Manifest listing all tag URIs with schema URIs supported by weldx
 tags:
@@ -37,6 +37,8 @@ tags:
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/dimension-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/file-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/file-0.1.0
+- tag_uri: asdf://weldx.bam.de/weldx/tags/core/file-0.1.1
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/file-0.1.1
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/generic_series-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/generic_series-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/generic_series_free_dimension-0.1.0
@@ -53,6 +55,8 @@ tags:
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/graph/di_node-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/mathematical_expression-0.1.0
+- tag_uri: asdf://weldx.bam.de/weldx/tags/core/media_file-0.1.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/media_file-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/time_series-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1

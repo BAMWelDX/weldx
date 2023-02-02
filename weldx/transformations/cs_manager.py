@@ -22,7 +22,7 @@ from .types import types_coordinates, types_orientation
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib
+    import matplotlib  # noqa: ICN001
     import networkx as nx
 
 

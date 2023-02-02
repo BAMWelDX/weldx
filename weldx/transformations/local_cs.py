@@ -23,7 +23,7 @@ from weldx.transformations.util import normalize
 __all__ = ("LocalCoordinateSystem",)
 
 if typing.TYPE_CHECKING:
-    import matplotlib
+    import matplotlib  # noqa: ICN001
 
 
 class LocalCoordinateSystem(TimeDependent):
@@ -256,6 +256,8 @@ class LocalCoordinateSystem(TimeDependent):
             and _comp_coords()
             and self.reference_time == other.reference_time
         )
+
+    __hash__ = None
 
     @staticmethod
     def _build_orientation(

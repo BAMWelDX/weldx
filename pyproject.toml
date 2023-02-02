@@ -176,7 +176,7 @@ ignore_errors = true
 target-version = "py38"  # designated Python version
 exclude = [
     "__init__.py",
-    "doc/conf.py",
+    "doc/src/conf.py",
 ]
 # TODO: should be the following list, but Ruff does not yet impl all of them.
 #    W503,W504
@@ -224,6 +224,7 @@ mccabe = {max-complexity = 15}  # max branches inside a function.
 
 [tool.ruff.isort]
 known-first-party = ["weldx"]
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.flake8-import-conventions]
 extend-aliases = {xarray = "xr"}
