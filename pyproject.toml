@@ -9,7 +9,7 @@ authors = [
     {name="Martin K. Scherer", email="martin.scherer@bam.de"},
 ]
 description = "Python API for the WelDX file format and standard"
-readme = {file = "README.rst", content-type="text/x-rst"}
+readme = "README.md"
 license = {file = "LICENSE", name="BSD License"}
 keywords = [
     "welding",
