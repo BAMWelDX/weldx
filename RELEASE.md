@@ -28,7 +28,7 @@ A short primer in the steps needed to release a new version of the `weldx` packa
     ([this website](https://mystyc.herokuapp.com/) can be used to convert rST -> MD)
 - [ ] wait for all Github Actions to finish
 
-## ReadTheDocs update
+## ReadTheDocs updates
 
 - [ ] check the build processes for `latest`, `stable` and `vX.Y.Z` get triggered on RTD (the tag build can get
   triggered twice, resulting in a failed/duplicated build, no need to worry)
