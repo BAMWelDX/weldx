@@ -257,6 +257,8 @@ class LocalCoordinateSystem(TimeDependent):
             and self.reference_time == other.reference_time
         )
 
+    __hash__ = None
+
     @staticmethod
     def _build_orientation(
         orientation: types_orientation,
