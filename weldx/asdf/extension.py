@@ -13,7 +13,6 @@ from .constants import (
     WELDX_TAG_URI_BASE,
 )
 from .types import WeldxConverter
-from .validators import wx_property_tag_validator, wx_shape_validator, wx_unit_validator
 
 
 # RESOURCES ----------------------------------------------------------------------------
