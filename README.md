@@ -36,8 +36,7 @@ published under an appropriate open source license. By using the file
 format objectivity, comparability and reproducibility across different
 experimental setups can be improved.
 
-The project is under active development by the \[Welding Technology\]
-(https://www.bam.de/Navigation/EN/About-us/Organisation/Organisation-Chart/President/Department-9/Division-93/division93.html)
+The project is under active development by the [Welding Technology](https://www.bam.de/Navigation/EN/About-us/Organisation/Organisation-Chart/President/Department-9/Division-93/division93.html)
 division at Bundesanstalt für Materialforschung und -prüfung (BAM).
 
 ## Features
