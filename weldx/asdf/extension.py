@@ -13,7 +13,6 @@ from .constants import (
     WELDX_TAG_URI_BASE,
 )
 from .types import WeldxConverter
-from .validators import wx_property_tag_validator, wx_shape_validator, wx_unit_validator
 
 
 # RESOURCES ----------------------------------------------------------------------------
@@ -59,11 +58,6 @@ class WeldxExtension(ManifestExtension):
         "weldx.asdf.extension.WeldxExtension",
     ]
     yaml_tag_handles = {"!weldx!": WELDX_TAG_URI_BASE}
-    validators = {  # not active yet
-        "wx_property_tag": wx_property_tag_validator,
-        "wx_unit": wx_unit_validator,
-        "wx_shape": wx_shape_validator,
-    }
 
 
 def get_extensions() -> list[ManifestExtension]:
