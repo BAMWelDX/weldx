@@ -2,6 +2,10 @@
 
 ## 0.6.4 (unreleased)
 
+### Changes
+
+- `WeldxFile` also shows its JSON widget header representation in an Jupyter hub based environment \[{pull}`853`\].
+
 ### ASDF
 
 - remove preliminary validators from new style ASDF extension for compatibility with upcoming `asdf` changes \[{pull}`853`\].
