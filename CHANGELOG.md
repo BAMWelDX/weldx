@@ -1,5 +1,12 @@
 # Release Notes
 
+
+## 0.6.4 (unreleased)
+
+### ASDF
+
+- remove preliminary validators from new style ASDF extension for compatibility with upcoming `asdf` changes \[{pull}`853`\].
+
 ## 0.6.3 (02.02.2023)
 
 Version `0.6.3` is a minor release to increase compatibility with Python 3.11 and `asdf 2.14`
