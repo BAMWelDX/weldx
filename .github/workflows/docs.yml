@@ -62,7 +62,7 @@ jobs:
         run: echo "jupyter_execute_notebooks=${{ github.event.inputs.jupyter_execute_notebooks }}" >> $GITHUB_ENV
 
       - name: Build docs
-        run: sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2-D jupyter_execute_notebooks=${{ env.jupyter_execute_notebooks }}
+        run: sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2 -D jupyter_execute_notebooks=${{ env.jupyter_execute_notebooks }}
 
       - uses: actions/upload-artifact@v3
         if: |
