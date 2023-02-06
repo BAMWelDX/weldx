@@ -9,7 +9,7 @@ authors = [
     {name="Martin K. Scherer", email="martin.scherer@bam.de"},
 ]
 description = "Python API for the WelDX file format and standard"
-readme = {file = "README.rst", content-type="text/x-rst"}
+readme = "README.md"
 license = {file = "LICENSE", name="BSD License"}
 keywords = [
     "welding",
@@ -57,7 +57,7 @@ dependencies = [
 documentation = "https://weldx.readthedocs.io"
 repository = "https://github.com/BAMweldx/weldx"
 bug_tracker = "https://github.com/BAMweldx/weldx/issues"
-changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.rst"
+changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
 test = [
