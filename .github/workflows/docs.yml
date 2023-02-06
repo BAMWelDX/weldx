@@ -12,10 +12,10 @@ on:
     - cron: '0 6 * * 1'
   workflow_dispatch:
     inputs:
-      nbsphinx_execute:
-        description: 'run notebooks (always/never)'
+      jupyter_execute_notebooks:
+        description: 'run notebooks (force/off)'
         required: true
-        default: 'always'
+        default: 'force'
 
 # execute commands with conda aware shell by default:
 defaults:
@@ -57,8 +57,12 @@ jobs:
       - name: install weldx kernel
         run: ipython kernel install --user --name=weldx
 
+      - name: set notebook execution
+        if: (github.event_name == 'workflow_dispatch')
+        run: echo "jupyter_execute_notebooks=${{ github.event.inputs.jupyter_execute_notebooks }}" >> $GITHUB_ENV
+
       - name: Build docs
-        run: sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2
+        run: sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2-D jupyter_execute_notebooks=${{ env.jupyter_execute_notebooks }}
 
       - uses: actions/upload-artifact@v3
         if: |
