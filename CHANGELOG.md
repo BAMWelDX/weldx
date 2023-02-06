@@ -4,7 +4,7 @@
 
 ### Changes
 
-- `WeldxFile` also shows its JSON widget header representation in an Jupyter hub based environment \[{pull}`853`\].
+- `WeldxFile` also shows its JSON widget header representation in an Jupyter hub based environment \[{pull}`854`\].
 
 ### ASDF
 
