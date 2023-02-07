@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import functools
-import re
 import sys
 import warnings
 from collections.abc import Callable, Sequence, Set
@@ -13,7 +12,6 @@ from typing import ClassVar, Collection, Hashable, Mapping, Union
 import numpy as np
 import pandas as pd
 import pint
-import psutil
 import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
@@ -366,14 +364,32 @@ def is_interactive_session() -> bool:
 
 
 def is_jupyterlab_session() -> bool:
-    """Heuristic to check whether we are in a Jupyter-Lab session.
+    """Check whether we are in a Jupyter-Lab session.
 
     Notes
     -----
-    False positive, if classic NB launched from JupyterLab.
-
+    This is a heuristic based process inspection based on the current Jupyter lab
+    (major 3) version. So it could fail in the future.
+    It will also report false positive in case a classic notebook frontend is started
+    via Jupyter lab.
     """
-    return any(re.search("jupyter-lab", x) for x in psutil.Process().parent().cmdline())
+    import psutil
+
+    # inspect parent process for any signs of being a jupyter lab server
+
+    parent = psutil.Process().parent()
+    if parent.name() == "jupyter-lab":
+        return True
+    keys = (
+        "JUPYTERHUB_API_KEY",
+        "JPY_API_TOKEN",
+        "JUPYTERHUB_API_TOKEN",
+    )
+    env = parent.environ()
+    if any(k in env for k in keys):
+        return True
+
+    return False
 
 
 def _patch_mod_all(module_name: str):
