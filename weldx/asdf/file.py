@@ -548,7 +548,7 @@ class WeldxFile(_ProtectedViewDict):
         return super().keys()
 
     @classmethod
-    def fromkeys(cls, iterable, default=None) -> "WeldxFile":
+    def fromkeys(cls, iterable, default=None) -> WeldxFile:
         """Create a new file with keys from iterable and values set to value.
 
         Parameters
@@ -755,7 +755,7 @@ class WeldxFile(_ProtectedViewDict):
         self,
         filename_or_file_like: Optional[types_path_and_file_like] = None,
         overwrite: bool = False,
-    ) -> "WeldxFile":
+    ) -> WeldxFile:
         """Take a copy of this file.
 
         Depending on the underlying file type this does several different things.
@@ -971,7 +971,7 @@ class _HeaderVisualizer:
 
     def show(
         self, use_widgets=None, path=None, _interactive=None
-    ) -> Union[None, "IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
+    ) -> Union[None, IPython.display.HTML, IPython.display.JSON]:  # noqa: F821
         if _interactive is None:
             _interactive = is_interactive_session()
         if use_widgets is None:
@@ -996,7 +996,7 @@ class _HeaderVisualizer:
     @staticmethod
     def _show_interactive(
         use_widgets: bool, buff: BytesIO, path: tuple = None
-    ) -> Union["IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
+    ) -> Union[IPython.display.HTML, IPython.display.JSON]:  # noqa: F821
         from weldx.asdf.util import notebook_fileprinter
 
         if use_widgets:

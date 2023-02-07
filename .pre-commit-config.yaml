@@ -29,18 +29,18 @@ repos:
           - mdformat-config
   # ----- Python formatting -----
   - repo: https://github.com/psf/black
-    rev: 22.12.0
+    rev: 23.1.0
     hooks:
       - id: black
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.239
+    rev: v0.0.242
     hooks:
       - id: ruff
         args:
           - --quiet
           - --fix
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.11
+    rev: v0.12.1
     hooks:
       - id: validate-pyproject
   # ----- Jupyter Notebooks -----
