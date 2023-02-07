@@ -349,7 +349,6 @@ def _compare_lists(_list, list_expected) -> Union[bool, dict]:
 
     has_variable_dim_num = False
     for i, exp in enumerate(list_expected):
-
         if "..." in str(exp):
             has_variable_dim_num = True
             break  # all the following dimensions are accepted

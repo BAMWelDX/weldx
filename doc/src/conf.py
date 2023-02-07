@@ -253,6 +253,7 @@ html_context = {
 # documentation.
 # html_theme_options = {"logo_only": True}
 
+
 # Intersphinx mappings -----------------------------------------------------
 def _get_intersphinx_mapping():
     from asdf import __version__ as asdf_version

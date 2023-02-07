@@ -48,11 +48,11 @@ class Signal:
     def plot(
         self,
         time: Union[TimedeltaIndex, Quantity] = None,
-        axes: "matplotlib.axes.Axes" = None,
+        axes: matplotlib.axes.Axes = None,
         data_name: str = "values",
         time_unit: Union[str, Unit] = None,
         **mpl_kwargs,
-    ) -> "matplotlib.axes.Axes":
+    ) -> matplotlib.axes.Axes:
         """Plot the time dependent data of the `Signal`.
 
         Parameters
@@ -284,7 +284,7 @@ class MeasurementChain:
     __hash__ = None
 
     @classmethod
-    def from_dict(cls, dictionary: dict) -> "MeasurementChain":
+    def from_dict(cls, dictionary: dict) -> MeasurementChain:
         """Create a measurement chain from a dictionary.
 
         Parameters
@@ -306,7 +306,7 @@ class MeasurementChain:
     @classmethod
     def from_equipment(
         cls, name, equipment: MeasurementEquipment, source_name=None
-    ) -> "MeasurementChain":
+    ) -> MeasurementChain:
         """Create a measurement chain from a piece of equipment that contains a source.
 
         Parameters
@@ -377,7 +377,7 @@ class MeasurementChain:
         output_signal_type: str,
         output_signal_unit: Union[str, Unit],
         signal_data: TimeSeries = None,
-    ) -> "MeasurementChain":
+    ) -> MeasurementChain:
         """Create a new measurement chain without providing a `SignalSource` instance.
 
         Parameters
