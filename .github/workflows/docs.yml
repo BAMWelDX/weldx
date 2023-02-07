@@ -12,7 +12,7 @@ on:
     - cron: '0 6 * * 1'
   workflow_dispatch:
     inputs:
-      jupyter_execute_notebooks:
+      nb_execution_mode:
         description: 'run notebooks (force/off)'
         required: true
         default: 'force'
@@ -59,10 +59,10 @@ jobs:
 
       - name: set notebook execution
         if: (github.event_name == 'workflow_dispatch')
-        run: echo "jupyter_execute_notebooks=${{ github.event.inputs.jupyter_execute_notebooks }}" >> $GITHUB_ENV
+        run: echo "nb_execution_mode=${{ github.event.inputs.nb_execution_mode }}" >> $GITHUB_ENV
 
       - name: Build docs
-        run: sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2 -D jupyter_execute_notebooks=${{ env.jupyter_execute_notebooks }}
+        run: sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2 -D nb_execution_mode=${{ env.nb_execution_mode }}
 
       - uses: actions/upload-artifact@v3
         if: |
