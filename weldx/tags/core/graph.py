@@ -13,7 +13,7 @@ from weldx.asdf.types import WeldxConverter
 class DiEdge:
     """Generic directed edge type."""
 
-    target_node: "DiNode"
+    target_node: DiNode
     attributes: dict = field(default_factory=dict)
     direction: str = "fwd"
 
@@ -40,7 +40,7 @@ class DiEdgeConverter(WeldxConverter):
 class DiNode:
     """Generic directed graph node type."""
 
-    edges: list["DiEdge"] = field(default_factory=list)
+    edges: list[DiEdge] = field(default_factory=list)
     name: str = field(default_factory=uuid4)
     attributes: dict = field(default_factory=dict)
 

@@ -543,8 +543,7 @@ def test_time_series(ts, copy_arrays, lazy_load):
     ],
 )
 def test_generic_series_discrete(coords, interpolation, copy_arrays, lazy_load):
-
-    shape = tuple([len(v) for v in coords.values()])
+    shape = tuple(len(v) for v in coords.values())
     data = Q_(np.ones(shape), "m")
 
     gs = GenericSeries(data, coords=coords, interpolation=interpolation)

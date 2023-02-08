@@ -694,6 +694,7 @@ def test_comparison(
         A list containing the expected results of each instance comparison
 
     """
+
     # define support function
     def create_csm_list(csm_data_list, cs_data_list, merge_data_list):
         """Create a list of CSM instances."""

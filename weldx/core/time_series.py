@@ -390,11 +390,11 @@ class TimeSeries(TimeDependent):
     def plot(
         self,
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
-        axes: "matplotlib.axes.Axes" = None,
+        axes: matplotlib.axes.Axes = None,
         data_name: str = "values",
         time_unit: UnitLike = None,
         **mpl_kwargs,
-    ) -> "matplotlib.axes.Axes":
+    ) -> matplotlib.axes.Axes:
         """Plot the `TimeSeries`.
 
         Parameters
