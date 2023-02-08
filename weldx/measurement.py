@@ -307,7 +307,7 @@ class MeasurementChain:
     def from_equipment(
         cls, name, equipment: MeasurementEquipment, source_name=None
     ) -> "MeasurementChain":
-        """Create a measurement chain from a piece of equipment that contains a source.
+        r"""Create a measurement chain from a piece of equipment that contains a source.
 
         Parameters
         ----------
@@ -672,7 +672,7 @@ class MeasurementChain:
         input_signal_source: str = None,
         transformation_name=None,
     ):
-        """Add a transformation from a piece of equipment.
+        r"""Add a transformation from a piece of equipment.
 
         Parameters
         ----------

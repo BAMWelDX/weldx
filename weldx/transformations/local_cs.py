@@ -803,7 +803,7 @@ class LocalCoordinateSystem(TimeDependent):
         show_trace: bool = True,
         show_vectors: bool = True,
     ):
-        """Plot the coordinate system.
+        r"""Plot the coordinate system.
 
         Parameters
         ----------
