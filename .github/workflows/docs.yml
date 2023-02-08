@@ -36,7 +36,7 @@ jobs:
     name: sphinx build
     runs-on: ubuntu-latest
     env:
-      nbsphinx_execute: 'always'
+      nb_execution_mode: 'force'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
