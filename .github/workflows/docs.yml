@@ -16,6 +16,11 @@ on:
         description: 'run notebooks (force/off)'
         required: true
         default: 'force'
+      upload_docs:
+        description: 'upload docs as artifacts'
+        type: boolean
+        required: false
+        default: false
 
 # execute commands with conda aware shell by default:
 defaults:
@@ -68,7 +73,7 @@ jobs:
         if: |
           always() && (
           startsWith(github.ref, 'refs/tags/') ||
-          (github.event_name == 'workflow_dispatch') ||
+          ((github.event_name == 'workflow_dispatch') && (github.event.inputs.upload_docs == 'true')) ||
           (github.ref == 'refs/heads/master') ||
           (github.event_name == 'release' && github.event.action == 'created')
           )
