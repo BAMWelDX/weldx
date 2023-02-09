@@ -1,10 +1,12 @@
 # Release Notes
 
-## 0.6.4 (unreleased)
+## 0.6.4 (09.02.2023)
+
+Version `0.6.4` is a small maintenance release with no changes affecting user code.
 
 ### Changes
 
-- `WeldxFile` also shows its JSON widget header representation in an Jupyter hub based environment \[{pull}`854`\].
+- `WeldxFile` also shows its JSON widget header representation in a JupyterHub based environment \[{pull}`854`\].
 
 ### ASDF
 
