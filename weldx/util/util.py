@@ -420,7 +420,7 @@ def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
 def check_matplotlib_available(func, *args, **kwargs):
     """Emit a warning if matplotlib is not available."""
     try:
-        import matplotlib.pyplot as plt  # noqa: F401
+        import matplotlib.pyplot as plt
     except ModuleNotFoundError:
         warnings.warn(
             "Matplotlib unavailable! Cannot plot. "
