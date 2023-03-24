@@ -429,9 +429,8 @@ def check_matplotlib_available(func, *args, **kwargs):
                 "Please install matplotlib or weldx_widgets.",
                 stacklevel=2,
             )
+            return None
     except ValueError:
         warnings.warn("Matplotlib is unavailable (module set to None).", stacklevel=2)
-    else:
-        return func(*args, **kwargs)
 
-    return None
+    return func(*args, **kwargs)
