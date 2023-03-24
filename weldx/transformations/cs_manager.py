@@ -30,6 +30,7 @@ __all__ = ["CoordinateSystemManager"]
 
 
 class CoordinateSystemManager:
+
     """Handles hierarchical dependencies between multiple coordinate systems.
 
     Notes
@@ -42,6 +43,7 @@ class CoordinateSystemManager:
     @dataclass_nested_eq
     @dataclass
     class SubsystemInfo:
+
         """Contains information about subsystems."""
 
         name: str
@@ -1920,7 +1922,8 @@ class CoordinateSystemManager:
             warnings.warn(
                 "The following coordinate systems are not part of any subsystem and "
                 f"lost connection to the CoordinateSystemManager instance: {lcs_rem}\n"
-                "These systems are removed."
+                "These systems are removed.",
+                stacklevel=1,
             )
 
         return subsystems
