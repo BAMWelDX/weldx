@@ -6,6 +6,7 @@ import sys
 import warnings
 from collections.abc import Callable, Sequence, Set
 from functools import wraps
+from importlib.util import find_spec
 from inspect import getmembers, isfunction
 from typing import ClassVar, Collection, Hashable, Mapping, Union
 
@@ -36,6 +37,7 @@ __all__ = [
 
 
 class WeldxDeprecationWarning(DeprecationWarning):
+
     """Deprecation warning type."""
 
 
@@ -185,6 +187,7 @@ _eq_compare_nested_input_types = Union[
 
 
 class _EqCompareNested:
+
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
     # some types need special comparison handling.
@@ -420,13 +423,14 @@ def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
 def check_matplotlib_available(func, *args, **kwargs):
     """Emit a warning if matplotlib is not available."""
     try:
-        import matplotlib.pyplot as plt
-    except ModuleNotFoundError:
-        warnings.warn(
-            "Matplotlib unavailable! Cannot plot. "
-            "Please install matplotlib or weldx_widgets.",
-            stacklevel=2,
-        )
+        if find_spec("matplotlib.pyplot") is None:
+            warnings.warn(
+                "Matplotlib unavailable! Cannot plot. "
+                "Please install matplotlib or weldx_widgets.",
+                stacklevel=2,
+            )
+    except ValueError:
+        warnings.warn("Matplotlib is unavailable (module set to None).", stacklevel=2)
     else:
         return func(*args, **kwargs)
 

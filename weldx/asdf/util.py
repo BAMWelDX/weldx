@@ -63,7 +63,10 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
     if len(schemas) == 0:
         raise ValueError(f"No matching schema for filename '{schema}'.")
     elif len(schemas) > 1:
-        warn(f"Found more than one matching schema for filename '{schema}'.")
+        warn(
+            f"Found more than one matching schema for filename '{schema}'.",
+            stacklevel=1,
+        )
     return schemas[0]
 
 
@@ -477,7 +480,9 @@ def get_converter_for_tag(tag: str) -> Union[WeldxConverter, None]:
     """Get the converter class that handles a given tag."""
     converters = [s for s in WeldxConverter.__subclasses__() if uri_match(s.tags, tag)]
     if len(converters) > 1:
-        warn(f"Found more than one converter class for {tag=}", UserWarning)
+        warn(
+            f"Found more than one converter class for {tag=}", UserWarning, stacklevel=1
+        )
     if converters:
         return converters[0]
     return None
