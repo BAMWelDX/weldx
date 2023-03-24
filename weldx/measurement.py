@@ -490,7 +490,7 @@ class MeasurementChain:
 
     @staticmethod
     def _determine_output_signal_type(type_transformation: str, input_type: str) -> str:
-        """Determine the type of a transformations' output signal.
+        """Determine the type of given transformations' output signal.
 
         Parameters
         ----------
@@ -636,7 +636,7 @@ class MeasurementChain:
         ...                               )
 
         Use the mathematical expression to create a signal transformation which also
-        performs a analog-digital conversion.
+        performs analog-digital conversion.
 
         >>> current_ad_transform = SignalTransformation(
         ...                            name="Current AD conversion",
@@ -713,7 +713,7 @@ class MeasurementChain:
         ...                               )
 
         Use the mathematical expression to create a signal transformation which also
-        performs a analog-digital conversion.
+        performs analog-digital conversion.
 
         >>> current_ad_transform = SignalTransformation(
         ...                            name="Current AD conversion",
@@ -722,7 +722,7 @@ class MeasurementChain:
         ...                            type_transformation="AD"
         ...                            )
 
-        Create a new equipment that performs the transformation
+        Create new equipment that performs the transformation
 
         >>> current_ad_converter = MeasurementEquipment(
         ...                            name="Current AD converter",
@@ -812,7 +812,7 @@ class MeasurementChain:
         ...                               )
 
         Use the mathematical expression to create a new transformation which also
-        performs a analog-digital conversion.
+        performs an analog-digital conversion.
 
         >>> mc.create_transformation(name="Current AD conversion",
         ...                          error=Error(deviation=Q_(1,"percent")),
@@ -825,7 +825,10 @@ class MeasurementChain:
             output_signal_unit = U_(output_signal_unit)
 
         if output_signal_type is None and output_signal_unit is None and func is None:
-            warn("The created transformation does not perform any transformations.")
+            warn(
+                "The created transformation does not perform any transformations.",
+                stacklevel=1,
+            )
 
         input_signal_source = self._check_and_get_node_name(input_signal_source)
         input_signal: Signal = self._graph.nodes[input_signal_source]["signal"]
