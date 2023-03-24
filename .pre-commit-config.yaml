@@ -33,7 +33,7 @@ repos:
     hooks:
       - id: black
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.254
+    rev: v0.0.259
     hooks:
       - id: ruff
         args:
@@ -45,7 +45,7 @@ repos:
       - id: validate-pyproject
   # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.6.3
+    rev: 1.6.4
     hooks:
       - id: nbqa-black
       - id: nbqa-ruff  # ruff handles isort
@@ -60,7 +60,7 @@ repos:
           - --remove-kernel-metadata
   # ----- spellchecking -----
   - repo: https://github.com/codespell-project/codespell/
-    rev: v2.2.2
+    rev: v2.2.4
     hooks:
       - id: codespell
         exclude: doc/src/legal-notice.md
