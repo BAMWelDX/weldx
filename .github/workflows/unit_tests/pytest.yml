@@ -63,7 +63,6 @@ jobs:
       - name: install quality standards requisites
         if: matrix.py == '3.9'
         include: ./unit_tests/install_quality_standards.yml
-        job: install_quality_standards
 
       - name: run pytest
         run: |
@@ -79,7 +78,6 @@ jobs:
       - name: run advanced unit tests (asdf) with coverage
         if: matrix.py == '3.9'
         include: ./unit_tests/run_tests.yml
-        job: run_tests
 
   compat:
     name: pytest
