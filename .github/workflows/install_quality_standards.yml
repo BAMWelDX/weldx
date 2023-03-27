@@ -1,11 +1,12 @@
 name: install quality standards requisites
 jobs:
-  steps:
-    - name: cookiecutter
-      run: pip install cookiecutter
+  install_quality_standards:
+    steps:
+      - name: cookiecutter
+        run: pip install cookiecutter
 
-    - name: create installable quality standard from repo
-      run: cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template
+      - name: create installable quality standard from repo
+        run: cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template
 
-    - name: install quality standard
-      run: pip install -e ./quality_standard_demo
+      - name: install quality standard
+        run: pip install -e ./quality_standard_demo
