@@ -6,6 +6,7 @@ import sys
 import warnings
 from collections.abc import Callable, Sequence, Set
 from functools import wraps
+from importlib.util import find_spec
 from inspect import getmembers, isfunction
 from typing import ClassVar, Collection, Hashable, Mapping, Union
 
@@ -36,6 +37,7 @@ __all__ = [
 
 
 class WeldxDeprecationWarning(DeprecationWarning):
+
     """Deprecation warning type."""
 
 
@@ -419,15 +421,23 @@ def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
 @decorator
 def check_matplotlib_available(func, *args, **kwargs):
     """Emit a warning if matplotlib is not available."""
-    try:
-        import matplotlib.pyplot as plt  # noqa: F401
-    except ModuleNotFoundError:
+
+    def _warn():
         warnings.warn(
             "Matplotlib unavailable! Cannot plot. "
             "Please install matplotlib or weldx_widgets.",
-            stacklevel=2,
+            stacklevel=3,
         )
-    else:
-        return func(*args, **kwargs)
 
-    return None
+    try:
+        if find_spec("matplotlib.pyplot") is None:
+            _warn()
+            return
+    except ModuleNotFoundError:
+        _warn()
+        return
+    except ValueError:
+        warnings.warn("Matplotlib is unavailable (module set to None).", stacklevel=2)
+        return
+
+    return func(*args, **kwargs)
