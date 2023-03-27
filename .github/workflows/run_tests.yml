@@ -1,20 +1,21 @@
 name: Run unit tests with coverage
 jobs:
-  steps:
-    - name: run pytest on notebooks (append coverage)
-      run: pytest -n 2 --dist loadfile --nbval --current-env --cov-append ./doc/src/tutorials/
+  run_tests:
+    steps:
+      - name: run pytest on notebooks (append coverage)
+        run: pytest -n 2 --dist loadfile --nbval --current-env --cov-append ./doc/src/tutorials/
 
-    - name: test with WeldxFile
-      run: pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
+      - name: test with WeldxFile
+        run: pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
 
-    - name: test quality standard
-      run: pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py
+      - name: test quality standard
+        run: pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py
 
-    - name: test installable quality standard from template repository
-      run: pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py
+      - name: test installable quality standard from template repository
+        run: pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py
 
-    - name: coverage xml (combination is performed by pytest-cov)
-      run: coverage xml
+      - name: coverage xml (combination is performed by pytest-cov)
+        run: coverage xml
 
-    - name: codecov.io
-      uses: codecov/codecov-action@v3.1.1
+      - name: codecov.io
+        uses: codecov/codecov-action@v3.1.1
