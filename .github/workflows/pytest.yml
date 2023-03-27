@@ -60,20 +60,10 @@ jobs:
       - name: activate env
         run: micromamba activate weldx
 
-      - name: install cookiecutter
+      - name: install quality standards requisites
         if: matrix.py == '3.8'
-        run: |
-          pip install cookiecutter
-
-      - name: create installable quality standard from repo
-        if: matrix.py == '3.8'
-        run: |
-          cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template
-
-      - name: install quality standard
-        if: matrix.py == '3.8'
-        run: |
-          pip install -e ./quality_standard_demo
+        include: ./install_quality_standards.yml
+        job: install_quality_standards
 
       - name: run pytest
         run: |
@@ -86,34 +76,10 @@ jobs:
           name: Unit Test Results
           path: pytest.xml
 
-      - name: run pytest on notebooks (append coverage)
+      - name: run advanced unit tests (asdf) with coverage
         if: matrix.py == '3.8'
-        run: |
-          pytest -n 2 --dist loadfile --nbval --current-env --cov-append ./doc/src/tutorials/
-
-      - name: test with WeldxFile
-        if: matrix.py == '3.8'
-        run: |
-          pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
-
-      - name: test quality standard
-        if: matrix.py == '3.8'
-        run: |
-          pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py
-
-
-      - name: test installable quality standard from template repository
-        if: matrix.py == '3.8'
-        run: |
-          pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py
-
-      - name: coverage xml (combination is performed by pytest-cov)
-        if: matrix.py == '3.8'
-        run: coverage xml
-
-      - name: codecov.io
-        if: matrix.py == '3.8'
-        uses: codecov/codecov-action@v3.1.1
+        include: ./run_tests.yml
+        job: run_tests
 
   compat:
     name: pytest
