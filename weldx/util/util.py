@@ -422,15 +422,23 @@ def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
 @decorator
 def check_matplotlib_available(func, *args, **kwargs):
     """Emit a warning if matplotlib is not available."""
+
+    def _warn():
+        warnings.warn(
+            "Matplotlib unavailable! Cannot plot. "
+            "Please install matplotlib or weldx_widgets.",
+            stacklevel=3,
+        )
+
     try:
         if find_spec("matplotlib.pyplot") is None:
-            warnings.warn(
-                "Matplotlib unavailable! Cannot plot. "
-                "Please install matplotlib or weldx_widgets.",
-                stacklevel=2,
-            )
-            return None
+            _warn()
+            return
+    except ModuleNotFoundError:
+        _warn()
+        return
     except ValueError:
         warnings.warn("Matplotlib is unavailable (module set to None).", stacklevel=2)
+        return
 
     return func(*args, **kwargs)
