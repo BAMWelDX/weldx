@@ -27,7 +27,6 @@ if typing.TYPE_CHECKING:
 
 
 class LocalCoordinateSystem(TimeDependent):
-
     """Defines a local cartesian coordinate system in 3d.
 
     Notes
