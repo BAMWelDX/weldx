@@ -30,7 +30,6 @@ __all__ = ["CoordinateSystemManager"]
 
 
 class CoordinateSystemManager:
-
     """Handles hierarchical dependencies between multiple coordinate systems.
 
     Notes
@@ -43,7 +42,6 @@ class CoordinateSystemManager:
     @dataclass_nested_eq
     @dataclass
     class SubsystemInfo:
-
         """Contains information about subsystems."""
 
         name: str
