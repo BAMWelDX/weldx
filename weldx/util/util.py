@@ -187,7 +187,6 @@ _eq_compare_nested_input_types = Union[
 
 
 class _EqCompareNested:
-
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
     # some types need special comparison handling.
