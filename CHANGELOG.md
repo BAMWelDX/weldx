@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.6.5 (unreleased)
+
+### Dependencies
+
+- require XArray >= 2023.3.0, as `LocalCoordinateSystem` now handles merges correctly \[{pull}`861`\].
+
 ## 0.6.4 (09.02.2023)
 
 Version `0.6.4` is a small maintenance release with no changes affecting user code.
