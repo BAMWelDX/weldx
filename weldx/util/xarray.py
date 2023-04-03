@@ -737,10 +737,14 @@ def xr_interp_coordinates_in_time(
         return da
 
     times = Time(times).as_pandas_index()
+    time_ref = da.weldx.time_ref
     da = da.weldx.time_ref_unset()
     da = xr_interp_like(
         da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
     )
+    # resync and reset to correct format
+    if time_ref:
+        da.weldx.time_ref = time_ref
     da = da.weldx.time_ref_restore()
 
     if len(da.time) == 1:  # remove "time dimension" for static cases
