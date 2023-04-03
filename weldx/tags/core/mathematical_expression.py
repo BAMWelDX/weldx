@@ -22,7 +22,9 @@ class MathematicalExpressionConverter(WeldxConverter):
         for k, v in obj.parameters.items():
             if isinstance(v, DataArray):
                 if len(v.coords) > 0:
-                    warnings.warn("Coordinates are dropped during serialization.")
+                    warnings.warn(
+                        "Coordinates are dropped during serialization.", stacklevel=0
+                    )
                 dims = v.dims
                 v = v.data
                 setattr(v, META_ATTR, dict(dims=dims))

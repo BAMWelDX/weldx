@@ -86,7 +86,8 @@ class LocalCoordinateSystem(TimeDependent):
         ):
             warnings.warn(
                 "Provided time is dropped because of the given coordinates and "
-                "orientation."
+                "orientation.",
+                stacklevel=2,
             )
 
         if construction_checks:
@@ -113,7 +114,10 @@ class LocalCoordinateSystem(TimeDependent):
 
         # warn about dropped reference time
         if time_ref is not None and time is None and self._time_ref is None:
-            warnings.warn("Reference time dropped. The system is not time dependent.")
+            warnings.warn(
+                "Reference time dropped. The system is not time dependent.",
+                stacklevel=2,
+            )
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -167,6 +171,8 @@ class LocalCoordinateSystem(TimeDependent):
             )
 
         # handle time
+        # TODO: time var is unused! why? The var should be used in line 201?
+        # e.g. ... rhs_cs.interp_time(lhs_cs.time, time_ref)
         time = lhs_cs.time
         if time is None:
             time = rhs_cs.time
@@ -407,7 +413,7 @@ class LocalCoordinateSystem(TimeDependent):
             orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
             coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
 
-        return (orientation, coordinates)
+        return orientation, coordinates
 
     @classmethod
     def from_euler(
@@ -422,7 +428,7 @@ class LocalCoordinateSystem(TimeDependent):
         """Construct a local coordinate system from an euler sequence.
 
         This function uses scipy.spatial.transform.Rotation.from_euler method to define
-        the coordinate systems orientation. Take a look at it's documentation, if some
+        the coordinate systems orientation. Take a look at its documentation, if some
         information is missing here. The related parameter docs are a copy of the scipy
         documentation.
 
@@ -724,7 +730,7 @@ class LocalCoordinateSystem(TimeDependent):
         value will be stripped from the result.
         Additionally, if the passed time range does not overlap with the time range of
         the coordinate system, the resulting system won't be time dependent neither
-        because the values outside of the coordinate systems time range are considered
+        because the values outside the coordinate systems time range are considered
         as being constant.
 
         Parameters
@@ -826,7 +832,7 @@ class LocalCoordinateSystem(TimeDependent):
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
         time_index: int
-            If the coordinate system is time dependent, this parameter can be used to
+            If the coordinate system is time dependent, this parameter can be used
             to select a specific key frame by its index.
         scale_vectors :
             A scaling factor or array to adjust the vector length
