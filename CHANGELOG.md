@@ -4,7 +4,7 @@
 
 ### Dependencies
 
-- require XArray >= 2023.3.0, as `LocalCoordinateSystem` now handles merges correctly \[{pull}`861`\].
+- require XArray >= 2022.9.0, as `LocalCoordinateSystem` now handles merges correctly \[{pull}`861`\].
 
 ## 0.6.4 (09.02.2023)
 

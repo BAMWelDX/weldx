@@ -33,12 +33,12 @@ classifiers = [
 ]
 
 # Dependencies
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 dependencies = [
     "numpy >=1.20",
     "asdf >=2.8.2,!=2.14.0,!=2.14.1,!=2.14.2",
     "pandas >=1.0",
-    "xarray >=2023.3.0",
+    "xarray >=2022.9.0",
     "scipy >=1.4,!=1.6.0,!=1.6.1",
     "sympy >=1.6",
     "pint >=0.18",
@@ -114,7 +114,7 @@ addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:ski
 testpaths = "weldx"
 # custom test markers, see https://docs.pytest.org/en/latest/example/markers.html#mark-examples
 markers = "slow: marks tests as slow to run (skipped by default, enable with --runslow option)"
-asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn"t we just use the entry points to resolve this?
+asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn't we just use the entry points to resolve this?
 #asdf_schema_tests_enabled = true
 #asdf_schema_skip_tests =
 #    weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml
