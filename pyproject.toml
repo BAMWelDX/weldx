@@ -215,6 +215,7 @@ per-file-ignores."doc/src/conf.py" = ["E501",  # ignore long lines.
 ]
 # Allow prints in certain areas.
 per-file-ignores."**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = ["T2"]
+per-file-ignores."doc/src/tutorials/**/*.ipynb" = ["B018"]
 
 external = ["B950"]
 pydocstyle = {convention = "numpy"}
