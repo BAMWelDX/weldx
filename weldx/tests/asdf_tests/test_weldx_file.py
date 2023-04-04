@@ -233,7 +233,7 @@ class TestWeldXFile:
 
         # cannot access closed handles
         with pytest.raises(RuntimeError):
-            self.fh.file_handle
+            self.fh.file_handle  # noqa: B018
 
     def test_update_on_close(self):
         """A WeldxFile with mode="rw" should write changes on close."""
