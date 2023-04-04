@@ -228,3 +228,8 @@ required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.flake8-import-conventions]
 extend-aliases = {xarray = "xr"}
+
+[tool.nbqa.addopts]
+ruff = [
+    "--extend-ignore=B018"
+]
