@@ -86,6 +86,8 @@ class MathematicalExpression:
         """
         return self.equals(other, check_parameters=True, check_structural_equality=True)
 
+    __hash__ = None
+
     def equals(
         self,
         other: Any,

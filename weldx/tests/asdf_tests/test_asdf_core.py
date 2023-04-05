@@ -141,7 +141,6 @@ def get_xarray_example_dataset():
     -------
         Dataset for test purposes
     """
-
     temp_data = [
         [[15.0, 16.0, 17.0], [18.0, 19.0, 20.0]],
         [[21.0, 22.0, 23.0], [24.0, 25.0, 26.0]],
