@@ -172,6 +172,7 @@ class MathematicalExpression:
             else:  # quantify as dimensionless if no unit provided
                 if v.weldx.units is None:
                     v = v.pint.quantify("")
+                v = v.pint.quantify()
             self._parameters[k] = v
 
     @property

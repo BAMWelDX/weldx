@@ -851,7 +851,7 @@ class TestMathematicalExpression:
             (Q_([1, 2, 3], "m"), Q_([4, 5, 6], "m")),
             (
                 xr.DataArray(Q_([1, 2], "m"), dims=["a"]),
-                xr.DataArray(Q_([3, 4], "m"), dims=["b"]),
+                xr.DataArray(Q_([3, 4], "m"), dims=["b"]).pint.dequantify(),
             ),
             (
                 xr.DataArray([1, 2], dims=["a"]),
