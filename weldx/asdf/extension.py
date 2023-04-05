@@ -4,7 +4,7 @@ from __future__ import annotations
 from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
 
-from .constants import (
+from weldx.asdf.constants import (
     MANIFEST_PATH,
     SCHEMA_PATH,
     WELDX_EXTENSION_URI,
@@ -12,7 +12,12 @@ from .constants import (
     WELDX_SCHEMA_URI_BASE,
     WELDX_TAG_URI_BASE,
 )
-from .types import WeldxConverter
+from weldx.asdf.types import WeldxConverter
+from weldx.asdf.validators import (
+    WxPropertyTagValidator,
+    WxShapeValidator,
+    WxUnitValidator,
+)
 
 
 # RESOURCES ----------------------------------------------------------------------------
@@ -58,6 +63,11 @@ class WeldxExtension(ManifestExtension):
         "weldx.asdf.extension.WeldxExtension",
     ]
     yaml_tag_handles = {"!weldx!": WELDX_TAG_URI_BASE}
+    validators = [
+        WxUnitValidator(),
+        WxShapeValidator(),
+        WxPropertyTagValidator(),
+    ]
 
 
 def get_extensions() -> list[ManifestExtension]:

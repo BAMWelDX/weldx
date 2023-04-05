@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from asdf import ValidationError
+from asdf.exceptions import ValidationError
 
 from weldx.asdf.types import WxSyntaxError
 from weldx.asdf.util import write_buffer, write_read_buffer
