@@ -42,6 +42,7 @@ jobs:
           channels: 'conda-forge defaults'
           extras: 'test vis media'
           setup_requires: 'include'
+          pip: 'asdf'
 
       - uses: mamba-org/provision-with-micromamba@main
         with:
