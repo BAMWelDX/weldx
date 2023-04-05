@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- fix non quantified xarray parameter inputs to `MathematicalExpression` \[{pull}`863`\].
+- fix non quantified xarray parameter inputs to `MathematicalExpression` \[{pull}`864`\].
 
 ### Dependencies
 
