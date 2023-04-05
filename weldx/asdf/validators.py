@@ -524,7 +524,7 @@ class WxUnitValidator(Validator):
     """Custom validator for checking dimensions for objects with 'unit' property."""
 
     schema_property = "wx_unit"
-    tags = ["asdf://weldx.bam.de/weldx/tags/**"]
+    tags = ["**"]
 
     def validate(self, wx_unit, node, schema):
         """Run unit validation."""
@@ -542,7 +542,7 @@ class WxShapeValidator(Validator):
     """Custom validator for checking dimensions for objects with 'shape' property."""
 
     schema_property = "wx_shape"
-    tags = ["asdf://weldx.bam.de/weldx/tags/**"]
+    tags = ["**"]
 
     def validate(self, wx_shape, node, schema):
         """Run shape validation."""
@@ -563,7 +563,7 @@ class WxPropertyTagValidator(Validator):
     """Validate list of properties against specific tags."""
 
     schema_property = "wx_property_tag"
-    tags = ["asdf://weldx.bam.de/weldx/tags/**"]
+    tags = ["**"]
 
     def validate(self, wx_property_tag, node, schema):
         """Run property tag validation."""
