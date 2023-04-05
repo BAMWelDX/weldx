@@ -847,10 +847,15 @@ class TestMathematicalExpression:
     @pytest.mark.parametrize(
         "a, b",
         [
+            ([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]),
             (Q_([1, 2, 3], "m"), Q_([4, 5, 6], "m")),
             (
                 xr.DataArray(Q_([1, 2], "m"), dims=["a"]),
                 xr.DataArray(Q_([3, 4], "m"), dims=["b"]),
+            ),
+            (
+                xr.DataArray([1, 2], dims=["a"]),
+                xr.DataArray([3, 4], dims=["b"]),
             ),
             (
                 Q_([1, 2], "m"),

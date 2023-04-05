@@ -169,6 +169,9 @@ class MathematicalExpression:
                 v = xr.DataArray(v[0], dims=v[1])
             if not isinstance(v, xr.DataArray):
                 v = Q_(v)
+            else:  # quantify as dimensionless if no unit provided
+                if v.weldx.units is None:
+                    v = v.pint.quantify("")
             self._parameters[k] = v
 
     @property
