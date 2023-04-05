@@ -78,7 +78,7 @@ jobs:
             ${{ runner.os }}-pip-
       - name: pip installs
         run: |
-          pip install asdf>=2.10
+          pip install asdf>=2.15
       - uses: jannekem/run-python-script-action@v1
         with:
           script: |
