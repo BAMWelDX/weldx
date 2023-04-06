@@ -141,7 +141,6 @@ def get_xarray_example_dataset():
     -------
         Dataset for test purposes
     """
-
     temp_data = [
         [[15.0, 16.0, 17.0], [18.0, 19.0, 20.0]],
         [[21.0, 22.0, 23.0], [24.0, 25.0, 26.0]],
@@ -847,10 +846,15 @@ class TestMathematicalExpression:
     @pytest.mark.parametrize(
         "a, b",
         [
+            ([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]),
             (Q_([1, 2, 3], "m"), Q_([4, 5, 6], "m")),
             (
                 xr.DataArray(Q_([1, 2], "m"), dims=["a"]),
-                xr.DataArray(Q_([3, 4], "m"), dims=["b"]),
+                xr.DataArray(Q_([3, 4], "m"), dims=["b"]).pint.dequantify(),
+            ),
+            (
+                xr.DataArray([1, 2], dims=["a"]),
+                xr.DataArray([3, 4], dims=["b"]),
             ),
             (
                 Q_([1, 2], "m"),

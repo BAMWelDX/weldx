@@ -2,9 +2,13 @@
 
 ## 0.6.5 (unreleased)
 
+### Fixes
+
+- fix non quantified xarray parameter inputs to `MathematicalExpression` \[{pull}`864`\].
+
 ### Dependencies
 
-- require XArray >= 2022.9.0, as `LocalCoordinateSystem` now handles merges correctly \[{pull}`861`\].
+- require `xarray >= 2022.9.0`, as `LocalCoordinateSystem` now handles merges correctly \[{pull}`861`\].
 - require `asdf>=2.15` for new extension style validator interface \[{pull}`863`\].
 
 ### ASDF
