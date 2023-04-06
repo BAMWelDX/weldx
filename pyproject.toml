@@ -171,7 +171,7 @@ follow_imports = "skip"
 ignore_errors = true
 
 [tool.ruff]
-target-version = "py310"  # designated Python version
+target-version = "py39"  # designated Python version
 exclude = [
     "__init__.py",
     "doc/src/conf.py",
