@@ -65,17 +65,17 @@ jobs:
         run: micromamba activate weldx
 
       - name: install cookiecutter
-        if: matrix.py == ${{ env.MAIN_PYTHON }}
+        if: matrix.py == env.MAIN_PYTHON
         run: |
           pip install cookiecutter
 
       - name: create installable quality standard from repo
-        if: matrix.py ==  ${{ env.MAIN_PYTHON }}
+        if: matrix.py == env.MAIN_PYTHON
         run: |
           cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template
 
       - name: install quality standard
-        if: matrix.py == ${{ env.MAIN_PYTHON }}
+        if: matrix.py == env.MAIN_PYTHON
         run: |
           pip install -e ./quality_standard_demo
 
@@ -84,39 +84,39 @@ jobs:
           pytest -n 2 --runslow --junit-xml pytest.xml
 
       - name: Upload Test Results
-        if: always() && (matrix.py == ${{ env.MAIN_PYTHON }})
+        if: always() && (${{ matrix.py == env.MAIN_PYTHON }})
         uses: actions/upload-artifact@v3
         with:
           name: Unit Test Results
           path: pytest.xml
 
       - name: run pytest on notebooks (append coverage)
-        if: matrix.py == ${{ env.MAIN_PYTHON }}
+        if: matrix.py == env.MAIN_PYTHON
         run: |
           pytest -n 2 --dist loadfile --nbval --current-env --cov-append ./doc/src/tutorials/
 
       - name: test with WeldxFile
-        if: matrix.py == ${{ env.MAIN_PYTHON }}
+        if: matrix.py == env.MAIN_PYTHON
         run: |
           pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
 
       - name: test quality standard
-        if: matrix.py == ${{ env.MAIN_PYTHON }}
+        if: matrix.py == env.MAIN_PYTHON
         run: |
           pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py
 
 
       - name: test installable quality standard from template repository
-        if: matrix.py == ${{ env.MAIN_PYTHON }}
+        if: matrix.py == env.MAIN_PYTHON
         run: |
           pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py
 
       - name: coverage xml (combination is performed by pytest-cov)
-        if: matrix.py == ${{ env.MAIN_PYTHON }}
+        if: matrix.py == env.MAIN_PYTHON
         run: coverage xml
 
       - name: codecov.io
-        if: matrix.py == ${{ env.MAIN_PYTHON }}
+        if: matrix.py == env.MAIN_PYTHON
         uses: codecov/codecov-action@v3.1.1
 
   compat:
@@ -130,6 +130,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
+        py: ['3.10']
     steps:
       - uses: actions/checkout@v3
         with:
@@ -148,7 +149,7 @@ jobs:
           environment-name: weldx
           cache-env: true
           extra-specs: |
-            python=${{ env.MAIN_PYTHON }}
+            python=${{ matrix.py }}
             wheel
             pip
 
