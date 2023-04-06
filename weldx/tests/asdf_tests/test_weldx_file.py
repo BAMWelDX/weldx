@@ -341,7 +341,7 @@ class TestWeldXFile:
     @staticmethod
     def _get_schema_file(arg, mismatch: bool, tmp_path) -> (str, np.ndarray):
         data = np.arange(6)
-        if not arg or not isinstance(arg, list | tuple):
+        if not arg or not isinstance(arg, (list, tuple)):
             return None, data
         result = [None, None]
         shape = (1, -1)
@@ -359,7 +359,7 @@ properties:
     wx_shape: [{shape}]
         """
 
-        if isinstance(arg, list | tuple):
+        if isinstance(arg, (list, tuple)):
             a, b = arg
 
             def _create_schema(shape_, name):

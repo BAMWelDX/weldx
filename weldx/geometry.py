@@ -1607,7 +1607,7 @@ class DynamicTraceSegment(DynamicBaseSegment):
             The coordinate system and the specified position.
 
         """
-        if not isinstance(position, float | int | Q_):
+        if not isinstance(position, (float, int, Q_)):
             position = np.array(position)
 
         if self._series.is_expression:
@@ -2275,7 +2275,7 @@ class Geometry:
             Trace
 
         """
-        if not isinstance(profile, Profile | VariableProfile):
+        if not isinstance(profile, (Profile, VariableProfile)):
             raise TypeError("'profile' must be a 'Profile' or 'VariableProfile' class")
 
         if not isinstance(trace, Trace):

@@ -582,7 +582,7 @@ class WxPropertyTagValidator(Validator):
                         f"mismatched tags, wanted '{tagname}', got '{node_tag}'"
                     )
 
-        if not isinstance(wx_property_tag, str | list):
+        if not isinstance(wx_property_tag, (str, list)):
             raise WxSyntaxError(
                 f"'wx_property_tag' must be str or List[str], got {wx_property_tag}"
             )

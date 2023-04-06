@@ -315,7 +315,7 @@ def xr_interp_like(
 
     """
     da1 = da1.weldx.time_ref_unset()  # catch time formats
-    if isinstance(da2, xr.DataArray | xr.Dataset):
+    if isinstance(da2, (xr.DataArray, xr.Dataset)):
         da2 = da2.weldx.time_ref_unset()  # catch time formats
         sel_coords = da2.weldx.coordinates_as_quantities()
     else:  # assume da2 to be dict-like
@@ -483,7 +483,7 @@ def xr_check_coords(coords: Union[xr.DataArray, Mapping[str, Any]], ref: dict) -
 
     """
     # only process the coords of the xarray
-    if isinstance(coords, xr.DataArray | xr.Dataset):
+    if isinstance(coords, (xr.DataArray, xr.Dataset)):
         coords = coords.coords
 
     for key, check in ref.items():

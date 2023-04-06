@@ -307,7 +307,7 @@ class LocalCoordinateSystem(TimeDependent):
             coordinates = Q_(np.zeros(3), _DEFAULT_LEN_UNIT)
 
         if not isinstance(coordinates, xr.DataArray):
-            if not isinstance(coordinates, np.ndarray | pint.Quantity):
+            if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                 coordinates = np.array(coordinates)
 
             coordinates = ut.xr_3d_vector(coordinates, time)

@@ -598,7 +598,7 @@ class CoordinateSystemManager:
             raise ValueError(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(reference_system)
 
-        if not isinstance(data, xr.DataArray | SpatialData):
+        if not isinstance(data, (xr.DataArray, SpatialData)):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
         if target_system is not None:

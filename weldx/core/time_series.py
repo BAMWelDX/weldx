@@ -69,7 +69,7 @@ class TimeSeries(TimeDependent):
         self._interp_counter = 0
         self._reference_time = None
 
-        if isinstance(data, pint.Quantity | xr.DataArray):
+        if isinstance(data, (pint.Quantity, xr.DataArray)):
             self._initialize_discrete(data, time, interpolation, reference_time)
         elif isinstance(data, MathematicalExpression):
             self._init_expression(data, reference_time)

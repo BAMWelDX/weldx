@@ -247,7 +247,7 @@ class _EqCompareNested:
             other_value = other_data_structure[key]
             # check lengths of Sequence types first and raise
             # prior starting a more expensive comparison!
-            if isinstance(other_data_structure, Sequence | Set) and len(
+            if isinstance(other_data_structure, (Sequence, Set)) and len(
                 other_data_structure
             ) != len(data_structure):
                 raise RuntimeError("len does not match")

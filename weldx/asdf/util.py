@@ -550,7 +550,7 @@ def _get_instance_shape(
     List
         A numpy-style shape list or `None` if the shape could not be determined.
     """
-    if isinstance(instance_dict, float | int):  # test against [1] for scalar values
+    if isinstance(instance_dict, (float, int)):  # test against [1] for scalar values
         return [1]
     elif isinstance(instance_dict, Mapping) and "shape" in instance_dict:
         return instance_dict["shape"]
@@ -577,7 +577,7 @@ def _get_instance_units(
     pint.Unit
         The pint unit or `None` if no unit information is present.
     """
-    if isinstance(instance_dict, float | int):  # base types
+    if isinstance(instance_dict, (float, int)):  # base types
         return WELDX_UNIT_REGISTRY.dimensionless
     elif isinstance(instance_dict, Mapping) and UNITS_KEY in instance_dict:
         return U_(str(instance_dict[UNITS_KEY]))  # catch TaggedString as str
@@ -753,7 +753,7 @@ def get_schema_tree(  # noqa: C901, MC0001, RUF100, codacy:ignore
     def drop_meta(path, key, value):
         """Drop common metadata fields from the output."""
         default = {"examples", "description", "tag", "$ref", "type"}
-        return key not in default | set(drop)
+        return key not in (default, set(drop))
 
     def drop_properties(path, key, value):
         """Drop the 'properties' field."""
