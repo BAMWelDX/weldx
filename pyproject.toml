@@ -24,7 +24,6 @@ classifiers = [
     "Natural Language :: English",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Physics", # TODO: add more topics here!
@@ -33,7 +32,7 @@ classifiers = [
 ]
 
 # Dependencies
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "numpy >=1.20",
     "asdf >=2.15.0",
@@ -146,7 +145,7 @@ exclude_lines = [
 ]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 files = "weldx"
 ignore_missing_imports = true # TODO: this is bad!
 strict_optional = false
@@ -172,7 +171,7 @@ follow_imports = "skip"
 ignore_errors = true
 
 [tool.ruff]
-target-version = "py39"  # designated Python version
+target-version = "py310"  # designated Python version
 exclude = [
     "__init__.py",
     "doc/src/conf.py",

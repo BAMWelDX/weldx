@@ -598,7 +598,7 @@ class CoordinateSystemManager:
             raise ValueError(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(reference_system)
 
-        if not isinstance(data, (xr.DataArray, SpatialData)):
+        if not isinstance(data, xr.DataArray | SpatialData):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
         if target_system is not None:
@@ -1196,7 +1196,7 @@ class CoordinateSystemManager:
         from networkx import shortest_path
 
         path = shortest_path(self.graph, coordinate_system_name, reference_system_name)
-        path_edges = list(zip(path[:-1], path[1:]))
+        path_edges = list(zip(path[:-1], path[1:], strict=True))
 
         # handle time inputs
         if time_ref is None:

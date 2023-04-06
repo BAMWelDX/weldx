@@ -311,7 +311,7 @@ class Time:
             pass
         elif isinstance(time, pint.Quantity):
             time = Time._convert_quantity(time)
-        elif isinstance(time, (xr.DataArray, xr.Dataset)):
+        elif isinstance(time, xr.DataArray | xr.Dataset):
             time = Time._convert_xarray(time)
         else:
             time = Time._convert_other(time)
@@ -536,7 +536,7 @@ class Time:
     @property
     def is_absolute(self) -> bool:
         """Return `True` if the class has a reference time and `False` otherwise."""
-        return isinstance(self._time, (Timestamp, DatetimeIndex))
+        return isinstance(self._time, Timestamp | DatetimeIndex)
 
     @property
     def is_timestamp(self) -> bool:
@@ -703,7 +703,7 @@ class Time:
 
         time = pd.Index(time)
 
-        if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+        if isinstance(time, pd.DatetimeIndex | pd.TimedeltaIndex):
             return time
         # try manual casting for object dtypes (i.e. strings), should avoid integers
         # warning: this allows something like ["1","2","3"] which will be ns !!

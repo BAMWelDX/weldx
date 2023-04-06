@@ -342,7 +342,7 @@ class WeldxFile(_ProtectedViewDict):
                     ) from ve
             return schema
 
-        if isinstance(custom_schema, (list, tuple)):
+        if isinstance(custom_schema, list | tuple):
             if len(custom_schema) == 2:
                 self._schema_on_read = resolve_schema(custom_schema[0])
                 self._schema_on_write = resolve_schema(custom_schema[1])
@@ -775,7 +775,7 @@ class WeldxFile(_ProtectedViewDict):
             The new instance with the copied content.
         """
         # check if we would overwrite an existing path
-        if isinstance(filename_or_file_like, (str, pathlib.Path)):
+        if isinstance(filename_or_file_like, str | pathlib.Path):
             try:
                 filename_or_file_like, _ = self._handle_path(
                     filename_or_file_like, mode="rw"

@@ -224,11 +224,11 @@ class GenericSeries:
         self._units: pint.Unit = None
         self._interpolation = "linear" if interpolation is None else interpolation
 
-        if isinstance(obj, (pint.Quantity, xr.DataArray)):
+        if isinstance(obj, pint.Quantity | xr.DataArray):
             if dims is not None and not isinstance(dims, list):
                 raise ValueError(f"Argument 'dims' must be list of strings, not {dims}")
             self._init_discrete(obj, dims, coords)
-        elif isinstance(obj, (MathematicalExpression, str, sympy.Expr)):
+        elif isinstance(obj, MathematicalExpression | str | sympy.Expr):
             if dims is not None and not isinstance(dims, dict):
                 raise ValueError(f"Argument 'dims' must be dict, not {dims}")
             self._init_expression(
@@ -842,10 +842,10 @@ class SeriesParameter:
             self.dim = self.values[1]
             self.values = Q_(self.values[0])
 
-        if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
+        if not isinstance(self.values, pint.Quantity | xr.DataArray):
             self.values = Q_(self.values)
 
-        if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
+        if not isinstance(self.values, pint.Quantity | xr.DataArray):
             raise ValueError(f"Cannot set parameter as {self.values}")
 
     @property

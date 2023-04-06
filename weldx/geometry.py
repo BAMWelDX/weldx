@@ -1453,7 +1453,7 @@ class Profile:
         if isinstance(color, str):  # single color
             color = [color] * len(raster_data)
 
-        for segment, c in zip(raster_data, color):
+        for segment, c in zip(raster_data, color, strict=True):
             ax.plot(segment[0], segment[1], line_style, label=label, color=c)
 
     @property
@@ -1607,7 +1607,7 @@ class DynamicTraceSegment(DynamicBaseSegment):
             The coordinate system and the specified position.
 
         """
-        if not isinstance(position, (float, int, Q_)):
+        if not isinstance(position, float | int | Q_):
             position = np.array(position)
 
         if self._series.is_expression:
@@ -2275,7 +2275,7 @@ class Geometry:
             Trace
 
         """
-        if not isinstance(profile, (Profile, VariableProfile)):
+        if not isinstance(profile, Profile | VariableProfile):
             raise TypeError("'profile' must be a 'Profile' or 'VariableProfile' class")
 
         if not isinstance(trace, Trace):

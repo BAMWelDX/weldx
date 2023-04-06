@@ -40,7 +40,7 @@ def to_yaml_tree_metadata(func):
             if attr:
                 tree[key] = attr
 
-        if isinstance(tree, (dict, list)):
+        if isinstance(tree, dict | list):
             tree = remap(tree, lambda p, k, v: v is not None)  # drop all None values
         return tree
 
