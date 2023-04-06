@@ -1,15 +1,19 @@
 ## Changes
 
-_Describe changes in this PR_
+<!--
+Describe changes in this PR
+-->
 
 ## Related Issues
 
-Closes # (add issue numbers)
+<!--
+List related issues and closing issues here
+-->
 
 ## Checks
 
-- [ ] updated CHANGELOG.rst
-- [ ] updated tests
-- [ ] updated doc/
+- [ ] updated `CHANGELOG.md`
+- [ ] updated `tests/`
+- [ ] updated `doc/`
 - [ ] update example/tutorial notebooks
 - [ ] update manifest file

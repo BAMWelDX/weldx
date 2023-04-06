@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        py: ['3.8', '3.9', '3.10', '3.11']
+        py: ['3.9', '3.10', '3.11']
     steps:
       - uses: actions/checkout@v3
         with:
@@ -61,17 +61,17 @@ jobs:
         run: micromamba activate weldx
 
       - name: install cookiecutter
-        if: matrix.py == '3.8'
+        if: matrix.py == '3.9'
         run: |
           pip install cookiecutter
 
       - name: create installable quality standard from repo
-        if: matrix.py == '3.8'
+        if: matrix.py == '3.9'
         run: |
           cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template
 
       - name: install quality standard
-        if: matrix.py == '3.8'
+        if: matrix.py == '3.9'
         run: |
           pip install -e ./quality_standard_demo
 
@@ -87,32 +87,32 @@ jobs:
           path: pytest.xml
 
       - name: run pytest on notebooks (append coverage)
-        if: matrix.py == '3.8'
+        if: matrix.py == '3.9'
         run: |
           pytest -n 2 --dist loadfile --nbval --current-env --cov-append ./doc/src/tutorials/
 
       - name: test with WeldxFile
-        if: matrix.py == '3.8'
+        if: matrix.py == '3.9'
         run: |
           pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
 
       - name: test quality standard
-        if: matrix.py == '3.8'
+        if: matrix.py == '3.9'
         run: |
           pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py
 
 
       - name: test installable quality standard from template repository
-        if: matrix.py == '3.8'
+        if: matrix.py == '3.9'
         run: |
           pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py
 
       - name: coverage xml (combination is performed by pytest-cov)
-        if: matrix.py == '3.8'
+        if: matrix.py == '3.9'
         run: coverage xml
 
       - name: codecov.io
-        if: matrix.py == '3.8'
+        if: matrix.py == '3.9'
         uses: codecov/codecov-action@v3.1.1
 
   compat:
