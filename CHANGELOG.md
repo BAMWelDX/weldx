@@ -1,9 +1,6 @@
 # Release Notes
 
-## 0.6.5 (2023.04.06)
-
-Version `0.6.5` is a compatibility release to support new `asdf` and `xarray` and drops support for Python 3.8.
-Please see the new minimal version requirements below.
+## 0.6.5 (unreleased)
 
 ### Fixes
 
@@ -11,10 +8,8 @@ Please see the new minimal version requirements below.
 
 ### Dependencies
 
-- drop Python 3.8 support \[{pull}`865`\]
 - require `xarray >= 2022.9.0`, as `LocalCoordinateSystem` now handles merges correctly \[{pull}`861`\].
 - require `asdf>=2.15` for new extension style validator interface \[{pull}`863`\].
-- require `scipy >=1.6.2` and `networkx >=2.8.2` \[{pull}`865`\]
 
 ### ASDF
 
