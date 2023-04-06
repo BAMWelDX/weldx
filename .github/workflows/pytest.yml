@@ -47,7 +47,7 @@ jobs:
         with:
           environment-file: ./environment.yml
           environment-name: weldx
-          cache-env: true
+          cache-env: false
           extra-specs: |
             python=${{ matrix.py }}
             wheel
