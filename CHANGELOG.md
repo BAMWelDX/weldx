@@ -9,6 +9,11 @@
 ### Dependencies
 
 - require `xarray >= 2022.9.0`, as `LocalCoordinateSystem` now handles merges correctly \[{pull}`861`\].
+- require `asdf>=2.15` for new extension style validator interface \[{pull}`863`\].
+
+### ASDF
+
+- Move validators to new extension style and remove legacy extension code \[{pull}`863`\].
 
 ## 0.6.4 (09.02.2023)
 

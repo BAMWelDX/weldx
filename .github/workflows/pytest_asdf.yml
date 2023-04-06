@@ -16,13 +16,7 @@ jobs:
     strategy:
       matrix:
         asdf_version:
-          - "2.8"
-          - "2.9"
-          - "2.10"
-          - "2.11"
-          - "2.12"
-          - "2.13"
-          - "2.14"
+          - "2.15"
     name: pytest asdf
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +78,7 @@ jobs:
             ${{ runner.os }}-pip-
       - name: pip installs
         run: |
-          pip install asdf>=2.10
+          pip install asdf>=2.15
       - uses: jannekem/run-python-script-action@v1
         with:
           script: |

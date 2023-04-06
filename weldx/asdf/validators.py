@@ -6,14 +6,15 @@ from collections import OrderedDict
 from collections.abc import Callable, Iterator, Mapping
 from typing import Any, Union
 
-from asdf import ValidationError
+from asdf.exceptions import ValidationError
+from asdf.extension import Validator
 from asdf.schema import _type_to_tag
 
 from weldx.asdf.types import WxSyntaxError
 from weldx.asdf.util import _get_instance_shape, _get_instance_units, uri_match
 from weldx.constants import U_
 
-__all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
+__all__ = ["WxUnitValidator", "WxShapeValidator", "WxPropertyTagValidator"]
 
 
 def _walk_validator(
@@ -516,120 +517,75 @@ def _custom_shape_validator(
     return dict_values
 
 
-def wx_unit_validator(
-    validator, wx_unit, instance, schema
-) -> Iterator[ValidationError]:
-    """Custom validator for checking dimensions for objects with 'unit' property.
-
-    ASDF documentation:
-    https://asdf.readthedocs.io/en/2.8.1/asdf/extensions.html#adding-custom-validators
-
-    Parameters
-    ----------
-    validator:
-        A jsonschema.Validator instance.
-    wx_unit:
-        Enable unit validation for this schema.
-    instance:
-        Tree serialization (with default dtypes) of the instance
-    schema:
-        Dict representing the full ASDF schema.
-
-    Yields
-    ------
-    asdf.ValidationError
-
-    """
-    yield from _walk_validator(
-        instance=instance,
-        validator_dict=wx_unit,
-        validator_function=_unit_validator,
-        position=[],
-        allow_missing_keys=False,
-    )
+# VALIDATOR CLASSES --------------------------------------------------------------------
 
 
-def wx_shape_validator(
-    validator, wx_shape, instance, schema
-) -> Iterator[ValidationError]:
-    """Custom validator for checking dimensions for objects with 'shape' property.
+class WxUnitValidator(Validator):
+    """Custom validator for checking dimensions for objects with 'unit' property."""
 
-    ASDF documentation:
-    https://asdf.readthedocs.io/en/2.6.0/asdf/extensions.html#adding-custom-validators
+    schema_property = "wx_unit"
+    tags = ["**"]
 
-    Parameters
-    ----------
-    validator:
-        A jsonschema.Validator instance.
-    wx_shape:
-        Enable shape validation for this schema.
-    instance:
-        Tree serialization (with default dtypes) of the instance
-    schema:
-        Dict representing the full ASDF schema.
+    def validate(self, wx_unit, node, schema):
+        """Run unit validation."""
 
-    Yields
-    ------
-    asdf.ValidationError
-
-    """
-
-    dim_dict = None
-    try:
-        dim_dict = _custom_shape_validator(instance, wx_shape)
-    except ValidationError:
-        yield ValidationError(
-            f"Error validating shape {wx_shape}.\nOn instance {instance}"
-        )
-
-    if isinstance(dim_dict, dict):
-        return None
-    else:
-        yield ValidationError(
-            f"Error validating shape {wx_shape}.\nOn instance {instance}"
+        yield from _walk_validator(
+            instance=node,
+            validator_dict=wx_unit,
+            validator_function=_unit_validator,
+            position=[],
+            allow_missing_keys=False,
         )
 
 
-def wx_property_tag_validator(
-    validator, wx_property_tag: Union[str, list[str]], instance, schema
-) -> Iterator[ValidationError]:
-    """
+class WxShapeValidator(Validator):
+    """Custom validator for checking dimensions for objects with 'shape' property."""
 
-    Parameters
-    ----------
-    validator
-        A jsonschema.Validator instance.
-    wx_property_tag
-        The tag to test all object properties against.
-    instance
-        Tree serialization (with default dtypes or as tagged dict) of the instance
-    schema
-        Dict representing the full ASDF schema.
+    schema_property = "wx_shape"
+    tags = ["**"]
 
-    Yields
-    ------
-    asdf.ValidationError
+    def validate(self, wx_shape, node, schema):
+        """Run shape validation."""
 
-    """
+        dim_dict = None
+        try:
+            dim_dict = _custom_shape_validator(node, wx_shape)
+        except ValidationError:
+            yield ValidationError(f"Error validating shape {wx_shape}.\nOn node {node}")
 
-    def _tag_validator(tagname, instance):
-        """Validate against a tag string using ASDF uri match patterns."""
-        if hasattr(instance, "_tag"):
-            instance_tag = instance._tag
+        if isinstance(dim_dict, dict):
+            return None
         else:
-            # Try tags for known Python builtins
-            instance_tag = _type_to_tag(type(instance))
+            yield ValidationError(f"Error validating shape {wx_shape}.\nOn node {node}")
 
-        if instance_tag is not None:
-            if not uri_match(tagname, instance_tag):
-                yield ValidationError(
-                    f"mismatched tags, wanted '{tagname}', got '{instance_tag}'"
-                )
 
-    if not isinstance(wx_property_tag, (str, list)):
-        raise WxSyntaxError(
-            f"'wx_property_tag' must be str or List[str], got {wx_property_tag}"
-        )
+class WxPropertyTagValidator(Validator):
+    """Validate list of properties against specific tags."""
 
-    for _, value in instance.items():
-        yield from _tag_validator(tagname=wx_property_tag, instance=value)
+    schema_property = "wx_property_tag"
+    tags = ["**"]
+
+    def validate(self, wx_property_tag, node, schema):
+        """Run property tag validation."""
+
+        def _tag_validator(tagname, node):
+            """Validate against a tag string using ASDF uri match patterns."""
+            if hasattr(node, "_tag"):
+                node_tag = node._tag
+            else:
+                # Try tags for known Python builtins
+                node_tag = _type_to_tag(type(node))
+
+            if node_tag is not None:
+                if not uri_match(tagname, node_tag):
+                    yield ValidationError(
+                        f"mismatched tags, wanted '{tagname}', got '{node_tag}'"
+                    )
+
+        if not isinstance(wx_property_tag, (str, list)):
+            raise WxSyntaxError(
+                f"'wx_property_tag' must be str or List[str], got {wx_property_tag}"
+            )
+
+        for _, value in node.items():
+            yield from _tag_validator(tagname=wx_property_tag, node=value)

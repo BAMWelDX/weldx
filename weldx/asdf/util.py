@@ -554,7 +554,7 @@ def _get_instance_shape(
         return [1]
     elif isinstance(instance_dict, Mapping) and "shape" in instance_dict:
         return instance_dict["shape"]
-    elif isinstance(instance_dict, asdf.types.tagged.Tagged):
+    elif isinstance(instance_dict, asdf.tagged.Tagged):
         # try calling shape_from_tagged for custom types
         converter = get_converter_for_tag(instance_dict._tag)
         if hasattr(converter, "shape_from_tagged"):
@@ -581,7 +581,7 @@ def _get_instance_units(
         return WELDX_UNIT_REGISTRY.dimensionless
     elif isinstance(instance_dict, Mapping) and UNITS_KEY in instance_dict:
         return U_(str(instance_dict[UNITS_KEY]))  # catch TaggedString as str
-    elif isinstance(instance_dict, asdf.types.tagged.Tagged):
+    elif isinstance(instance_dict, asdf.tagged.Tagged):
         # try calling units_from_tagged for custom types
         if instance_dict._tag.startswith("tag:stsci.edu:asdf/core/ndarray"):
             return WELDX_UNIT_REGISTRY.dimensionless
