@@ -4,7 +4,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from functools import reduce
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -784,14 +784,14 @@ class Time:
 # list of types that are supported to be stored in Time._time
 _data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
 
-types_datetime_like = Union[DatetimeIndex, np.datetime64, List[str], Time]
+types_datetime_like = Union[DatetimeIndex, np.datetime64, list[str], Time]
 """types that define ascending arrays of time stamps."""
 
 types_timestamp_like = Union[Timestamp, str, Time]
 """types that define timestamps."""
 
 types_timedelta_like = Union[
-    TimedeltaIndex, pint.Quantity, np.timedelta64, List[str], Time
+    TimedeltaIndex, pint.Quantity, np.timedelta64, list[str], Time
 ]
 """types that define ascending time delta arrays."""
 

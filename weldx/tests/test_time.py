@@ -1,7 +1,7 @@
 """Test the `Time` class."""
 from __future__ import annotations
 
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -21,13 +21,13 @@ from weldx.transformations.local_cs import LocalCoordinateSystem
 def _initialize_delta_type(cls_type, values, unit):
     """Initialize the passed time type."""
     if cls_type is np.timedelta64:
-        if isinstance(values, List):
+        if isinstance(values, list):
             return np.array(values, dtype=f"timedelta64[{unit}]")
         return np.timedelta64(values, unit)
     if cls_type is Time:
         return Time(Q_(values, unit))
     if cls_type is str:
-        if not isinstance(values, List):
+        if not isinstance(values, list):
             return f"{values}{unit}"
         return [f"{v}{unit}" for v in values]
     return cls_type(values, unit)
@@ -36,7 +36,7 @@ def _initialize_delta_type(cls_type, values, unit):
 def _initialize_datetime_type(cls_type, values):
     """Initialize the passed datetime type."""
     if cls_type is np.datetime64:
-        if isinstance(values, List):
+        if isinstance(values, list):
             return np.array(values, dtype="datetime64")
         return np.datetime64(values)
     if cls_type is str:

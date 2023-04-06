@@ -5,10 +5,10 @@ import copy
 import io
 import pathlib
 import warnings
-from collections.abc import Iterable, Mapping, MutableMapping, Set, ValuesView
+from collections.abc import Hashable, Iterable, Mapping, MutableMapping, Set, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, Any, Dict, Hashable, Optional, Union, get_args
+from typing import IO, Any, Optional, Union, get_args
 
 import asdf
 import numpy as np
@@ -487,7 +487,7 @@ class WeldxFile(_ProtectedViewDict):
                 "version": version,
             }
         else:
-            if not isinstance(value, Dict):
+            if not isinstance(value, dict):
                 raise ValueError("expected a dictionary type")
             try:
                 test = AsdfFile(tree=dict(software=Software(value)))

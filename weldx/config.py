@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 
 import asdf
 import pkg_resources
@@ -177,7 +177,7 @@ class Config:
         """Load all standards that are installed to the active virtual environment."""
         for entry_point in pkg_resources.iter_entry_points("weldx.standard"):
             standards = entry_point.load()()
-            if not isinstance(standards, List):
+            if not isinstance(standards, list):
                 standards = [standards]
             for standard in standards:
                 if not isinstance(standard, QualityStandard):

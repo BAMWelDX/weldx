@@ -1,7 +1,7 @@
 """Contains the MathematicalExpression class."""
 from __future__ import annotations
 
-from typing import Any, Tuple, Union
+from typing import Any, Union
 
 import pint
 import sympy
@@ -10,7 +10,7 @@ import xarray as xr
 from weldx import Q_
 
 ExpressionParameterTypes = Union[
-    pint.Quantity, str, Tuple[pint.Quantity, str], xr.DataArray
+    pint.Quantity, str, tuple[pint.Quantity, str], xr.DataArray
 ]
 
 __all__ = ["MathematicalExpression", "ExpressionParameterTypes"]
