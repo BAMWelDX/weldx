@@ -86,6 +86,8 @@ class MathematicalExpression:
         """
         return self.equals(other, check_parameters=True, check_structural_equality=True)
 
+    __hash__ = None
+
     def equals(
         self,
         other: Any,
@@ -169,6 +171,10 @@ class MathematicalExpression:
                 v = xr.DataArray(v[0], dims=v[1])
             if not isinstance(v, xr.DataArray):
                 v = Q_(v)
+            else:  # quantify as dimensionless if no unit provided
+                if v.weldx.units is None:
+                    v = v.pint.quantify("")
+                v = v.pint.quantify()
             self._parameters[k] = v
 
     @property
