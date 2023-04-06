@@ -24,6 +24,7 @@ classifiers = [
     "Natural Language :: English",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Physics", # TODO: add more topics here!
@@ -32,7 +33,7 @@ classifiers = [
 ]
 
 # Dependencies
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "numpy >=1.20",
     "asdf >=2.15.0",
