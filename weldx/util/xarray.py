@@ -617,7 +617,7 @@ def xr_3d_vector(
         coords["time"] = time  # type: ignore[assignment]
 
     if "time" in coords:
-        coords["time"] = Time(coords["time"]).index
+        coords["time"] = Time(coords["time"]).as_data_array()
 
     coords = dict(add_coords, **coords)
 
@@ -643,7 +643,7 @@ def xr_3d_matrix(data: wxt.ArrayLike, time: Time = None) -> xr.DataArray:
     """
     if time is not None and np.array(data).ndim == 3:
         if isinstance(time, Time):
-            time = time.as_pandas_index()
+            time = time.as_data_array()
         da = xr.DataArray(
             data=data,
             dims=["time", "c", "v"],
