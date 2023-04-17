@@ -763,6 +763,10 @@ class LocalCoordinateSystem(TimeDependent):
         orientation = self._interp_time_orientation(time)
         coordinates = self._interp_time_coordinates(time)
 
+        if time_ref:
+            orientation.weldx.time_ref = time_ref
+            coordinates.weldx.time_ref = time_ref
+
         # remove time if orientations and coordinates are single values (static)
         if orientation.ndim == 2 and coordinates.ndim == 1:
             time = None

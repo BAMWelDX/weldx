@@ -627,10 +627,10 @@ def test_interp_time_timeseries_as_coords(
     seconds :
         The seconds (time delta) that should be interpolated
     lcs_ref_sec :
-        The seconds of the reference time, that will passed to the created LCS. If
+        The seconds of the reference time, that will be passed to the created LCS. If
         `None`, no reference time will be passed
     ref_sec :
-        The seconds of the reference time, that will passed to `interp_time`. If
+        The seconds of the reference time, that will be passed to `interp_time`. If
         `None`, no reference time will be passed
     time_dep_orientation :
         If `True` a time dependent orientation will be passed to the LCS.
