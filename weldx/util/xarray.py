@@ -170,6 +170,7 @@ def xr_matmul(
         b,
         input_core_dims=[dims_a, dims_b],
         output_core_dims=[dims_out],
+        keep_attrs=True,
         **apply_kwargs,
     )
 

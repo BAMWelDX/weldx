@@ -359,23 +359,17 @@ class LocalCoordinateSystem(TimeDependent):
             ),
         )
 
-        _time_ref = orientation.weldx.time_ref
-
         orientation = xr.apply_ufunc(
             normalize,
-            orientation.copy(),
+            orientation,
             input_core_dims=[["c"]],
             output_core_dims=[["c"]],
             keep_attrs=True,
         )
 
         # vectorize test if orthogonal
-        # THIS REMOVES TIME ATTRIBUTES
         if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
             raise ValueError("Orientation vectors must be orthogonal")
-
-        if _time_ref:
-            orientation.weldx.time_ref = _time_ref
 
         return orientation
 
