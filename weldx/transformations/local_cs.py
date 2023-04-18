@@ -281,10 +281,8 @@ class LocalCoordinateSystem(TimeDependent):
                 orientation = np.array(orientation)
             orientation = ut.xr_3d_matrix(orientation, time)
 
-        # make sure we have correct "time" format and reference time
+        # make sure we have correct "time" format
         orientation = orientation.weldx.time_ref_restore()
-        if time and time.reference_time:
-            orientation.weldx.time_ref = time.reference_time
 
         return orientation
 
@@ -325,10 +323,8 @@ class LocalCoordinateSystem(TimeDependent):
                 extra_msg="\nThe coordinates require units representing a length.",
             )
 
-        # make sure we have correct "time" format and reference time
+        # make sure we have correct "time" format
         coordinates = coordinates.weldx.time_ref_restore()
-        if time and time.reference_time:
-            coordinates.weldx.time_ref = time.reference_time
 
         return coordinates
 
