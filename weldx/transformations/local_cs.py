@@ -702,10 +702,7 @@ class LocalCoordinateSystem(TimeDependent):
         if time.min() >= self.time.max():  # only use edge timestamp
             return self.orientation.isel(time=-1).data
         # full interpolation with overlapping times
-        orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
-        if time.reference_time:
-            orientation.weldx.time_ref = time.reference_time
-        return orientation
+        return ut.xr_interp_orientation_in_time(self.orientation, time)
 
     def _interp_time_coordinates(self, time: Time) -> xr.DataArray:
         """Interpolate the coordinates in time."""
@@ -724,10 +721,7 @@ class LocalCoordinateSystem(TimeDependent):
         if time.min() >= self.time.max():  # only use edge timestamp
             return self.coordinates.isel(time=-1).data
         # full interpolation with overlapping times
-        coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
-        if time.reference_time:
-            coordinates.weldx.time_ref = time.reference_time
-        return coordinates
+        return ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
     def interp_time(
         self,
