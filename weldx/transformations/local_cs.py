@@ -360,6 +360,7 @@ class LocalCoordinateSystem(TimeDependent):
             orientation,
             input_core_dims=[["c"]],
             output_core_dims=[["c"]],
+            keep_attrs=True,
         )
 
         # vectorize test if orthogonal

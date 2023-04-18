@@ -1,5 +1,17 @@
 # Release Notes
 
+## 0.6.6 (unreleased)
+
+Version `0.6.6` is a compatibility release for `xarray>=2023.4.0` .
+
+### Fixes
+
+- explicitly keep reference time as xarray attribute in transformation and interpolation operations \[{pull}`868`\] .
+
+### Dependencies
+
+- compatibility with `xarray=2023.4.0` and `pandas=2` \[{pull}`868`\] .
+
 ## 0.6.5 (2023.04.06)
 
 Version `0.6.5` is a compatibility release to support new `asdf` and `xarray` and drops support for Python 3.8.
