@@ -15,6 +15,7 @@ from xarray import DataArray
 import weldx.util as ut
 from weldx.constants import META_ATTR, Q_, U_, UNITS_KEY
 from weldx.time import Time
+from weldx.exceptions import WeldxDeprecationWarning
 
 
 def test_deprecation_decorator():
@@ -24,7 +25,7 @@ def test_deprecation_decorator():
     def _deprecated_function():
         return "nothing"
 
-    with pytest.warns(ut.WeldxDeprecationWarning):
+    with pytest.warns(WeldxDeprecationWarning):
         _deprecated_function()
 
 
