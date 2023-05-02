@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.6.7 (unreleased)
+
+### Added
+
+- added `weldx.exceptions` module with `WeldxException` \[{pull}`871`\] .
+
 ## 0.6.6 (19.04.2023)
 
 Version `0.6.6` is a compatibility release for `xarray>=2023.4.0` .
