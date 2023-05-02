@@ -2471,9 +2471,9 @@ def test_trace_rasterization():
     assert vector_is_close([-3, 4.5, 4], data[:, 1].m)
 
     # exceptions ------------------------------------------
-    with pytest.raises(WeldxException):
+    with pytest.raises(ValueError):
         trace.rasterize("0mm")
-    with pytest.raises(WeldxException):
+    with pytest.raises(ValueError):
         trace.rasterize("-23.1mm")
 
 
@@ -2830,17 +2830,17 @@ def test_geometry_rasterization_trace():
             assert np.isclose(data[1, i].m, 1)
 
     # exceptions ------------------------------------------
-    with pytest.raises(WeldxException):
+    with pytest.raises(ValueError):
         geometry.rasterize("0mm", "1mm")
-    with pytest.raises(WeldxException):
+    with pytest.raises(ValueError):
         geometry.rasterize("1mm", "0mm")
-    with pytest.raises(WeldxException):
+    with pytest.raises(ValueError):
         geometry.rasterize("0mm", "0mm")
-    with pytest.raises(WeldxException):
+    with pytest.raises(ValueError):
         geometry.rasterize("-2.3mm", "1mm")
-    with pytest.raises(WeldxException):
+    with pytest.raises(ValueError):
         geometry.rasterize("1mm", "-4.6mm")
-    with pytest.raises(WeldxException):
+    with pytest.raises(ValueError):
         geometry.rasterize("-2.3mm", "-4.6mm")
 
 
