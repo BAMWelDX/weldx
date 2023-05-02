@@ -10,12 +10,14 @@ from typing import Union
 import numpy as np
 import pint
 import pytest
+from pint import DimensionalityError
 from xarray import DataArray
 
 import weldx.geometry as geo
 import weldx.tests._helpers as helpers
 import weldx.transformations as tf
 from weldx.constants import Q_
+from weldx.exceptions import WeldxException
 from weldx.geometry import SpatialData
 from weldx.transformations import WXRotation
 from weldx.transformations.cs_manager import CoordinateSystemManager
@@ -474,9 +476,9 @@ def test_line_segment_transformations():
     # transformation results in length = 0
     zero_matrix = np.zeros((2, 2))
     segment = geo.LineSegment.construct_with_points(Q_([0, 0], "mm"), Q_([1, 2], "mm"))
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         segment.apply_transformation(zero_matrix)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         segment.transform(zero_matrix)
 
 
@@ -676,19 +678,19 @@ def test_arc_segment_constructor():
 
     # radius differs
     points = Q_([[3, 6, 6], [3, 10, 3]], "mm")
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.ArcSegment(points, False)
 
     # radius is zero
     points = Q_([[3, 3, 3], [3, 3, 3]], "mm")
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.ArcSegment(points, False)
 
     # arc length zero
     points = Q_([[3, 3, 6], [3, 3, 3]], "mm")
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.ArcSegment(points, False)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.ArcSegment(points, True)
 
     # not 2x3
@@ -1225,9 +1227,9 @@ def test_arc_segment_transformations():
     segment = geo.ArcSegment.construct_with_points(
         Q_([3, 2], "mm"), Q_([5, 4], "mm"), Q_([5, 2], "mm"), False
     )
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         segment.transform(scaling_matrix)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         segment.apply_transformation(scaling_matrix)
 
     # transformation results in length = 0
@@ -1235,9 +1237,9 @@ def test_arc_segment_transformations():
         Q_([3, 2], "mm"), Q_([5, 4], "mm"), Q_([5, 2], "mm"), False
     )
     zero_matrix = np.zeros((2, 2))
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         segment.transform(zero_matrix)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         segment.apply_transformation(zero_matrix)
 
 
@@ -1255,7 +1257,7 @@ def test_arc_segment_interpolation():
     )
 
     # not implemented yet
-    with pytest.raises(Exception):
+    with pytest.raises(NotImplementedError):
         geo.ArcSegment.linear_interpolation(segment_a, segment_b, 1)
 
 
@@ -1292,7 +1294,7 @@ def test_shape_construction():
     # exceptions ------------------------------------------
 
     # segments not connected
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape = geo.Shape([line_segment, arc_segment])
 
 
@@ -1326,15 +1328,15 @@ def test_shape_segment_addition():
     # exceptions ------------------------------------------
 
     # new segment are not connected to already included segments
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape.add_segments(arc_segment2)
     assert shape.num_segments == 3  # ensure shape is unmodified
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape.add_segments([arc_segment2, arc_segment])
     assert shape.num_segments == 3  # ensure shape is unmodified
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape.add_segments([arc_segment, arc_segment])
     assert shape.num_segments == 3  # ensure shape is unmodified
 
@@ -1377,21 +1379,21 @@ def test_shape_line_segment_addition():
 
     shape_2 = geo.Shape()
     # invalid inputs
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape_2.add_line_segments([])
     assert shape_2.num_segments == 0
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape_2.add_line_segments(None)
     assert shape_2.num_segments == 0
 
     # single point with empty shape
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape_2.add_line_segments(Q_([0, 1], "mm"))
     assert shape_2.num_segments == 0
 
     # invalid point format
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape_2.add_line_segments(Q_([[0, 1, 2], [1, 2, 3]], "mm"))
     assert shape_2.num_segments == 0
 
@@ -1449,13 +1451,13 @@ def test_shape_rasterization():
     assert helpers.are_all_columns_unique(data)
 
     # exceptions ------------------------------------------
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape.rasterize("0mm")
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape.rasterize("-3mm")
     # empty shape
     shape_empty = geo.Shape()
-    with pytest.raises(Exception):
+    with pytest.raises(WeldxException):
         shape_empty.rasterize("0.2mm")
 
 
@@ -1743,9 +1745,9 @@ def test_shape_reflection():
     # exceptions ------------------------------------------
     shape = default_test_shape()
 
-    with pytest.raises(Exception):
+    with pytest.raises(DimensionalityError):
         shape.reflect([0, 0], 2)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape.apply_reflection([0, 0])
 
 
@@ -1854,9 +1856,9 @@ def test_shape_reflection_across_line():
     # exceptions ------------------------------------------
     shape = default_test_shape()
 
-    with pytest.raises(Exception):
+    with pytest.raises(DimensionalityError):
         shape.reflect_across_line([2, 5], [2, 5])
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         shape.apply_reflection_across_line([-3, 2], [-3, 2])
 
 
@@ -1929,12 +1931,12 @@ def test_shape_interpolation_general():
 
     # interpolation destroys shape continuity
     shape_f = geo.Shape().add_line_segments(Q_([[-1, 4], [2, 2], [3, 4]], "mm"))
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.Shape.interpolate(shape_a, shape_f, 0.5, interpolations)
 
     # number of segments differ
     shape_a.add_line_segments(Q_([2, 2], "mm"))
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.Shape.linear_interpolation(shape_a, shape_b, 0.25)
 
 
@@ -1977,7 +1979,7 @@ def test_shape_linear_interpolation():
 
     # number of segments differ
     shape_a.add_line_segments(Q_([2, 2], "mm"))
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.Shape.linear_interpolation(shape_a, shape_b, 0.25)
 
 
@@ -2068,9 +2070,9 @@ def test_profile_rasterization():
         assert vector_is_close(data[:, i].m, [i * raster_width.m - 1, 0])
 
     # exceptions
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         profile.rasterize("0mm")
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         profile.rasterize("-3mm")
 
 
@@ -2321,7 +2323,7 @@ def test_trace_construction():
         geo.Trace(radial_segment, linear_segment)
     with pytest.raises(TypeError):
         geo.Trace(radial_segment, 2)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.Trace(None)
 
     # check construction with custom segment --------------
@@ -2330,10 +2332,10 @@ def test_trace_construction():
     geo.Trace(custom_segment)
 
     # trace length <= 0
-    with pytest.raises(Exception):
+    with pytest.raises(DimensionalityError):
         custom_segment.length = -12
         geo.Trace(custom_segment)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         custom_segment.length = 0
         geo.Trace(custom_segment)
 
@@ -2469,9 +2471,9 @@ def test_trace_rasterization():
     assert vector_is_close([-3, 4.5, 4], data[:, 1].m)
 
     # exceptions ------------------------------------------
-    with pytest.raises(Exception):
+    with pytest.raises(WeldxException):
         trace.rasterize("0mm")
-    with pytest.raises(Exception):
+    with pytest.raises(WeldxException):
         trace.rasterize("-23.1mm")
 
 
@@ -2547,7 +2549,7 @@ def test_linear_profile_interpolation_sbs():
 
     # number of shapes differ
     profile_d = geo.Profile([shape_b01, shape_b12, shape_a12])
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.linear_profile_interpolation_sbs(profile_d, profile_b, 0.5)
 
     # number of segments differ
@@ -2559,7 +2561,7 @@ def test_linear_profile_interpolation_sbs():
     )
 
     profile_b2 = geo.Profile([shape_b01, shape_b012])
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.linear_profile_interpolation_sbs(profile_a, profile_b2, 0.2)
 
 
@@ -2626,23 +2628,23 @@ def test_variable_profile_construction():
     # exceptions ------------------------------------------
 
     # first location is not 0
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.VariableProfile([profile_a, profile_b], Q_([1, 2], "mm"), interpol)
 
     # number of locations is not correct
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.VariableProfile(
             [profile_a, profile_b, profile_a], Q_("1mm"), [interpol, interpol]
         )
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.VariableProfile([profile_a, profile_b], Q_([0, 1, 2], "mm"), interpol)
 
     # number of interpolations is not correct
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.VariableProfile(
             [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm"), [interpol]
         )
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.VariableProfile(
             [profile_a, profile_b, profile_a],
             Q_([0, 1, 2], "mm"),
@@ -2650,7 +2652,7 @@ def test_variable_profile_construction():
         )
 
     # locations not ordered
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         geo.VariableProfile(
             [profile_a, profile_b, profile_a], Q_([0, 2, 1], "mm"), [interpol, interpol]
         )
@@ -2828,17 +2830,17 @@ def test_geometry_rasterization_trace():
             assert np.isclose(data[1, i].m, 1)
 
     # exceptions ------------------------------------------
-    with pytest.raises(Exception):
+    with pytest.raises(WeldxException):
         geometry.rasterize("0mm", "1mm")
-    with pytest.raises(Exception):
+    with pytest.raises(WeldxException):
         geometry.rasterize("1mm", "0mm")
-    with pytest.raises(Exception):
+    with pytest.raises(WeldxException):
         geometry.rasterize("0mm", "0mm")
-    with pytest.raises(Exception):
+    with pytest.raises(WeldxException):
         geometry.rasterize("-2.3mm", "1mm")
-    with pytest.raises(Exception):
+    with pytest.raises(WeldxException):
         geometry.rasterize("1mm", "-4.6mm")
-    with pytest.raises(Exception):
+    with pytest.raises(WeldxException):
         geometry.rasterize("-2.3mm", "-4.6mm")
 
 
