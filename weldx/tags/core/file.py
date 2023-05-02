@@ -4,6 +4,7 @@ from copy import deepcopy
 import numpy as np
 
 from weldx.asdf.types import WeldxConverter
+from weldx.exceptions import WeldxException
 from weldx.util.external_file import ExternalFile
 
 # Python class -------------------------------------------------------------------------
@@ -58,7 +59,7 @@ class ExternalFileConverter(WeldxConverter):
         if buffer is not None:
             hash_buffer = ExternalFile.calculate_hash(buffer, node["hashing_algorithm"])
             if hash_buffer != node["hash"]:  # pragma: no cover
-                raise Exception(
+                raise WeldxException(
                     "The stored hash does not match the stored contents' hash."
                 )
         return ExternalFile(**node)

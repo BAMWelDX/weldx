@@ -13,6 +13,7 @@ import xarray as xr
 
 from weldx import util
 from weldx.core import TimeSeries
+from weldx.exceptions import WeldxException
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.util import check_matplotlib_available, dataclass_nested_eq
@@ -489,7 +490,7 @@ class CoordinateSystemManager:
                 )
             )
         ):
-            raise Exception(
+            raise WeldxException(
                 "Inconsistent usage of reference times! If you didn't specify a "
                 "reference time for the CoordinateSystemManager, either all or "
                 "none of the added coordinate systems must have a reference time."
@@ -849,7 +850,7 @@ class CoordinateSystemManager:
         children = self.get_child_system_names(coordinate_system_name, False)
 
         if not delete_children and len(children) > 0:
-            raise Exception(
+            raise WeldxException(
                 f'Can not delete coordinate system "{coordinate_system_name}". It '
                 "has one or more children that would be disconnected to the root "
                 f'after deletion. Set the delete_children option to "True" to '
@@ -1035,7 +1036,7 @@ class CoordinateSystemManager:
 
         if invert:
             if isinstance(lcs.coordinates, TimeSeries):
-                raise Exception(
+                raise WeldxException(
                     "The chosen transformation is time dependent, but no time is "
                     "given. This is usually the case if the time dependencies are "
                     "only described by mathematical expressions. Provide the "

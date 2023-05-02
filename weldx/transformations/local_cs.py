@@ -16,6 +16,7 @@ from scipy.spatial.transform import Rotation as Rot
 import weldx.util as ut
 from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
+from weldx.exceptions import WeldxException
 from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.transformations.types import types_coordinates, types_orientation
 from weldx.transformations.util import normalize
@@ -165,7 +166,7 @@ class LocalCoordinateSystem(TimeDependent):
         if isinstance(lhs_cs.coordinates, TimeSeries) or isinstance(
             rhs_cs.coordinates, TimeSeries
         ):
-            raise Exception(
+            raise WeldxException(
                 "Addition of coordinate systems that use a 'TimeSeries' as coordinates "
                 "is not supported. Use 'interp_time' to create discrete values."
             )
@@ -783,7 +784,7 @@ class LocalCoordinateSystem(TimeDependent):
 
         """
         if isinstance(self.coordinates, TimeSeries):
-            raise Exception(
+            raise WeldxException(
                 "Can not invert coordinates that are described by an expression. "
                 "Use 'interp_time' to create discrete values."
             )
