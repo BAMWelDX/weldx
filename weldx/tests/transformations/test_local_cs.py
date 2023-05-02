@@ -22,7 +22,6 @@ from weldx.tests._helpers import get_test_name
 from weldx.time import Time
 from weldx.transformations import LocalCoordinateSystem as LCS
 from weldx.transformations import WXRotation
-from weldx.exceptions import WeldxException
 
 from ._util import check_coordinate_system, check_cs_close, r_mat_y, r_mat_z
 
