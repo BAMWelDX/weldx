@@ -1832,7 +1832,7 @@ class CoordinateSystemManager:
                 and (self.reference_time != other.reference_time)
             )
         ):
-            raise Exception(
+            raise ValueError(
                 "You can only merge subsystems with time dependent coordinate systems "
                 "if the reference times of both `CoordinateSystemManager` instances "
                 "are identical."
