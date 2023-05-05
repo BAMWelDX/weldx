@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Set
+from contextlib import contextmanager
 from io import BytesIO, TextIOBase
 from pathlib import Path
 from typing import Any, Hashable, MutableMapping, Union
@@ -34,8 +35,10 @@ _INVOKE_SHOW_HEADER = False
 __all__ = [
     "get_schema_path",
     "read_buffer",
+    "read_buffer_context",
     "write_buffer",
     "write_read_buffer",
+    "write_read_buffer_context",
     "get_yaml_header",
     "view_tree",
     "notebook_fileprinter",
@@ -147,6 +150,48 @@ def write_buffer(
     return buff
 
 
+@contextmanager
+def read_buffer_context(
+    buffer: BytesIO,
+    open_kwargs: dict = None,
+    _use_weldx_file=_USE_WELDX_FILE,
+):
+    """Contextmanager to read ASDF file contents from buffer instance.
+
+    Parameters
+    ----------
+    buffer : io.BytesIO
+        Buffer containing ASDF file contents
+    open_kwargs
+        Additional keywords to pass to `asdf.AsdfFile.open`
+        Extensions are always set, ``copy_arrays=True`` is set by default.
+
+    Returns
+    -------
+    dict
+        ASDF file tree.
+
+    """
+    if open_kwargs is None:
+        open_kwargs = {"copy_arrays": True, "lazy_load": False}
+
+    buffer.seek(0)
+
+    if _use_weldx_file is None:
+        _use_weldx_file = _USE_WELDX_FILE
+    if _use_weldx_file:
+        from weldx.asdf.file import WeldxFile
+
+        return WeldxFile(buffer, asdffile_kwargs=open_kwargs)
+
+    with asdf.open(
+        buffer,
+        extensions=None,
+        **open_kwargs,
+    ) as af:
+        yield af.tree
+
+
 def read_buffer(
     buffer: BytesIO,
     open_kwargs: dict = None,
@@ -168,25 +213,38 @@ def read_buffer(
         ASDF file tree.
 
     """
-    if open_kwargs is None:
-        open_kwargs = {"copy_arrays": True}
+    with read_buffer_context(buffer, open_kwargs, _use_weldx_file) as data:
+        return data
 
-    buffer.seek(0)
 
-    if _use_weldx_file is None:
-        _use_weldx_file = _USE_WELDX_FILE
-    if _use_weldx_file:
-        from weldx.asdf.file import WeldxFile
+@contextmanager
+def write_read_buffer_context(
+    tree: dict, asdffile_kwargs=None, write_kwargs=None, open_kwargs=None
+):
+    """Context manager to perform a buffered write/read roundtrip of a tree
+    using default ASDF settings.
 
-        return WeldxFile(buffer, asdffile_kwargs=open_kwargs)
+    Parameters
+    ----------
+    tree
+        Tree object to serialize.
+    asdffile_kwargs
+        Additional keywords to pass to `asdf.AsdfFile`
+    write_kwargs
+        Additional keywords to pass to `asdf.AsdfFile.write_to`
+        Extensions are always set.
+    open_kwargs
+        Additional keywords to pass to `asdf.AsdfFile.open`
+        Extensions are always set, ``copy_arrays=True`` is set by default.
 
-    with asdf.open(
-        buffer,
-        extensions=None,
-        **open_kwargs,
-    ) as af:
-        data = af.tree
-    return data
+    Returns
+    -------
+    dict
+
+    """
+    buffer = write_buffer(tree, asdffile_kwargs, write_kwargs)
+    with read_buffer_context(buffer, open_kwargs) as data:
+        yield data
 
 
 def write_read_buffer(
@@ -212,8 +270,11 @@ def write_read_buffer(
     dict
 
     """
-    buffer = write_buffer(tree, asdffile_kwargs, write_kwargs)
-    return read_buffer(buffer, open_kwargs)
+
+    with write_read_buffer_context(
+        tree, asdffile_kwargs, write_kwargs, open_kwargs
+    ) as data:
+        return data
 
 
 def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, dict]:

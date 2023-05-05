@@ -6,7 +6,7 @@ import pytest
 import xarray as xr
 from asdf import ValidationError
 
-from weldx.asdf.util import write_read_buffer
+from weldx.asdf.util import write_read_buffer, write_read_buffer_context
 
 
 # --------------------------------------------------------------------------------------
@@ -28,12 +28,14 @@ def test_dataarray():
     da.attrs["long_name"] = "random velocity"
     # add metadata to coordinate
     da.x.attrs["units"] = "x units"
-    da2 = write_read_buffer({"da": da})["da"]
-    assert da2.identical(da)
+    with write_read_buffer_context({"da": da}) as data:
+        da2 = data["da"]
+        assert da2.identical(da)
 
 
 def test_dataset_children():
     da = xr.DataArray(np.arange(10), name="arr1", attrs={"name": "sample data"})
     ds = da.to_dataset()
-    ds2 = write_read_buffer({"ds": ds})["ds"]
-    assert ds2.identical(ds)
+    with write_read_buffer_context({"ds": ds}) as data:
+        ds2 = data["ds"]
+        assert ds2.identical(ds)

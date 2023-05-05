@@ -13,7 +13,7 @@ from fs.osfs import OSFS
 from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
-from weldx.asdf.util import write_buffer, write_read_buffer
+from weldx.asdf.util import write_buffer, write_read_buffer_context
 from weldx.constants import META_ATTR, Q_
 from weldx.core import GenericSeries, TimeSeries
 from weldx.core import MathematicalExpression as ME  # nopep8
@@ -52,11 +52,11 @@ _base_rotation = Rotation.from_euler(
     ],
 )
 def test_rotation(inputs):
-    data = write_read_buffer({"rot": inputs})
-    r = data["rot"]
-    assert np.allclose(r.as_quat(), inputs.as_quat())
-    if hasattr(inputs, META_ATTR):
-        assert getattr(r, META_ATTR) == getattr(inputs, META_ATTR)
+    with write_read_buffer_context({"rot": inputs}) as data:
+        r = data["rot"]
+        assert np.allclose(r.as_quat(), inputs.as_quat())
+        if hasattr(inputs, META_ATTR):
+            assert getattr(r, META_ATTR) == getattr(inputs, META_ATTR)
 
 
 def test_rotation_euler_exception():
@@ -79,10 +79,10 @@ def test_rotation_euler_prefix(inputs):
     """Test unit prefix handling."""
     degrees = "degree" in str(inputs.u)
     rot = WXRotation.from_euler(seq="x", angles=inputs)
-    data = write_read_buffer({"rot": rot})
-    r = data["rot"].as_euler("xyz", degrees=degrees)[0]
-    r = Q_(r, "degree") if degrees else Q_(r, "rad")
-    assert np.allclose(inputs, r)
+    with write_read_buffer_context({"rot": rot}) as data:
+        r = data["rot"].as_euler("xyz", degrees=degrees)[0]
+        r = Q_(r, "degree") if degrees else Q_(r, "rad")
+        assert np.allclose(inputs, r)
 
 
 # xarray.DataArray ---------------------------------------------------------------------
@@ -127,10 +127,11 @@ def test_xarray_data_array(copy_arrays, lazy_load, select):
     """Test ASDF read/write of xarray.DataArray."""
     dax = get_xarray_example_data_array().sel(**select)
     tree = {"dax": dax}
-    dax_file = write_read_buffer(
+    with write_read_buffer_context(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )["dax"]
-    assert dax.identical(dax_file)
+    ) as data:
+        dax_file = data["dax"]
+        assert dax.identical(dax_file)
 
 
 # xarray.Dataset ---------------------------------------------------------------------
@@ -175,10 +176,11 @@ def get_xarray_example_dataset():
 def test_xarray_dataset(copy_arrays, lazy_load):
     dsx = get_xarray_example_dataset()
     tree = {"dsx": dsx}
-    dsx_file = write_read_buffer(
+    with write_read_buffer_context(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )["dsx"]
-    assert dsx.identical(dsx_file)
+    ) as data:
+        dsx_file = data["dsx"]
+        assert dsx.identical(dsx_file)
 
 
 # weldx.transformations.LocalCoordinateSystem ------------------------------------------
@@ -232,10 +234,10 @@ def test_local_coordinate_system(
 ):
     """Test (de)serialization of LocalCoordinateSystem in ASDF."""
     lcs = get_local_coordinate_system(time_dep_orientation, time_dep_coordinates)
-    data = write_read_buffer(
+    with write_read_buffer_context(
         {"lcs": lcs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )
-    assert data["lcs"] == lcs
+    ) as data:
+        assert data["lcs"] == lcs
 
 
 @pytest.mark.parametrize("copy_arrays", [True, False])
@@ -266,10 +268,11 @@ def test_local_coordinate_system_coords_timeseries(
     )
 
     # round trip and compare
-    lcs_buffer = write_read_buffer(
+    with write_read_buffer_context(
         {"lcs": lcs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )["lcs"]
-    assert lcs_buffer == lcs
+    ) as data:
+        lcs_buffer = data["lcs"]
+        assert lcs_buffer == lcs
 
 
 def test_local_coordinate_system_shape_violation():
@@ -338,11 +341,11 @@ def get_example_coordinate_system_manager():
 def test_coordinate_system_manager(copy_arrays, lazy_load):
     csm = get_example_coordinate_system_manager()
     tree = {"cs_hierarchy": csm}
-    data = write_read_buffer(
+    with write_read_buffer_context(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )
-    csm_file = data["cs_hierarchy"]
-    assert csm == csm_file
+    ) as data:
+        csm_file = data["cs_hierarchy"]
+        assert csm == csm_file
 
 
 def get_coordinate_system_manager_with_subsystems(nested: bool):
@@ -402,11 +405,11 @@ def get_coordinate_system_manager_with_subsystems(nested: bool):
 def test_coordinate_system_manager_with_subsystems(copy_arrays, lazy_load, nested):
     csm = get_coordinate_system_manager_with_subsystems(nested)
     tree = {"cs_hierarchy": csm}
-    data = write_read_buffer(
+    with write_read_buffer_context(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )
-    csm_file = data["cs_hierarchy"]
-    assert csm == csm_file
+    ) as data:
+        csm_file = data["cs_hierarchy"]
+        assert csm == csm_file
 
 
 @pytest.mark.parametrize("copy_arrays", [True, False])
@@ -444,11 +447,11 @@ def test_coordinate_system_manager_time_dependencies(
     csm_root.merge(csm_sub_2)
 
     tree = {"cs_hierarchy": csm_root}
-    data = write_read_buffer(
+    with write_read_buffer_context(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )
-    csm_file = data["cs_hierarchy"]
-    assert csm_root == csm_file
+    ) as data:
+        csm_file = data["cs_hierarchy"]
+        assert csm_root == csm_file
 
 
 @pytest.mark.parametrize("copy_arrays", [True, False])
@@ -478,15 +481,15 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
     csm.assign_data(data_2, "data_2", "cs_2")
 
     tree = {"csm": csm}
-    buffer = write_read_buffer(
+    with write_read_buffer_context(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )
-    csm_buffer = buffer["csm"]
+    ) as buffer:
+        csm_buffer = buffer["csm"]
 
-    for data_name in csm.data_names:
-        sd = csm.get_data(data_name)
-        sd_buffer = csm_buffer.get_data(data_name)
-        assert sd == sd_buffer
+        for data_name in csm.data_names:
+            sd = csm.get_data(data_name)
+            sd_buffer = csm_buffer.get_data(data_name)
+            assert sd == sd_buffer
 
 
 # --------------------------------------------------------------------------------------
@@ -515,15 +518,16 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
     ],
 )
 def test_time_series(ts, copy_arrays, lazy_load):
-    ts_file = write_read_buffer(
+    with write_read_buffer_context(
         {"ts": ts}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )["ts"]
-    if isinstance(ts.data, ME):
-        assert ts.data == ts_file.data
-    else:
-        assert np.all(ts_file.data == ts.data)
-    assert np.all(ts_file.time == ts.time)
-    assert ts_file.interpolation == ts.interpolation
+    ) as data:
+        ts_file = data["ts"]
+        if isinstance(ts.data, ME):
+            assert ts.data == ts_file.data
+        else:
+            assert np.all(ts_file.data == ts.data)
+        assert np.all(ts_file.time == ts.time)
+        assert ts_file.interpolation == ts.interpolation
 
 
 # --------------------------------------------------------------------------------------
@@ -547,11 +551,12 @@ def test_generic_series_discrete(coords, interpolation, copy_arrays, lazy_load):
 
     gs = GenericSeries(data, coords=coords, interpolation=interpolation)
 
-    gs_file = write_read_buffer(
+    with write_read_buffer_context(
         {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )["gs"]
+    ) as data:
+        gs_file = data["gs"]
 
-    assert gs == gs_file
+        assert gs == gs_file
 
 
 @pytest.mark.parametrize("copy_arrays", [True, False])
@@ -578,11 +583,12 @@ def test_generic_series_discrete(coords, interpolation, copy_arrays, lazy_load):
 def test_generic_series_expression(expr, params, units, dims, copy_arrays, lazy_load):
     gs = GenericSeries(expr, parameters=params, units=units, dims=dims)
 
-    gs_file = write_read_buffer(
+    with write_read_buffer_context(
         {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )["gs"]
+    ) as data:
+        gs_file = data["gs"]
 
-    assert gs == gs_file
+        assert gs == gs_file
 
 
 # --------------------------------------------------------------------------------------
@@ -761,29 +767,30 @@ class TestExternalFile:
             asdf_save_content=store_content,
         )
         tree = {"file": ef}
-        ef_file = write_read_buffer(
+        with write_read_buffer_context(
             tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-        )["file"]
+        ) as data:
+            ef_file = data["file"]
 
-        assert ef.filename == ef_file.filename
-        assert ef.suffix == ef_file.suffix
-        assert ef.mimetype == ef_file.mimetype == "image/svg+xml"
-        assert ef.directory == ef_file.directory
-        assert ef.hostname == ef_file.hostname
+            assert ef.filename == ef_file.filename
+            assert ef.suffix == ef_file.suffix
+            assert ef.mimetype == ef_file.mimetype == "image/svg+xml"
+            assert ef.directory == ef_file.directory
+            assert ef.hostname == ef_file.hostname
 
-        assert ef.created == ef_file.created
-        assert ef.modified == ef_file.modified
-        assert ef.size == ef_file.size
+            assert ef.created == ef_file.created
+            assert ef.modified == ef_file.modified
+            assert ef.size == ef_file.size
 
-        assert ef.hashing_algorithm == ef_file.hashing_algorithm
+            assert ef.hashing_algorithm == ef_file.hashing_algorithm
 
-        if store_content:
-            with OSFS(weldx_root_dir) as file_system:
-                original_hash = file_system.hash("data/WelDX_notext.svg", "md5")
+            if store_content:
+                with OSFS(weldx_root_dir) as file_system:
+                    original_hash = file_system.hash("data/WelDX_notext.svg", "md5")
 
-            with MemoryFS() as file_system:
-                ef_file.write_to("", file_system)
-                assert file_system.hash("WelDX_notext.svg", "md5") == original_hash
+                with MemoryFS() as file_system:
+                    ef_file.write_to("", file_system)
+                    assert file_system.hash("WelDX_notext.svg", "md5") == original_hash
 
 
 # --------------------------------------------------------------------------------------
@@ -813,11 +820,12 @@ class TestPointCloud:
 
         pc = SpatialData(coordinates=coordinates, triangles=triangles, time=time)
         tree = {"point_cloud": pc}
-        pc_file = write_read_buffer(
+        with write_read_buffer_context(
             tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-        )["point_cloud"]
+        ) as data:
+            pc_file = data["point_cloud"]
 
-        assert pc_file == pc
+            assert pc_file == pc
 
 
 # --------------------------------------------------------------------------------------
@@ -830,10 +838,11 @@ class TestGraph:
         g.add_edges_from(
             [("A", "B"), ("A", "C"), ("A", "F"), ("D", "C"), ("B", "H"), ("X", "A")]
         )
-        g2 = write_read_buffer({"graph": g})["graph"]
+        with write_read_buffer_context({"graph": g}) as data:
+            g2 = data["graph"]
 
-        assert all(e in g.edges for e in g2.edges)
-        assert all(n in g.nodes for n in g2.nodes)
+            assert all(e in g.edges for e in g2.edges)
+            assert all(n in g.nodes for n in g2.nodes)
 
 
 # --------------------------------------------------------------------------------------
@@ -867,6 +876,7 @@ class TestMathematicalExpression:
         parameters = dict(a=a, b=b)
 
         me = ME(expression, parameters)
-        me_2 = write_read_buffer({"me": me})["me"]
+        with write_read_buffer_context({"me": me}) as data:
+            me_2 = data["me"]
 
-        assert me == me_2
+            assert me == me_2

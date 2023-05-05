@@ -1,6 +1,6 @@
 import pytest
 
-from weldx.asdf.util import write_read_buffer
+from weldx.asdf.util import write_read_buffer_context
 from weldx.constants import Q_
 from weldx.core import MathematicalExpression
 from weldx.measurement import (
@@ -89,8 +89,8 @@ def measurement_chain_with_equipment() -> MeasurementChain:
 def test_measurement_chain(copy_arrays, lazy_load, measurement_chain):
     """Test the asdf serialization of the measurement chain."""
     tree = {"m_chain": measurement_chain}
-    data = write_read_buffer(
+    with write_read_buffer_context(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )
-    mc_file = data["m_chain"]
-    assert measurement_chain == mc_file
+    ) as data:
+        mc_file = data["m_chain"]
+        assert measurement_chain == mc_file
