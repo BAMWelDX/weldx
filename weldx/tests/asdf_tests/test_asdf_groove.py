@@ -2,7 +2,7 @@
 import pytest
 from decorator import contextmanager
 
-from weldx.asdf.util import write_read_buffer
+from weldx.asdf.util import write_read_buffer_context
 from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.geometry import Profile
 from weldx.welding.groove.iso_9692_1 import (
@@ -46,22 +46,22 @@ def test_asdf_groove(groove: IsoBaseGroove, expected_dtype):
     k = "groove"
     tree = {k: groove}
 
-    data = write_read_buffer(tree)
-    assert isinstance(
-        data[k], expected_dtype
-    ), f"Did not match expected type {expected_dtype} on item {data[k]}"
-    # test content equality using dataclass built-in functions
-    assert (
-        groove == data[k]
-    ), f"Could not correctly reconstruct groove of type {type(groove)}"
-    # test to_profile
-    assert isinstance(
-        groove.to_profile(), Profile
-    ), f"Error calling plot function of {type(groove)} "
+    with write_read_buffer_context(tree) as data:
+        assert isinstance(
+            data[k], expected_dtype
+        ), f"Did not match expected type {expected_dtype} on item {data[k]}"
+        # test content equality using dataclass built-in functions
+        assert (
+            groove == data[k]
+        ), f"Could not correctly reconstruct groove of type {type(groove)}"
+        # test to_profile
+        assert isinstance(
+            groove.to_profile(), Profile
+        ), f"Error calling plot function of {type(groove)} "
 
-    # call plot function
-    with _close_plot():
-        groove.plot()
+        # call plot function
+        with _close_plot():
+            groove.plot()
 
 
 def test_asdf_groove_exceptions():
