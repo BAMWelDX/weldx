@@ -1,5 +1,12 @@
 # Release Notes
 
+## 0.6.7 (unreleased)
+
+### Fixes
+
+- add `read_buffer_context` and `write_read_buffer_context` to `weldx.asdf.util`
+  to fix tests accessing closed files {issue}`873` \[{pull}`875`\].
+
 ## 0.6.6 (19.04.2023)
 
 Version `0.6.6` is a compatibility release for `xarray>=2023.4.0` .
