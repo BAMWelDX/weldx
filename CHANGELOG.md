@@ -6,6 +6,7 @@
 
 - add `read_buffer_context` and `write_read_buffer_context` to `weldx.asdf.util`
   to fix tests accessing closed files {issue}`873` \[{pull}`875`\].
+- fix compatibility with `pint=0.21` \[{pull}`876`\] .
 
 ## 0.6.6 (19.04.2023)
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Union
 
 import numpy as np
+from pkg_resources import get_distribution
 from xarray import DataArray
 
 import weldx.transformations as tf
@@ -77,7 +78,13 @@ def check_coordinate_system(
         lcs.orientation, orientation_expected, positive_orientation_expected
     )
 
-    assert np.allclose(lcs.coordinates.data, coordinates_expected, atol=1e-9)
+    atol_unit = 1.0
+    if get_distribution("pint").version >= "0.21":
+        atol_unit = coordinates_expected.u
+
+    assert np.allclose(
+        lcs.coordinates.data, coordinates_expected, atol=1e-9 * atol_unit
+    )
 
 
 def check_cs_close(lcs_0, lcs_1):
