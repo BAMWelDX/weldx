@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.6.7 (unreleased)
+
+### Fixes
+
+- fix compatibility with `pint=0.21` \[{pull}`876`\] .
+
 ## 0.6.6 (19.04.2023)
 
 Version `0.6.6` is a compatibility release for `xarray>=2023.4.0` .
