@@ -163,15 +163,19 @@ def test_dataclass_serialization_class(
 
 def test_write_buffer_dummy_inline_arrays():
     """Test dummy inline arrays argument for write_buffer."""
+    from asdf.tagged import TaggedDict
+
     name = "large_array"
     array = np.random.random(50)
     buff = write_buffer(tree={name: array}, write_kwargs=dict(dummy_arrays=True))
 
-    buff.seek(0)
     with read_buffer_context(buff) as data:
         restored = data[name]
-        assert restored.dtype == array.dtype
-        assert restored.shape == array.shape
+        assert type(restored) == TaggedDict
+        assert restored._tag.startswith("tag:stsci.edu:asdf/core/ndarray-")
+        assert restored["data"] == []
+        assert restored["datatype"] == array.dtype
+        assert restored["shape"][0] == array.shape[0]
 
 
 def test_get_highest_tag_version():
