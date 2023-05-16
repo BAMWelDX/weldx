@@ -2,7 +2,7 @@
 
 import pytest
 
-from weldx.asdf.util import write_read_buffer
+from weldx.asdf.util import write_read_buffer_context
 from weldx.constants import Q_
 from weldx.core import TimeSeries
 from weldx.welding.processes import GmawProcess
@@ -65,5 +65,5 @@ from weldx.welding.processes import GmawProcess
     ],
 )
 def test_gmaw_process(inputs):
-    data = write_read_buffer({"root": inputs})
-    assert data["root"] == inputs
+    with write_read_buffer_context({"root": inputs}) as data:
+        assert data["root"] == inputs

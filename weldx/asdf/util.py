@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Set
+from contextlib import contextmanager
 from io import BytesIO, TextIOBase
 from pathlib import Path
 from typing import Any, Hashable, MutableMapping, Union
@@ -34,8 +35,10 @@ _INVOKE_SHOW_HEADER = False
 __all__ = [
     "get_schema_path",
     "read_buffer",
+    "read_buffer_context",
     "write_buffer",
     "write_read_buffer",
+    "write_read_buffer_context",
     "get_yaml_header",
     "view_tree",
     "notebook_fileprinter",
@@ -96,18 +99,11 @@ def write_buffer(
     -------
     io.BytesIO
         Bytes buffer of the ASDF file.
-
-    Notes
-    -----
-    In addition to the usual asdf.AsdfFile.write_to arguments in write_args you can pass
-    the parameter "dummy_arrays". If set, all array data is replaced with a empty list.
     """
     if asdffile_kwargs is None:
         asdffile_kwargs = {}
     if write_kwargs is None:
         write_kwargs = {}
-
-    dummy_inline_arrays = write_kwargs.pop("dummy_arrays", False)
 
     if _use_weldx_file is None:
         _use_weldx_file = _USE_WELDX_FILE
@@ -120,7 +116,6 @@ def write_buffer(
             wx.header(False, False)
 
     if _use_weldx_file:
-        write_kwargs = dict(all_array_storage="inline")
         from weldx.asdf.file import WeldxFile
 
         with WeldxFile(
@@ -129,22 +124,56 @@ def write_buffer(
             write_kwargs=write_kwargs,
             mode="rw",
         ) as wx:
-            wx.write_to()
             show(wx)
             buff = wx.file_handle
     else:
         buff = BytesIO()
         with asdf.AsdfFile(tree, extensions=None, **asdffile_kwargs) as ff:
-            if dummy_inline_arrays:  # lets store an empty list in the asdf file.
-                write_kwargs["all_array_storage"] = "inline"
-                from unittest.mock import patch
-
-                with patch("asdf.tags.core.ndarray.numpy_array_to_list", lambda x: []):
-                    ff.write_to(buff, **write_kwargs)
-            else:
-                ff.write_to(buff, **write_kwargs)
+            ff.write_to(buff, **write_kwargs)
     buff.seek(0)
     return buff
+
+
+@contextmanager
+def read_buffer_context(
+    buffer: BytesIO,
+    open_kwargs: dict = None,
+    _use_weldx_file=_USE_WELDX_FILE,
+):
+    """Contextmanager to read ASDF file contents from buffer instance.
+
+    Parameters
+    ----------
+    buffer : io.BytesIO
+        Buffer containing ASDF file contents
+    open_kwargs
+        Additional keywords to pass to `asdf.AsdfFile.open`
+        Extensions are always set, ``copy_arrays=True`` is set by default.
+
+    Returns
+    -------
+    dict
+        ASDF file tree.
+
+    """
+    if open_kwargs is None:
+        open_kwargs = {"copy_arrays": True, "lazy_load": False}
+
+    buffer.seek(0)
+
+    if _use_weldx_file is None:
+        _use_weldx_file = _USE_WELDX_FILE
+    if _use_weldx_file:
+        from weldx.asdf.file import WeldxFile
+
+        return WeldxFile(buffer, asdffile_kwargs=open_kwargs)
+
+    with asdf.open(
+        buffer,
+        extensions=None,
+        **open_kwargs,
+    ) as af:
+        yield af.tree
 
 
 def read_buffer(
@@ -168,25 +197,38 @@ def read_buffer(
         ASDF file tree.
 
     """
-    if open_kwargs is None:
-        open_kwargs = {"copy_arrays": True}
+    with read_buffer_context(buffer, open_kwargs, _use_weldx_file) as data:
+        return data
 
-    buffer.seek(0)
 
-    if _use_weldx_file is None:
-        _use_weldx_file = _USE_WELDX_FILE
-    if _use_weldx_file:
-        from weldx.asdf.file import WeldxFile
+@contextmanager
+def write_read_buffer_context(
+    tree: dict, asdffile_kwargs=None, write_kwargs=None, open_kwargs=None
+):
+    """Context manager to perform a buffered write/read roundtrip of a tree
+    using default ASDF settings.
 
-        return WeldxFile(buffer, asdffile_kwargs=open_kwargs)
+    Parameters
+    ----------
+    tree
+        Tree object to serialize.
+    asdffile_kwargs
+        Additional keywords to pass to `asdf.AsdfFile`
+    write_kwargs
+        Additional keywords to pass to `asdf.AsdfFile.write_to`
+        Extensions are always set.
+    open_kwargs
+        Additional keywords to pass to `asdf.AsdfFile.open`
+        Extensions are always set, ``copy_arrays=True`` is set by default.
 
-    with asdf.open(
-        buffer,
-        extensions=None,
-        **open_kwargs,
-    ) as af:
-        data = af.tree
-    return data
+    Returns
+    -------
+    dict
+
+    """
+    buffer = write_buffer(tree, asdffile_kwargs, write_kwargs)
+    with read_buffer_context(buffer, open_kwargs) as data:
+        yield data
 
 
 def write_read_buffer(
@@ -212,8 +254,11 @@ def write_read_buffer(
     dict
 
     """
-    buffer = write_buffer(tree, asdffile_kwargs, write_kwargs)
-    return read_buffer(buffer, open_kwargs)
+
+    with write_read_buffer_context(
+        tree, asdffile_kwargs, write_kwargs, open_kwargs
+    ) as data:
+        return data
 
 
 def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, dict]:
