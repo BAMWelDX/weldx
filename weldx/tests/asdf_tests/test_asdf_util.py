@@ -15,8 +15,6 @@ from weldx.asdf.util import (
     get_highest_tag_version,
     get_schema_tree,
     get_yaml_header,
-    read_buffer_context,
-    write_buffer,
 )
 
 
@@ -159,23 +157,6 @@ def test_dataclass_serialization_class(
 
     assert dc_restored.b == 2
     assert dc_restored.a == exp_val_a_dc
-
-
-def test_write_buffer_dummy_inline_arrays():
-    """Test dummy inline arrays argument for write_buffer."""
-    from asdf.tagged import TaggedDict
-
-    name = "large_array"
-    array = np.random.random(50)
-    buff = write_buffer(tree={name: array}, write_kwargs=dict(dummy_arrays=True))
-
-    with read_buffer_context(buff) as data:
-        restored = data[name]
-        assert type(restored) == TaggedDict
-        assert restored._tag.startswith("tag:stsci.edu:asdf/core/ndarray-")
-        assert restored["data"] == []
-        assert restored["datatype"] == array.dtype
-        assert restored["shape"][0] == array.shape[0]
 
 
 def test_get_highest_tag_version():
