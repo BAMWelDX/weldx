@@ -6,7 +6,7 @@ import xarray as xr
 from asdf.exceptions import ValidationError
 
 from weldx.asdf.types import WxSyntaxError
-from weldx.asdf.util import write_buffer, write_read_buffer
+from weldx.asdf.util import write_buffer, write_read_buffer, write_read_buffer_context
 from weldx.asdf.validators import _custom_shape_validator
 from weldx.constants import Q_
 from weldx.core import TimeSeries
@@ -148,11 +148,10 @@ def test_shape_validation_error_exception(shape, exp, err):
     ],
 )
 def test_shape_validator(test_input):
-    result = write_read_buffer(
-        {"root": test_input},
-    )["root"]
-    assert compare_nested(test_input.__dict__, result.__dict__)
-    assert compare_nested(result.__dict__, test_input.__dict__)
+    with write_read_buffer_context({"root": test_input}) as data:
+        result = data["root"]
+        assert compare_nested(test_input.__dict__, result.__dict__)
+        assert compare_nested(result.__dict__, test_input.__dict__)
 
 
 @pytest.mark.parametrize(
@@ -186,16 +185,16 @@ def test_shape_validator_exceptions(test_input):
     ],
 )
 def test_unit_validator(test):
-    data = write_read_buffer({"root_node": test})
-    test_read = data["root_node"]
-    assert isinstance(data, dict)
-    assert test_read.length_prop == test.length_prop
-    assert test_read.velocity_prop == test.velocity_prop
-    assert np.all(test_read.current_prop == test.current_prop)
-    assert np.all(test_read.nested_prop["q1"] == test.nested_prop["q1"])
-    assert test_read.nested_prop["q2"] == test.nested_prop["q2"]
-    assert test_read.simple_prop == test.simple_prop
-    assert np.all(test_read.current_prop == test.current_prop)
+    with write_read_buffer_context({"root_node": test}) as data:
+        test_read = data["root_node"]
+        assert isinstance(data, dict)
+        assert test_read.length_prop == test.length_prop
+        assert test_read.velocity_prop == test.velocity_prop
+        assert np.all(test_read.current_prop == test.current_prop)
+        assert np.all(test_read.nested_prop["q1"] == test.nested_prop["q1"])
+        assert test_read.nested_prop["q2"] == test.nested_prop["q2"]
+        assert test_read.simple_prop == test.simple_prop
+        assert np.all(test_read.current_prop == test.current_prop)
 
 
 @pytest.mark.parametrize(

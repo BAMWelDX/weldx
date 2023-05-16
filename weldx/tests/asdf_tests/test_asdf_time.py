@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from weldx.asdf.util import write_buffer, write_read_buffer
+from weldx.asdf.util import write_buffer, write_read_buffer_context
 from weldx.time import Time
 
 
@@ -24,16 +24,17 @@ from weldx.time import Time
 )
 @pytest.mark.parametrize("time_ref", [None, pd.Timestamp.min + pd.Timedelta("10s")])
 def test_time_classes(inputs, time_ref):
-    data = write_read_buffer({"root": inputs})
-    assert np.all(data["root"] == inputs)
+    with write_read_buffer_context({"root": inputs}) as data:
+        assert np.all(data["root"] == inputs)
 
     if isinstance(inputs, pd.Index) and not inputs.is_monotonic_increasing:
         # this is not valid for the time class, hence cancel here
         return
 
     t1 = Time(inputs, time_ref)
-    t2 = write_read_buffer({"root": t1})["root"]
-    assert t1.equals(t2)
+    with write_read_buffer_context({"root": t1}) as data:
+        t2 = data["root"]
+        assert t1.equals(t2)
 
 
 def test_time_classes_max_inline():

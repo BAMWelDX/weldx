@@ -5,7 +5,7 @@ from uuid import uuid4
 import networkx as nx
 import pytest
 
-from weldx.asdf.util import write_read_buffer
+from weldx.asdf.util import write_read_buffer, write_read_buffer_context
 
 # --------------------------------------------------------------------------------------
 # DiGraph
@@ -29,17 +29,17 @@ class TestDiGraph(unittest.TestCase):
 
     @staticmethod
     def _assert_roundtrip(g):
-        data = write_read_buffer(dict(graph=g))
-        g2 = data["graph"]
+        with write_read_buffer_context(dict(graph=g)) as data:
+            g2 = data["graph"]
 
-        for node in g:
-            assert g.nodes[node] == g2.nodes[node]
+            for node in g:
+                assert g.nodes[node] == g2.nodes[node]
 
-        for edge in g.edges:
-            assert g.edges[edge] == g2.edges[edge]
+            for edge in g.edges:
+                assert g.edges[edge] == g2.edges[edge]
 
-        assert set(g.nodes) == set(g2.nodes)
-        assert set(g.edges) == set(g2.edges)
+            assert set(g.nodes) == set(g2.nodes)
+            assert set(g.edges) == set(g2.edges)
 
     def test_graph_roundtrip(self):
         for g in [self.graph, self.graph_uuid]:
