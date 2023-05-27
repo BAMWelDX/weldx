@@ -187,7 +187,8 @@ ignore = [
     "E402",
     #"W503",
     #"W504",
-    "D203", "D211", "D213"
+    "D203", "D211", "D213",
+    "UP006", "UP007", # see ruff GH#4427
 ]
 line-length = 88
 select = [
@@ -217,7 +218,6 @@ per-file-ignores."**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = ["T2"]
 
 external = ["B950"]
 pydocstyle = {convention = "numpy"}
-pyupgrade = {keep-runtime-typing = true}
 
 mccabe = {max-complexity = 15}  # max branches inside a function.
 
