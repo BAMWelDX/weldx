@@ -1307,15 +1307,15 @@ def test_coordinate_system_init():
 
     # exceptions --------------------------------
     # invalid inputs
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.LocalCoordinateSystem(
             orientation="wrong", coordinates=coordinates_fix, time=time_0
         )
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.LocalCoordinateSystem(
             orientation=orientation_fix, coordinates="wrong", time=time_0
         )
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         tf.LocalCoordinateSystem(
             orientation=orientation_fix, coordinates=coordinates_fix, time="wrong"
         )
@@ -1492,8 +1492,8 @@ def test_coordinate_system_time_interpolation():
 
     # exceptions --------------------------------
     # wrong parameter type
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         lcs.interp_time("wrong")
     # no time component
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         lcs.interp_time(tf.LocalCoordinateSystem())

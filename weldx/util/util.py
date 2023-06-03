@@ -19,10 +19,10 @@ from boltons import iterutils
 from decorator import decorator
 
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
+from weldx.exceptions import WeldxDeprecationWarning
 from weldx.time import Time
 
 __all__ = [
-    "WeldxDeprecationWarning",
     "deprecated",
     "ureg_check_class",
     "inherit_docstrings",
@@ -34,11 +34,6 @@ __all__ = [
     "apply_func_by_mapping",
     "check_matplotlib_available",
 ]
-
-
-class WeldxDeprecationWarning(DeprecationWarning):
-
-    """Deprecation warning type."""
 
 
 def deprecated(since: str = None, removed: str = None, message: str = None) -> Callable:
