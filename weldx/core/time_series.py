@@ -11,6 +11,7 @@ from _warnings import warn
 
 from weldx import Q_
 from weldx import util as ut
+from weldx.exceptions import WeldxException
 from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.types import UnitLike
 from weldx.util import check_matplotlib_available
@@ -181,7 +182,7 @@ class TimeSeries(TimeDependent):
     def _init_expression(self, data, reference_time):
         """Initialize the internal data with a mathematical expression."""
         if data.num_variables != 1:
-            raise Exception(
+            raise WeldxException(
                 "The mathematical expression must have exactly 1 free "
                 "variable that represents time."
             )
@@ -196,7 +197,7 @@ class TimeSeries(TimeDependent):
             else:
                 self._shape = (1,)
         except pint.errors.DimensionalityError as de:
-            raise Exception(
+            raise WeldxException(
                 "Expression can not be evaluated with "
                 '"weldx.Quantity(1, "seconds")"'
                 ". Ensure that every parameter posses the correct unit."
@@ -213,7 +214,7 @@ class TimeSeries(TimeDependent):
             self.interp_time(Q_([1, 2], "second"))
             self.interp_time(Q_([1, 2, 3], "second"))
         except Exception as e:
-            raise Exception(
+            raise WeldxException(
                 "The expression can not be evaluated with arrays of time deltas. "
                 "Ensure that all parameters that are multiplied with the time "
                 "variable have an outer dimension of size 1. This dimension is "

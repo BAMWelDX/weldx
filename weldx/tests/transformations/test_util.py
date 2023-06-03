@@ -72,7 +72,7 @@ def test_normalize():
     #  exception ------------------------------------------
 
     # length is 0
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.normalize(np.array([0, 0, 0]))
 
 
@@ -98,11 +98,11 @@ def test_orientation_point_plane_containing_origin():
         assert np.sign(length) == orientation
 
     # check exceptions
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.orientation_point_plane_containing_origin(n, a, a)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.orientation_point_plane_containing_origin(n, np.zeros(3), b)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.orientation_point_plane_containing_origin(n, a, np.zeros(3))
 
     # check special case point on plane
@@ -136,13 +136,13 @@ def test_orientation_point_plane():
         assert np.sign(length) == orientation
 
     # check exceptions
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.orientation_point_plane(n, a, a, c)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.orientation_point_plane(n, a, b, b)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.orientation_point_plane(n, c, b, c)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.orientation_point_plane(n, a, a, a)
 
     # check special case point on plane
@@ -184,11 +184,11 @@ def test_is_orthogonal():
     # exceptions ------------------------------------------
 
     # vectors with length=0
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.is_orthogonal([0, 0, 0], z)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.is_orthogonal(x, [0, 0, 0])
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.is_orthogonal([0, 0, 0], [0, 0, 0])
 
 
@@ -259,9 +259,9 @@ def test_reflection_sign():
     assert tf.reflection_sign([[0, -8], [9, 0]]) == 1
     assert tf.reflection_sign([[0, 3], [-2, 0]]) == 1
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.reflection_sign([[0, 0], [0, 0]])
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.reflection_sign([[1, 0], [0, 0]])
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         tf.reflection_sign([[2, 2], [1, 1]])

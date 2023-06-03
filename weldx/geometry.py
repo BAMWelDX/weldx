@@ -20,6 +20,7 @@ import weldx.util as ut
 from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, SpatialSeries
+from weldx.exceptions import WeldxException
 from weldx.types import QuantityLike
 from weldx.util import check_matplotlib_available
 
@@ -1196,7 +1197,7 @@ class Shape:
 
         """
         if self.num_segments == 0:
-            raise Exception("Can't rasterize empty shape.")
+            raise WeldxException("Can't rasterize empty shape.")
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
 

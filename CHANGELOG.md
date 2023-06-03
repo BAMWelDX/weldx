@@ -2,6 +2,10 @@
 
 ## 0.6.7 (unreleased)
 
+### Added
+
+- added `weldx.exceptions` module with `WeldxException` \[{pull}`871`\] .
+
 ### Fixes
 
 - fix compatibility with `pint=0.21` \[{pull}`876`\].

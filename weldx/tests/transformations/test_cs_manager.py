@@ -13,6 +13,7 @@ from pandas import Timestamp as TS
 import weldx.transformations as tf
 from weldx.constants import Q_
 from weldx.core import MathematicalExpression, TimeSeries
+from weldx.exceptions import WeldxException
 from weldx.geometry import SpatialData
 from weldx.tests._helpers import get_test_name, matrix_is_close
 from weldx.time import Time, types_time_like, types_timestamp_like
@@ -84,7 +85,7 @@ def test_init():
 
     # Exceptions---------------------------------
     # Invalid root system name
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         CSM({})
 
 
@@ -1298,7 +1299,7 @@ def test_get_local_coordinate_system_no_time_dep(
             None,
             None,
             (None, None),
-            True,
+            TypeError,
         ),
         # should fail - if neither the CSM nor its attached coordinate systems have
         # a reference time, passing one to the function results in undefined
@@ -1309,7 +1310,7 @@ def test_get_local_coordinate_system_no_time_dep(
             None,
             None,
             (None, None),
-            True,
+            TypeError,
         ),
     ],
 )
@@ -1424,7 +1425,7 @@ def test_get_local_coordinate_system_time_dep(
             exp_time_ref,
         )
     else:
-        with pytest.raises(Exception):
+        with pytest.raises(exp_failure):
             csm.get_cs(*function_arguments)
 
 
@@ -1543,10 +1544,10 @@ def test_get_local_coordinate_system_exceptions(
 @pytest.mark.parametrize(
     "lcs, in_lcs, exp_exception",
     [
-        ("trl1", "ts", True),
+        ("trl1", "ts", WeldxException),
         ("ts", "trl1", False),
-        ("s", "trl1", True),
-        ("trl1", "s", True),
+        ("s", "trl1", WeldxException),
+        ("trl1", "s", WeldxException),
         ("trl1", "trl2", False),
         ("trl2", "trl1", False),
         ("r", "trl2", False),
@@ -1583,7 +1584,7 @@ def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception, units):
     csm.create_cs("s", "ts", coordinates=coords_1)
     csm.create_cs("trl2", "ts", coordinates=translation, time=Q_([2, 3], "s"))
     if exp_exception:
-        with pytest.raises(Exception):
+        with pytest.raises(exp_exception):
             csm.get_cs(lcs, in_lcs)
     else:
         csm.get_cs(lcs, in_lcs)
@@ -1714,7 +1715,7 @@ def test_merge_reference_times(
 
     # test
     if should_fail:
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             csm_parent.merge(csm_sub)
     else:
         csm_parent.merge(csm_sub)
@@ -2835,5 +2836,5 @@ def test_coordinate_system_manager_transform_data():
         csm.transform_data(data_xr, "lcs_3", "not present")
 
     # data is not compatible
-    with pytest.raises(Exception):
+    with pytest.raises(np.core._exceptions._UFuncNoLoopError):
         csm.transform_data("wrong", "lcs_3", "lcs_1")
