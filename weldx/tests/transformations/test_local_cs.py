@@ -25,7 +25,6 @@ from weldx.transformations import WXRotation
 
 from ._util import check_coordinate_system, check_cs_close, r_mat_y, r_mat_z
 
-
 # test_init ----------------------------------------------------------------------------
 
 
