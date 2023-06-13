@@ -428,9 +428,7 @@ class Time:
             return False
         return np.allclose(self.as_quantity("s").m, other.as_quantity("s").m)
 
-    def as_quantity(
-        self, unit: str = "s"
-    ) -> Union[pint.Quantity, pint.facets.plain.quantity.PlainQuantity]:
+    def as_quantity(self, unit: str = "s") -> pint.Quantity:
         """Return the data as `pint.Quantity`.
 
         Parameters
@@ -455,7 +453,7 @@ class Time:
         if self.is_absolute:
             # store time_ref info
             q.time_ref = self.reference_time  # type: ignore[attr-defined]
-        return q
+        return q  # type: ignore[return-value]
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
         """Return the data as `pandas.TimedeltaIndex` or `pandas.Timedelta`."""
