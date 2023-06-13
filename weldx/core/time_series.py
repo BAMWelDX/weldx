@@ -239,8 +239,8 @@ class TimeSeries(TimeDependent):
     def _interp_time_expression(self, time: Time, time_unit: str) -> xr.DataArray:
         """Interpolate the time series if its data is a mathematical expression."""
         time_q = time.as_quantity(unit=time_unit)
-        if len(time_q.shape) == 0:
-            time_q = np.expand_dims(time_q, 0)  # type: ignore[assignment]
+        if len(time_q.m.shape) == 0:
+            time_q = np.expand_dims(time_q, 0)  # type: ignore[call-overload]
 
         time_xr = xr.DataArray(time_q, dims=["time"])
 

@@ -852,7 +852,7 @@ class SeriesParameter:
     def units(self) -> pint.Unit:
         """Get the units information of the parameter."""
         if isinstance(self.values, pint.Quantity):
-            return self.values.units
+            return self.values.units  # type: ignore[return-value]
         return self.values.weldx.units
 
     @property
@@ -885,7 +885,7 @@ class SeriesParameter:
 def _quantity_to_coord_tuple(
     v: pint.Quantity, dim
 ) -> tuple[str, np.ndarray, dict[str, pint.Unit]]:
-    return dim, v.m, {UNITS_KEY: v.u}
+    return dim, v.m, {UNITS_KEY: v.u}  # type: ignore[dict-item]
 
 
 def _quantity_to_xarray(v: pint.Quantity, dim: str = None) -> xr.DataArray:

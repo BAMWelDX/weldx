@@ -66,8 +66,8 @@ U_.__doc__ = """For details on working with quantities and units, please see the
 """
 
 # set default units
-_DEFAULT_LEN_UNIT: pint.Unit = WELDX_UNIT_REGISTRY.millimeters
-_DEFAULT_ANG_UNIT: pint.Unit = WELDX_UNIT_REGISTRY.rad
+_DEFAULT_LEN_UNIT: pint.Unit = U_("millimeters")
+_DEFAULT_ANG_UNIT: pint.Unit = U_("rad")
 
 # set default unit registry for pint-xarray
 pint.set_application_registry(WELDX_UNIT_REGISTRY)

@@ -426,9 +426,11 @@ class Time:
         other = Time(other)
         if self.reference_time != other.reference_time:
             return False
-        return np.allclose(self.as_quantity(), other.as_quantity())
+        return np.allclose(self.as_quantity("s").m, other.as_quantity("s").m)
 
-    def as_quantity(self, unit: str = "s") -> pint.Quantity:
+    def as_quantity(
+        self, unit: str = "s"
+    ) -> Union[pint.Quantity, pint.facets.plain.quantity.PlainQuantity]:
         """Return the data as `pint.Quantity`.
 
         Parameters
@@ -574,7 +576,7 @@ class Time:
         `Time.as_quantity`
 
         """
-        return self.as_quantity(unit="s")
+        return self.as_quantity(unit="s")  # type: ignore[return-value]
 
     @property
     def duration(self) -> Time:
