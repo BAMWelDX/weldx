@@ -239,8 +239,8 @@ class TimeSeries(TimeDependent):
     def _interp_time_expression(self, time: Time, time_unit: str) -> xr.DataArray:
         """Interpolate the time series if its data is a mathematical expression."""
         time_q = time.as_quantity(unit=time_unit)
-        if len(time_q.shape) == 0:
-            time_q = np.expand_dims(time_q, 0)  # type: ignore[assignment]
+        if len(time_q.m.shape) == 0:
+            time_q = np.expand_dims(time_q, 0)  # type: ignore
 
         time_xr = xr.DataArray(time_q, dims=["time"])
 
@@ -430,7 +430,7 @@ class TimeSeries(TimeDependent):
 
         time = Time(self.time, self.reference_time).as_quantity()
         if time_unit is not None:
-            time = time.to(time_unit)
+            time = time.to(time_unit)  # type: ignore[assignment]
 
         axes.plot(time.m, self._data.data.m, **mpl_kwargs)  # type: ignore
         axes.set_xlabel(f"t in {time.u:~}")

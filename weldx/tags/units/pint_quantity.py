@@ -17,8 +17,14 @@ class PintQuantityConverter(WeldxConverter):
         "tag:stsci.edu:asdf/unit/quantity-1.*",
     ]
     types = [
-        "pint.util.Quantity",  # pint >= 0.20
-        "pint.quantity.build_quantity_class.<locals>.Quantity",  # pint < 0.20
+        # a type or string can be used here
+        # we use BOTH:
+        # - the type: to allow pint to freely move the Quantity class path
+        # - the string:
+        #     to support weldx.constants.Q_ which reports itself as a
+        #     'pint.Quantity'
+        pint.Quantity,
+        "pint.Quantity",
         "weldx.constants.Q_",
     ]
 
@@ -55,8 +61,10 @@ class PintUnitConverter(WeldxConverter):
 
     tags = ["asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"]
     types = [
-        "pint.util.Unit",  # pint >= 0.20
-        "pint.unit.build_unit_class.<locals>.Unit",  # pint < 0.20
+        # we need both the type and string (see the description
+        # about pint.Quantity in the PintQuantityConverter above)
+        pint.Unit,
+        "pint.Unit",
         "weldx.constants.U_",
     ]
 
