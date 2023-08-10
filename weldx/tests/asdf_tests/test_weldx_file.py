@@ -7,10 +7,10 @@ import tempfile
 from io import BytesIO
 
 import asdf
+from asdf.exceptions import ValidationError
 import numpy as np
 import pytest
 import xarray as xr
-from jsonschema import ValidationError
 
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.file import _PROTECTED_KEYS, DEFAULT_ARRAY_INLINE_THRESHOLD, WeldxFile
