@@ -1,5 +1,5 @@
 import pytest
-from asdf import ValidationError
+from asdf.exceptions import ValidationError
 
 from weldx import WeldxFile
 from weldx.config import enable_quality_standard

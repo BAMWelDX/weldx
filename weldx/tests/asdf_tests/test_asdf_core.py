@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from asdf import ValidationError
+from asdf.exceptions import ValidationError
 from fs.memoryfs import MemoryFS
 from fs.osfs import OSFS
 from scipy.spatial.transform import Rotation

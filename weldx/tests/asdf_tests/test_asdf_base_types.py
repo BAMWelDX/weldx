@@ -4,7 +4,7 @@ import uuid
 import numpy as np
 import pytest
 import xarray as xr
-from asdf import ValidationError
+from asdf.exceptions import ValidationError
 
 from weldx.asdf.util import write_read_buffer, write_read_buffer_context
 

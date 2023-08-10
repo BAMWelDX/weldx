@@ -72,7 +72,7 @@ class TestConfig:
 
         ge = MeasurementEquipment(name="GE")
         if expect_validation_error:
-            with pytest.raises(asdf.ValidationError):
+            with pytest.raises(asdf.exceptions.ValidationError):
                 WeldxFile(tree={"equipment": ge}, mode="rw")
         else:
             WeldxFile(tree={"equipment": ge}, mode="rw")
