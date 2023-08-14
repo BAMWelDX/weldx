@@ -74,7 +74,7 @@ def test_quality_standards():
 
     # run tests
     eq = MeasurementEquipment("some_equipment")
-    with pytest.raises(asdf.ValidationError):
+    with pytest.raises(asdf.exceptions.ValidationError):
         WeldxFile(tree={"equipment": eq}, mode="rw")
 
     eq.wx_metadata = {"required_field_for_test": 1234}

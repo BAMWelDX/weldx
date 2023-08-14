@@ -279,7 +279,6 @@ def _get_intersphinx_mapping():
         # "dask": ("https://docs.dask.org/en/latest", None),
         # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
         "pint": (f"https://pint.readthedocs.io/en/{pint_version}", None),
-        "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
         "asdf": (f"https://asdf.readthedocs.io/en/{asdf_version}/", None),
         "networkx": ("https://networkx.org/documentation/stable/", None),
         "IPython": ("https://ipython.readthedocs.io/en/stable/", None),

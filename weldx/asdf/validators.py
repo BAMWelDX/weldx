@@ -45,7 +45,7 @@ def _walk_validator(
 
     Yields
     ------
-    asdf.ValidationError
+    asdf.exceptions.ValidationError
 
     """
     if position is None:  # pragma: no cover
@@ -90,7 +90,7 @@ def _unit_validator(
 
     Yields
     ------
-    asdf.ValidationError
+    asdf.exceptions.ValidationError
 
     """
     if not position:
