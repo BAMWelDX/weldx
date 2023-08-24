@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.6.7 (unreleased)
+## 0.6.7 (2023.08.24)
 
 ### Added
 
@@ -22,6 +22,10 @@
 
 - update `PintQuantityConverter` and `PintUnitConverter` class assignments for `pint=0.22` \[{pull}`880`\].
 - use `ValidationError` from `asdf` instead of `jsonschema` \[{pull}`886`\].
+
+### Dependencies
+
+- require `asdf>=2.15.1` \[{pull}`886`\]
 
 ## 0.6.6 (19.04.2023)
 
