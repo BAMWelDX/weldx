@@ -3,15 +3,14 @@
 <hl/>
 
 [![CF](https://anaconda.org/conda-forge/weldx/badges/version.svg)](https://anaconda.org/conda-forge/weldx)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/tutorials/welding_example_01_basics.ipynb)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5e7ede6d978249a781e5c580ed1c813f)](https://www.codacy.com/gh/BAMWelDX/weldx)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/BAMWelDX/weldx/?ref=repository-badge)
 [![Documentation](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.5565185.svg)](https://doi.org/10.5281/zenodo.5565185)
 [![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
-[![conda build](https://github.com/BAMWelDX/weldx/workflows/conda%20build/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22conda+build%22+branch%3Amaster)
-[![documentation-gh](https://github.com/BAMWelDX/weldx/workflows/documentation/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Adocumentation+branch%3Amaster)
+[![package builds](https://github.com/BAMWelDX/weldx/workflows/package%20builds/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22package%20builds%22+branch%3Amaster)
+[![documentation-gh](https://github.com/BAMWelDX/weldx/workflows/documentation%20builds/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Adocumentation%20builds+branch%3Amaster)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/BAMWelDX/weldx/master.svg)](https://results.pre-commit.ci/latest/github/BAMWelDX/weldx/master)
 [![pytest](https://github.com/BAMWelDX/weldx/workflows/pytest/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Apytest+branch%3Amaster)
 [![static analysis](https://github.com/BAMWelDX/weldx/workflows/static%20analysis/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22static+analysis%22+branch%3Amaster)

@@ -173,20 +173,7 @@ nbsphinx_execute_arguments = [
 ]
 
 # This is processed by Jinja2 and inserted before each notebook
-nbsphinx_prolog = r"""
-{% set docname = env.doc2path(env.docname, base=None).replace("\\","/") %}
-
-.. only:: html
-
-    .. role:: raw-html(raw)
-        :format: html
-
-    .. nbinfo::
-
-        Run the interactive online version of this notebook (takes 1-2 minutes to load):
-        :raw-html:`<a href="https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/{{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>`
-
-"""
+# nbsphinx_prolog = ""
 
 nbsphinx_epilog = """
 ----
