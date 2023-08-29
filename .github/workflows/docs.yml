@@ -28,7 +28,7 @@ on:
 # execute commands with conda aware shell by default:
 defaults:
   run:
-    shell: bash -l {0}
+    shell: bash -el {0}
 
 jobs:
   build:
@@ -47,11 +47,14 @@ jobs:
           fetch-depth: 0 # Fetch all history for all tags and branches
 
       - name: Setup Conda Environment
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1.4.3
         with:
           environment-file: ./doc/rtd_environment.yml
           environment-name: rtd
-          cache-env: true
+          init-shell: >-
+            bash
+            powershell
+          cache-environment: true
 
       - name: activate build env
         run: micromamba activate rtd
