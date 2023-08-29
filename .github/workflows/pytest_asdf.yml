@@ -32,12 +32,16 @@ jobs:
           extras: 'test'
           setup_requires: 'include'
 
-      - uses: mamba-org/provision-with-micromamba@main
+      - name: Setup Conda Environment
+        uses: mamba-org/setup-micromamba@v1.4.3
         with:
           environment-file: ./environment.yml
           environment-name: weldx
-          cache-env: true
-          extra-specs: |
+          init-shell: >-
+            bash
+            powershell
+          cache-environment: true
+          create-args: >-
             python=3.10
             pip
 

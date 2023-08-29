@@ -1,4 +1,7 @@
 name: package builds
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 on:
   push:
     branches:
@@ -38,9 +41,13 @@ jobs:
           fetch-depth: 0 # Fetch all history for all tags and branches
 
       - name: Setup Conda Environment
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1.4.3
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
+          environment-name: build_env
+          init-shell: >-
+            bash
+            powershell
           cache-downloads: true
 
       - name: activate build env

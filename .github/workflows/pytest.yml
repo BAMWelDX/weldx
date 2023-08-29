@@ -1,4 +1,7 @@
 name: pytest
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 on:
   push:
   pull_request:
@@ -43,12 +46,16 @@ jobs:
           extras: 'test vis media'
           setup_requires: 'include'
 
-      - uses: mamba-org/provision-with-micromamba@main
+      - name: Setup Conda Environment
+        uses: mamba-org/setup-micromamba@v1.4.3
         with:
           environment-file: ./environment.yml
           environment-name: weldx
-          cache-env: true
-          extra-specs: |
+          init-shell: >-
+            bash
+            powershell
+          cache-environment: true
+          create-args: >-
             python=${{ matrix.py }}
             wheel
             pip
@@ -139,12 +146,16 @@ jobs:
           extras: 'test vis media'
           setup_requires: 'include'
 
-      - uses: mamba-org/provision-with-micromamba@main
+      - name: Setup Conda Environment
+        uses: mamba-org/setup-micromamba@v1.4.3
         with:
           environment-file: ./environment.yml
           environment-name: weldx
-          cache-env: true
-          extra-specs: |
+          init-shell: >-
+            bash
+            powershell
+          cache-environment: true
+          create-args: >-
             python=${{ matrix.py }}
             wheel
             pip
