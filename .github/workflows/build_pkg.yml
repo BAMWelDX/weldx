@@ -1,4 +1,7 @@
 name: package builds
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 on:
   push:
     branches:
