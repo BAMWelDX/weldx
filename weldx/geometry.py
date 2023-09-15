@@ -109,9 +109,9 @@ class DynamicBaseSegment:
 
     def __init__(
         self,
-        series: Union[
-            SpatialSeries, pint.Quantity, DataArray, str, MathematicalExpression
-        ],
+        series: (
+            SpatialSeries | pint.Quantity | DataArray | str | MathematicalExpression
+        ),
         max_coord: float = 1,
         **kwargs,
     ):
@@ -891,7 +891,7 @@ segment_types = Union[LineSegment, ArcSegment]
 class Shape:
     """Defines a shape in 2 dimensions."""
 
-    def __init__(self, segments: Union[segment_types, list[segment_types]] = None):
+    def __init__(self, segments: segment_types | list[segment_types] = None):
         """Construct a shape.
 
         Parameters
@@ -918,7 +918,7 @@ class Shape:
         return f"{shape_str}"
 
     @staticmethod
-    def _check_segments_connected(segments: Union[segment_types, list[segment_types]]):
+    def _check_segments_connected(segments: segment_types | list[segment_types]):
         """Check if all segments are connected to each other.
 
         The start point of a segment must be identical to the end point of
@@ -1071,7 +1071,7 @@ class Shape:
 
         return self
 
-    def add_segments(self, segments: Union[segment_types, list[segment_types]]):
+    def add_segments(self, segments: segment_types | list[segment_types]):
         """Add segments to the shape.
 
         Parameters
@@ -1303,7 +1303,7 @@ class Shape:
 class Profile:
     """Defines a 2d profile."""
 
-    def __init__(self, shapes: Union[Shape, list[Shape]], units: pint.Unit = None):
+    def __init__(self, shapes: Shape | list[Shape], units: pint.Unit = None):
         """Construct profile class.
 
         Parameters
@@ -1352,7 +1352,7 @@ class Profile:
         """
         return len(self._shapes)
 
-    def add_shapes(self, shapes: Union[Shape, list[Shape]]):
+    def add_shapes(self, shapes: Shape | list[Shape]):
         """Add shapes to the profile.
 
         Parameters
@@ -1372,7 +1372,7 @@ class Profile:
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=True)
     def rasterize(
         self, raster_width: pint.Quantity, stack: bool = True
-    ) -> Union[pint.Quantity, list[pint.Quantity]]:
+    ) -> pint.Quantity | list[pint.Quantity]:
         """Rasterize the profile.
 
         Parameters
@@ -1478,9 +1478,9 @@ class DynamicTraceSegment(DynamicBaseSegment):
 
     def __init__(
         self,
-        series: Union[
-            SpatialSeries, pint.Quantity, DataArray, str, MathematicalExpression
-        ],
+        series: (
+            SpatialSeries | pint.Quantity | DataArray | str | MathematicalExpression
+        ),
         max_coord: float = 1,
         limit_orientation_to_xy: bool = False,
         **kwargs,
@@ -1723,7 +1723,7 @@ class Trace:
 
     def __init__(
         self,
-        segments: Union[trace_segment_types, list[trace_segment_types]],
+        segments: trace_segment_types | list[trace_segment_types],
         coordinate_system: tf.LocalCoordinateSystem = None,
     ):
         """Construct trace.
@@ -2225,8 +2225,8 @@ class Geometry:
 
     def __init__(
         self,
-        profile: Union[Profile, VariableProfile, iso.IsoBaseGroove],
-        trace_or_length: Union[Trace, pint.Quantity],
+        profile: Profile | VariableProfile | iso.IsoBaseGroove,
+        trace_or_length: Trace | pint.Quantity,
         width: QuantityLike = "10mm",
     ):
         """Construct a geometry.
@@ -2265,7 +2265,7 @@ class Geometry:
         return f"Geometry('profile': {self._profile!r}, 'trace': {self._trace!r})"
 
     @staticmethod
-    def _check_inputs(profile: Union[Profile, VariableProfile], trace: Trace):
+    def _check_inputs(profile: Profile | VariableProfile, trace: Trace):
         """Check the inputs to the constructor.
 
         Parameters
@@ -2453,7 +2453,7 @@ class Geometry:
         return raster_data
 
     @property
-    def profile(self) -> Union[Profile, VariableProfile]:
+    def profile(self) -> Profile | VariableProfile:
         """Get the geometry's profile.
 
         Returns
@@ -2513,7 +2513,7 @@ class Geometry:
         profile_raster_width: QuantityLike = "1mm",
         trace_raster_width: QuantityLike = "50mm",
         axes: matplotlib.axes.Axes = None,
-        color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
+        color: int | tuple[int, int, int] | tuple[float, float, float] = None,
         label: str = None,
         limits: weldx.visualization.types.types_limits = None,
         show_wireframe: bool = True,
@@ -2657,7 +2657,7 @@ class Geometry:
 class SpatialData:
     """Represent 3D point cloud data with optional triangulation."""
 
-    coordinates: Union[DataArray, npt.ArrayLike]
+    coordinates: DataArray | npt.ArrayLike
     """3D array of point data.
         The expected array dimension order is [("time"), "n", "c"]."""
     triangles: npt.ArrayLike = None
@@ -2700,7 +2700,7 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_file(file_name: Union[str, Path], units: str = "mm") -> SpatialData:
+    def from_file(file_name: str | Path, units: str = "mm") -> SpatialData:
         """Create an instance from a file.
 
         Parameters
@@ -2723,7 +2723,7 @@ class SpatialData:
 
     @staticmethod
     def _shape_raster_points(
-        shape_raster_data: Union[np.ndarray, pint.Quantity]
+        shape_raster_data: np.ndarray | pint.Quantity,
     ) -> list[list[int]]:
         """Extract all points from a shapes raster data."""
         if isinstance(shape_raster_data, Q_):
@@ -2876,7 +2876,7 @@ class SpatialData:
     def plot(
         self,
         axes: matplotlib.axes.Axes = None,
-        color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
+        color: int | tuple[int, int, int] | tuple[float, float, float] = None,
         label: str = None,
         show_wireframe: bool = True,
         limits: weldx.visualization.types.types_limits = None,
@@ -2946,7 +2946,7 @@ class SpatialData:
             show_wireframe=show_wireframe,
         )
 
-    def to_file(self, file_name: Union[str, Path], units: str = "mm"):
+    def to_file(self, file_name: str | Path, units: str = "mm"):
         """Write spatial data into a file.
 
         The extension prescribes the output format.

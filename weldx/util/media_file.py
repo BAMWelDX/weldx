@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Union, get_args, get_type_hints
+from typing import Union, get_args, get_type_hints
 
 import numpy as np
 import pandas as pd
@@ -85,8 +85,8 @@ class MediaFile:
     def __init__(
         self,
         path_or_array: types_media_input,
-        reference_time: Optional[pd.Timestamp] = None,
-        fps: Optional[float] = None,
+        reference_time: pd.Timestamp | None = None,
+        fps: float | None = None,
     ):
         if isinstance(path_or_array, get_args(types_path_like)):
             self._init_from_path(path_or_array, reference_time)  # type: ignore
@@ -189,7 +189,7 @@ class MediaFile:
         return metadata
 
     @property
-    def reference_time(self) -> Optional[pd.Timestamp]:
+    def reference_time(self) -> pd.Timestamp | None:
         """Time of recording of this media (if known)."""
         return self._reference_time
 
@@ -211,7 +211,7 @@ class MediaFile:
         return Q_(self._metadata["fps"], "1/s")
 
     @property
-    def duration(self) -> Optional[pint.Quantity]:
+    def duration(self) -> pint.Quantity | None:
         """In case of time-dynamic data, return its duration."""
         return len(self._handle) / self.fps
 

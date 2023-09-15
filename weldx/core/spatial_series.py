@@ -1,8 +1,6 @@
 """Contains the SpatialSeries class."""
 from __future__ import annotations
 
-from typing import Union
-
 import pint
 import xarray as xr
 
@@ -31,12 +29,12 @@ class SpatialSeries(GenericSeries):
 
     def __init__(
         self,
-        obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
-        dims: Union[list[str], dict[str, str]] = None,
-        coords: dict[str, Union[list, pint.Quantity]] = None,
-        units: dict[str, Union[str, pint.Unit]] = None,
+        obj: pint.Quantity | xr.DataArray | str | MathematicalExpression,
+        dims: list[str] | dict[str, str] = None,
+        coords: dict[str, list | pint.Quantity] = None,
+        units: dict[str, str | pint.Unit] = None,
         interpolation: str = None,
-        parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
+        parameters: dict[str, str | pint.Quantity | xr.DataArray] = None,
     ):
         if isinstance(obj, Q_):
             obj = self._process_quantity(obj, dims, coords)
@@ -49,9 +47,9 @@ class SpatialSeries(GenericSeries):
     @classmethod
     def _process_quantity(
         cls,
-        obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
-        dims: Union[list[str], dict[str, str]],
-        coords: dict[str, Union[list, pint.Quantity]],
+        obj: pint.Quantity | xr.DataArray | str | MathematicalExpression,
+        dims: list[str] | dict[str, str],
+        coords: dict[str, list | pint.Quantity],
     ) -> xr.DataArray:
         """Turn a quantity into a a correctly formatted data array."""
         if isinstance(coords, dict):

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
@@ -275,7 +275,7 @@ def _add_coord_edges(da1: xr.DataArray, da2: xr.DataArray, assume_sorted: bool):
 
 def xr_interp_like(
     da1: xr.DataArray,
-    da2: Union[xr.DataArray, dict[str, Any]],
+    da2: xr.DataArray | dict[str, Any],
     interp_coords: list[str] = None,
     broadcast_missing: bool = False,
     fillna: bool = True,
@@ -425,7 +425,7 @@ def _check_dtype(var_dtype, ref_dtype: str) -> bool:
     return True
 
 
-def xr_check_coords(coords: Union[xr.DataArray, Mapping[str, Any]], ref: dict) -> bool:
+def xr_check_coords(coords: xr.DataArray | Mapping[str, Any], ref: dict) -> bool:
     """Validate the coordinates of the DataArray against a reference dictionary.
 
     The reference dictionary should have the dimensions as keys and those contain
@@ -541,7 +541,7 @@ def xr_check_coords(coords: Union[xr.DataArray, Mapping[str, Any]], ref: dict) -
     return True
 
 
-def xr_check_dimensionality(da: xr.DataArray, units_ref: Union[str, pint.Unit]):
+def xr_check_dimensionality(da: xr.DataArray, units_ref: str | pint.Unit):
     """Check if the dimensionality of a ``DataArray`` is compatible with reference unit.
 
     Parameters
@@ -817,7 +817,7 @@ class WeldxAccessor:
         return da
 
     @property
-    def time_ref(self) -> Union[pd.Timestamp, None]:
+    def time_ref(self) -> pd.Timestamp | None:
         """Get the time_ref value or `None` if not set."""
         da = self._obj
         if "time" in da.coords and "time_ref" in da.time.attrs:
@@ -894,7 +894,7 @@ class WeldxAccessor:
         return da
 
     @property
-    def units(self) -> Union[pint.Unit, None]:
+    def units(self) -> pint.Unit | None:
         """Get the unit of the data array values.
 
         Other than the pint-xarray accessor ``.pint.units`` this will also return units

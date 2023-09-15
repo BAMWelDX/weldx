@@ -1,7 +1,7 @@
 """Contains TimeSeries class."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
@@ -41,7 +41,7 @@ class TimeSeries(TimeDependent):
 
     def __init__(
         self,
-        data: Union[pint.Quantity, MathematicalExpression],
+        data: pint.Quantity | MathematicalExpression,
         time: types_time_like = None,
         interpolation: str = None,
         reference_time: types_timestamp_like = None,
@@ -63,8 +63,8 @@ class TimeSeries(TimeDependent):
             'step', 'linear'.
 
         """
-        self._data: Union[MathematicalExpression, xr.DataArray] = None
-        self._time_var_name: Optional[str] = None
+        self._data: MathematicalExpression | xr.DataArray = None
+        self._time_var_name: str | None = None
         self._shape = None
         self._units = None
         self._interp_counter = 0
@@ -141,7 +141,7 @@ class TimeSeries(TimeDependent):
 
     @staticmethod
     def _create_data_array(
-        data: Union[pint.Quantity, xr.DataArray], time: Time
+        data: pint.Quantity | xr.DataArray, time: Time
     ) -> xr.DataArray:
         return (
             xr.DataArray(data=data)
@@ -151,7 +151,7 @@ class TimeSeries(TimeDependent):
 
     def _initialize_discrete(
         self,
-        data: Union[pint.Quantity, xr.DataArray],
+        data: pint.Quantity | xr.DataArray,
         time: types_time_like = None,
         interpolation: str = None,
         reference_time=None,
@@ -249,7 +249,7 @@ class TimeSeries(TimeDependent):
         return data.assign_coords({"time": time.as_data_array()})
 
     @property
-    def data(self) -> Union[pint.Quantity, MathematicalExpression]:
+    def data(self) -> pint.Quantity | MathematicalExpression:
         """Return the data of the TimeSeries.
 
         This is either a set of discrete values/quantities or a mathematical expression.
@@ -267,7 +267,7 @@ class TimeSeries(TimeDependent):
         return self._data
 
     @property
-    def data_array(self) -> Union[xr.DataArray, None]:
+    def data_array(self) -> xr.DataArray | None:
         """Return the internal data as 'xarray.DataArray'.
 
         If the TimeSeries contains an expression, 'None' is returned.
@@ -283,7 +283,7 @@ class TimeSeries(TimeDependent):
         return None
 
     @property
-    def interpolation(self) -> Union[str, None]:
+    def interpolation(self) -> str | None:
         """Return the interpolation.
 
         Returns
@@ -320,7 +320,7 @@ class TimeSeries(TimeDependent):
         return isinstance(self.data, MathematicalExpression)
 
     @property
-    def time(self) -> Union[None, Time]:
+    def time(self) -> None | Time:
         """Return the data's timestamps.
 
         Returns
@@ -334,14 +334,14 @@ class TimeSeries(TimeDependent):
         return None
 
     @property
-    def reference_time(self) -> Union[pd.Timestamp, None]:
+    def reference_time(self) -> pd.Timestamp | None:
         """Get the reference time."""
         if self.is_discrete:
             return self._data.weldx.time_ref  # type: ignore[union-attr]
         return self._reference_time
 
     def interp_time(
-        self, time: Union[pd.TimedeltaIndex, pint.Quantity, Time], time_unit: str = "s"
+        self, time: pd.TimedeltaIndex | pint.Quantity | Time, time_unit: str = "s"
     ) -> TimeSeries:
         """Interpolate the TimeSeries in time.
 
@@ -390,7 +390,7 @@ class TimeSeries(TimeDependent):
     @check_matplotlib_available
     def plot(
         self,
-        time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
+        time: pd.TimedeltaIndex | pint.Quantity = None,
         axes: matplotlib.axes.Axes = None,
         data_name: str = "values",
         time_unit: UnitLike = None,

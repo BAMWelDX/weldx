@@ -1,11 +1,11 @@
 """Utilities for asdf files."""
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping, Set
+from collections.abc import Callable, Hashable, Mapping, MutableMapping, Set
 from contextlib import contextmanager
 from io import BytesIO, TextIOBase
 from pathlib import Path
-from typing import Any, Hashable, MutableMapping, Union
+from typing import Any
 from warnings import warn
 
 import asdf
@@ -261,7 +261,7 @@ def write_read_buffer(
         return data
 
 
-def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, dict]:
+def get_yaml_header(file: types_path_and_file_like, parse=False) -> str | dict:
     """Read the YAML header part (excluding binary sections) of an ASDF file.
 
     Parameters
@@ -492,7 +492,7 @@ def dataclass_serialization_class(
     return _SerializationClass
 
 
-def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extension:
+def get_weldx_extension(ctx: SerializationContext | AsdfConfig) -> Extension:
     """Grab the weldx extension from list of current active extensions."""
     if isinstance(ctx, asdf.asdf.SerializationContext):
         extensions = ctx.extension_manager.extensions
@@ -508,7 +508,7 @@ def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extensi
     return extensions[0]
 
 
-def uri_match(patterns: Union[str, list[str]], uri: str) -> bool:
+def uri_match(patterns: str | list[str], uri: str) -> bool:
     """Returns `True` if the ASDF URI matches any of the listed patterns.
 
     See Also
@@ -521,7 +521,7 @@ def uri_match(patterns: Union[str, list[str]], uri: str) -> bool:
     return any(asdf_uri_match(p, uri) for p in patterns)
 
 
-def get_converter_for_tag(tag: str) -> Union[WeldxConverter, None]:
+def get_converter_for_tag(tag: str) -> WeldxConverter | None:
     """Get the converter class that handles a given tag."""
     converters = [s for s in WeldxConverter.__subclasses__() if uri_match(s.tags, tag)]
     if len(converters) > 1:
@@ -534,8 +534,8 @@ def get_converter_for_tag(tag: str) -> Union[WeldxConverter, None]:
 
 
 def get_highest_tag_version(
-    pattern: Union[str, list[str]], ctx: Union[SerializationContext, AsdfConfig] = None
-) -> Union[str, None]:
+    pattern: str | list[str], ctx: SerializationContext | AsdfConfig = None
+) -> str | None:
     """Get the highest available weldx extension tag version matching a pattern.
 
     Parameters
@@ -580,9 +580,7 @@ def get_highest_tag_version(
     return tags[-1]
 
 
-def _get_instance_shape(
-    instance_dict: Union[TaggedDict, dict[str, Any]]
-) -> Union[list[int], None]:
+def _get_instance_shape(instance_dict: TaggedDict | dict[str, Any]) -> list[int] | None:
     """Get the shape of an ASDF instance from its tagged dict form.
 
     Parameters
@@ -607,9 +605,7 @@ def _get_instance_shape(
     return None
 
 
-def _get_instance_units(
-    instance_dict: Union[TaggedDict, dict[str, Any]]
-) -> Union[pint.Unit, None]:
+def _get_instance_units(instance_dict: TaggedDict | dict[str, Any]) -> pint.Unit | None:
     """Get the units of an ASDF instance from its tagged dict form.
 
     Parameters
@@ -715,7 +711,7 @@ class _ProtectedViewDict(MutableMapping):
 
 
 def get_schema_tree(  # noqa: C901, MC0001, RUF100, codacy:ignore
-    schemafile: Union[str, Path], *, drop: set = None
+    schemafile: str | Path, *, drop: set = None
 ) -> dict:
     """Get a dictionary representation of a weldx schema file with custom formatting.
 

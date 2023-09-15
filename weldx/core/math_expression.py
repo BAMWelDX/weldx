@@ -1,7 +1,7 @@
 """Contains the MathematicalExpression class."""
 from __future__ import annotations
 
-from typing import Any, Tuple, Union
+from typing import Any, Union
 
 import pint
 import sympy
@@ -10,7 +10,7 @@ import xarray as xr
 from weldx import Q_
 
 ExpressionParameterTypes = Union[
-    pint.Quantity, str, Tuple[pint.Quantity, str], xr.DataArray
+    pint.Quantity, str, tuple[pint.Quantity, str], xr.DataArray
 ]
 
 __all__ = ["MathematicalExpression", "ExpressionParameterTypes"]
@@ -21,7 +21,7 @@ class MathematicalExpression:
 
     def __init__(
         self,
-        expression: Union[sympy.Expr, str],
+        expression: sympy.Expr | str,
         parameters: ExpressionParameterTypes = None,
     ):
         """Construct a MathematicalExpression.
@@ -45,7 +45,7 @@ class MathematicalExpression:
             tuple(self._expression.free_symbols), self._expression, ("numpy", "scipy")
         )
 
-        self._parameters: dict[str, Union[pint.Quantity, xr.DataArray]] = {}
+        self._parameters: dict[str, pint.Quantity | xr.DataArray] = {}
         if parameters is not None:
             self.set_parameters(parameters)
 
@@ -214,7 +214,7 @@ class MathematicalExpression:
         return self._expression
 
     @property
-    def parameters(self) -> dict[str, Union[pint.Quantity, xr.DataArray]]:
+    def parameters(self) -> dict[str, pint.Quantity | xr.DataArray]:
         """Return the internal parameters dictionary.
 
         Returns

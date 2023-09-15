@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import dataclasses
-from collections.abc import Mapping
+from collections.abc import Hashable, Mapping
 from dataclasses import dataclass
-from typing import Any, Hashable
+from typing import Any
 
 import numpy as np
 import pint

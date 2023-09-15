@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 from collections import OrderedDict
 from collections.abc import Callable, Iterator, Mapping
-from typing import Any, Union
+from typing import Any
 
 from asdf.exceptions import ValidationError
 from asdf.extension import Validator
@@ -306,7 +306,7 @@ def _validate_expected_list(list_expected):
             )
 
 
-def _compare_lists(_list, list_expected) -> Union[bool, dict]:
+def _compare_lists(_list, list_expected) -> bool | dict:
     """Compare two lists.
 
     The two lists are interpreted as a list of dimensions. We compare the dimensions of
@@ -425,7 +425,7 @@ def _validate_instance_shape(
 
 def _custom_shape_validator(
     dict_test: dict[str, Any],
-    dict_expected: Union[dict[str, Any], list],
+    dict_expected: dict[str, Any] | list,
     optional: bool = False,
 ):
     """Validate dimensions which are stored in two dictionaries dict_test and

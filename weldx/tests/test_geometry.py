@@ -5,7 +5,6 @@ import copy
 import math
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Union
 
 import numpy as np
 import pint
@@ -234,7 +233,7 @@ def is_row_in_matrix(row, matrix) -> bool:
 
 
 def default_segment_rasterization_tests(
-    segment: Union[geo.ArcSegment, geo.LineSegment], raster_width
+    segment: geo.ArcSegment | geo.LineSegment, raster_width
 ):
     """Perform some default checks for a passed segment's rasterization method.
 
@@ -3136,7 +3135,7 @@ class TestSpatialData:
         "filename",
         ["test.ply", "test.stl", "test.vtk", Path("test.stl")],
     )
-    def test_read_write_file(filename: Union[str, Path]):
+    def test_read_write_file(filename: str | Path):
         """Test the `from_file` and `write_to_file` functions.
 
         The test simply creates a `SpatialData` instance, writes it to a file and reads

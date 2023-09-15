@@ -5,7 +5,7 @@ from __future__ import annotations
 import typing
 import warnings
 from copy import deepcopy
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -40,7 +40,7 @@ class LocalCoordinateSystem(TimeDependent):
     def __init__(
         self,
         orientation: types_orientation = None,
-        coordinates: Union[types_coordinates, TimeSeries] = None,
+        coordinates: types_coordinates | TimeSeries = None,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         construction_checks: bool = True,
@@ -290,7 +290,7 @@ class LocalCoordinateSystem(TimeDependent):
     @classmethod
     def _build_coordinates(
         cls, coordinates, time: Time = None
-    ) -> Union[xr.DataArray, TimeSeries]:
+    ) -> xr.DataArray | TimeSeries:
         """Create xarray coordinates from different formats and time-inputs."""
         if isinstance(coordinates, TimeSeries):
             if coordinates.is_expression:
@@ -331,10 +331,10 @@ class LocalCoordinateSystem(TimeDependent):
 
     @staticmethod
     def _build_time(
-        coordinates: Union[types_coordinates, TimeSeries],
+        coordinates: types_coordinates | TimeSeries,
         time: types_time_like,
         time_ref: types_timestamp_like,
-    ) -> Union[Time, None]:
+    ) -> Time | None:
         if time is None:
             if isinstance(coordinates, TimeSeries) and coordinates.is_discrete:
                 time = coordinates.time
@@ -371,7 +371,7 @@ class LocalCoordinateSystem(TimeDependent):
         return orientation
 
     @staticmethod
-    def _check_coordinates(coordinates: Union[xr.DataArray, TimeSeries]):
+    def _check_coordinates(coordinates: xr.DataArray | TimeSeries):
         """Check if the coordinates have the correct format."""
         if isinstance(coordinates, xr.DataArray):
             ut.xr_check_coords(
@@ -402,7 +402,7 @@ class LocalCoordinateSystem(TimeDependent):
 
     @staticmethod
     def _unify_time_axis(
-        orientation: xr.DataArray, coordinates: Union[xr.DataArray, TimeSeries]
+        orientation: xr.DataArray, coordinates: xr.DataArray | TimeSeries
     ) -> tuple:
         """Unify time axis of orientation and coordinates if both are DataArrays."""
         if (
@@ -553,7 +553,7 @@ class LocalCoordinateSystem(TimeDependent):
         return self.dataset.orientation
 
     @property
-    def coordinates(self) -> Union[xr.DataArray, TimeSeries]:
+    def coordinates(self) -> xr.DataArray | TimeSeries:
         """Get the coordinate systems coordinates.
 
         Returns
@@ -598,7 +598,7 @@ class LocalCoordinateSystem(TimeDependent):
         return self.reference_time is not None
 
     @property
-    def reference_time(self) -> Union[pd.Timestamp, None]:
+    def reference_time(self) -> pd.Timestamp | None:
         """Get the coordinate systems reference time.
 
         Returns
@@ -612,7 +612,7 @@ class LocalCoordinateSystem(TimeDependent):
         return self._dataset.weldx.time_ref
 
     @property
-    def time(self) -> Union[Time, None]:
+    def time(self) -> Time | None:
         """Get the time union of the local coordinate system (None if system is static).
 
         Returns
@@ -808,7 +808,7 @@ class LocalCoordinateSystem(TimeDependent):
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         time_index: int = None,
-        scale_vectors: Union[float, list, np.ndarray] = None,
+        scale_vectors: float | list | np.ndarray = None,
         show_origin: bool = True,
         show_trace: bool = True,
         show_vectors: bool = True,

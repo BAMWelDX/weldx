@@ -5,7 +5,7 @@ import itertools
 import warnings
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
@@ -560,7 +560,7 @@ class CoordinateSystemManager:
 
     def assign_data(
         self,
-        data: Union[xr.DataArray, SpatialData],
+        data: xr.DataArray | SpatialData,
         data_name: str,
         reference_system: str,
         target_system: str = None,
@@ -947,9 +947,7 @@ class CoordinateSystemManager:
             data_names += list(self._graph.nodes[node]["data"].keys())
         return data_names
 
-    def _find_data(
-        self, data_name: str
-    ) -> tuple[str, Union[xr.DataArray, SpatialData]]:
+    def _find_data(self, data_name: str) -> tuple[str, xr.DataArray | SpatialData]:
         """Get the data and its owning systems name."""
         for cs in self._graph.nodes:
             for name, data in self._graph.nodes[cs]["data"].items():
@@ -959,7 +957,7 @@ class CoordinateSystemManager:
 
     def get_data(
         self, data_name, target_coordinate_system_name=None
-    ) -> Union[np.ndarray, SpatialData]:
+    ) -> np.ndarray | SpatialData:
         """Get the specified data, optionally transformed into any coordinate system.
 
         Parameters
@@ -1231,7 +1229,7 @@ class CoordinateSystemManager:
             lcs_result += self._get_cs_on_edge(edge, time, time_ref)
         return lcs_result
 
-    def get_parent_system_name(self, coordinate_system_name) -> Union[str, None]:
+    def get_parent_system_name(self, coordinate_system_name) -> str | None:
         """Get the name of a coordinate systems parent system.
 
         The parent is the next system on the path towards the root node.
@@ -1297,7 +1295,7 @@ class CoordinateSystemManager:
         self,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
-        affected_coordinate_systems: Union[str, list[str]] = None,
+        affected_coordinate_systems: str | list[str] = None,
         in_place: bool = False,
     ) -> CoordinateSystemManager:
         """Interpolates the coordinate systems in time.
@@ -1520,13 +1518,13 @@ class CoordinateSystemManager:
         reference_system: str = None,
         coordinate_systems: list[str] = None,
         data_sets: list[str] = None,
-        colors: dict[str, Union[int, tuple[int, int, int]]] = None,
+        colors: dict[str, int | tuple[int, int, int]] = None,
         title: str = None,
         limits: list[tuple[float, float]] = None,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         axes_equal: bool = False,
-        scale_vectors: Union[float, list, np.ndarray] = None,
+        scale_vectors: float | list | np.ndarray = None,
         show_data_labels: bool = True,
         show_labels: bool = True,
         show_origins: bool = True,
@@ -1697,7 +1695,7 @@ class CoordinateSystemManager:
         data: types_coordinates,
         source_coordinate_system_name: str,
         target_coordinate_system_name: str,
-    ) -> Union[SpatialData, xr.DataArray]:
+    ) -> SpatialData | xr.DataArray:
         """Transform spatial data from one coordinate system to another.
 
         Parameters
