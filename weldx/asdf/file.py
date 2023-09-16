@@ -5,10 +5,10 @@ import copy
 import io
 import pathlib
 import warnings
-from collections.abc import Iterable, Mapping, MutableMapping, Set, ValuesView
+from collections.abc import Hashable, Iterable, Mapping, MutableMapping, Set, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, Any, Dict, Hashable, Optional, Union, get_args
+from typing import IO, Any, get_args
 
 import asdf
 import numpy as np
@@ -208,16 +208,17 @@ class WeldxFile(_ProtectedViewDict):
 
     def __init__(
         self,
-        filename_or_file_like: Optional[Union[types_path_like, types_file_like]] = None,
+        filename_or_file_like: types_path_like | types_file_like | None = None,
         mode: str = "r",
         asdffile_kwargs: Mapping = None,
         write_kwargs: Mapping = None,
         tree: Mapping = None,
         sync: bool = True,
-        custom_schema: Optional[
+        custom_schema: None
+        | (
             types_path_like,
             tuple[None, types_path_like],
-        ] = None,
+        ) = None,
         software_history_entry: Mapping = None,
         compression: str = DEFAULT_ARRAY_COMPRESSION,
         copy_arrays: bool = DEFAULT_ARRAY_COPYING,
@@ -486,7 +487,7 @@ class WeldxFile(_ProtectedViewDict):
                 "version": version,
             }
         else:
-            if not isinstance(value, Dict):
+            if not isinstance(value, dict):
                 raise ValueError("expected a dictionary type")
             try:
                 test = AsdfFile(tree=dict(software=Software(value)))
@@ -519,7 +520,7 @@ class WeldxFile(_ProtectedViewDict):
         self,
         all_array_storage: str = None,
         all_array_compression: str = "input",
-        pad_blocks: Union[float, bool] = False,
+        pad_blocks: float | bool = False,
         include_block_index: bool = True,
         version: str = None,
         **kwargs,
@@ -595,7 +596,7 @@ class WeldxFile(_ProtectedViewDict):
         """
         return super().get(key, default=default)
 
-    def update(self, mapping: Union[Mapping, Iterable] = (), **kwargs: Any):
+    def update(self, mapping: Mapping | Iterable = (), **kwargs: Any):
         """Update this file from mapping or iterable mapping and kwargs.
 
         Parameters
@@ -734,7 +735,7 @@ class WeldxFile(_ProtectedViewDict):
         return self._asdf_handle["asdf_library"].copy()
 
     @property
-    def custom_schema(self) -> Optional[str, tuple[Optional[str]]]:
+    def custom_schema(self) -> str | tuple[str | None] | None:
         """Return schema used to validate the structure and types of the tree."""
         if self._schema_on_read == self._schema_on_write:
             return self._schema_on_read
@@ -752,7 +753,7 @@ class WeldxFile(_ProtectedViewDict):
 
     def copy(
         self,
-        filename_or_file_like: Optional[types_path_and_file_like] = None,
+        filename_or_file_like: types_path_and_file_like | None = None,
         overwrite: bool = False,
     ) -> WeldxFile:
         """Take a copy of this file.
@@ -834,10 +835,10 @@ class WeldxFile(_ProtectedViewDict):
 
     def write_to(
         self,
-        fd: Optional[types_path_and_file_like] = None,
+        fd: types_path_and_file_like | None = None,
         array_inline_threshold=None,
         **write_args,
-    ) -> Optional[types_path_and_file_like]:
+    ) -> types_path_and_file_like | None:
         """Write current contents to given file name or file type.
 
         Parameters
@@ -885,7 +886,7 @@ class WeldxFile(_ProtectedViewDict):
         self,
         use_widgets: bool = None,
         path: tuple = None,
-        _interactive: Optional[bool] = None,
+        _interactive: bool | None = None,
     ):
         """Show the header of the ASDF serialization.
 
@@ -970,7 +971,7 @@ class _HeaderVisualizer:
 
     def show(
         self, use_widgets=None, path=None, _interactive=None
-    ) -> Union[None, IPython.display.HTML, IPython.display.JSON]:  # noqa: F821
+    ) -> None | IPython.display.HTML | IPython.display.JSON:  # noqa: F821
         if _interactive is None:
             _interactive = is_interactive_session()
         if use_widgets is None:
@@ -995,7 +996,7 @@ class _HeaderVisualizer:
     @staticmethod
     def _show_interactive(
         use_widgets: bool, buff: BytesIO, path: tuple = None
-    ) -> Union[IPython.display.HTML, IPython.display.JSON]:  # noqa: F821
+    ) -> IPython.display.HTML | IPython.display.JSON:  # noqa: F821
         from weldx.asdf.util import notebook_fileprinter
 
         if use_widgets:

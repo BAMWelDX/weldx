@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Union, get_args, get_type_hints
+from typing import Union, get_args
 
 import numpy as np
 import pandas as pd
@@ -85,8 +85,8 @@ class MediaFile:
     def __init__(
         self,
         path_or_array: types_media_input,
-        reference_time: Optional[pd.Timestamp] = None,
-        fps: Optional[float] = None,
+        reference_time: pd.Timestamp | None = None,
+        fps: float | None = None,
     ):
         if isinstance(path_or_array, get_args(types_path_like)):
             self._init_from_path(path_or_array, reference_time)  # type: ignore
@@ -136,8 +136,7 @@ class MediaFile:
             resolution=(image.width, image.height),
             nframes=len(path_or_array),
         )
-        _ref_time_types = get_type_hints(MediaFile.__init__)["reference_time"]
-        if not isinstance(reference_time, get_args(_ref_time_types)):
+        if reference_time is not None and not isinstance(reference_time, pd.Timestamp):
             raise ValueError(
                 f"unsupported type for reference_time {type(reference_time)}"
             )
@@ -189,7 +188,7 @@ class MediaFile:
         return metadata
 
     @property
-    def reference_time(self) -> Optional[pd.Timestamp]:
+    def reference_time(self) -> pd.Timestamp | None:
         """Time of recording of this media (if known)."""
         return self._reference_time
 
@@ -211,7 +210,7 @@ class MediaFile:
         return Q_(self._metadata["fps"], "1/s")
 
     @property
-    def duration(self) -> Optional[pint.Quantity]:
+    def duration(self) -> pint.Quantity | None:
         """In case of time-dynamic data, return its duration."""
         return len(self._handle) / self.fps
 

@@ -3,12 +3,11 @@ from __future__ import annotations
 
 import sys
 from io import BytesIO
-from typing import Optional, Union
 
 
 def single_pass_weld_example(
-    out_file: Optional[Union[str, BytesIO]] = "single_pass_weld_example.asdf",
-) -> Optional[tuple[BytesIO, dict]]:
+    out_file: str | BytesIO | None = "single_pass_weld_example.asdf",
+) -> tuple[BytesIO, dict] | None:
     """Create ASDF file containing all required fields of the single_pass_weld schema.
 
     Parameters

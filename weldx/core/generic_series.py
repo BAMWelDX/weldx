@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 import pint
@@ -95,12 +95,12 @@ class GenericSeries:
 
     def __init__(
         self,
-        obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
-        dims: Union[list[str], dict[str, str]] = None,
-        coords: dict[str, Union[list, pint.Quantity]] = None,
-        units: dict[str, Union[str, pint.Unit]] = None,
+        obj: pint.Quantity | xr.DataArray | str | MathematicalExpression,
+        dims: list[str] | dict[str, str] = None,
+        coords: dict[str, list | pint.Quantity] = None,
+        units: dict[str, str | pint.Unit] = None,
         interpolation: str = None,
-        parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
+        parameters: dict[str, str | pint.Quantity | xr.DataArray] = None,
     ):
         """Create a generic series.
 
@@ -218,7 +218,7 @@ class GenericSeries:
         if units is None:
             units = {}
 
-        self._obj: Union[xr.DataArray, MathematicalExpression] = None
+        self._obj: xr.DataArray | MathematicalExpression = None
         self._variable_units: dict[str, pint.Unit] = None
         self._symbol_dims: bidict = bidict({})
         self._units: pint.Unit = None
@@ -265,9 +265,9 @@ class GenericSeries:
 
     def _init_discrete(
         self,
-        data: Union[pint.Quantity, xr.DataArray],
+        data: pint.Quantity | xr.DataArray,
         dims: list[str],
-        coords: dict[str, Union[list, pint.Quantity]],
+        coords: dict[str, list | pint.Quantity],
     ):
         """Initialize the internal data with discrete values."""
         if not isinstance(data, xr.DataArray):
@@ -318,9 +318,9 @@ class GenericSeries:
 
     def _init_expression(
         self,
-        expr: Union[str, MathematicalExpression, sympy.Expr],
+        expr: str | MathematicalExpression | sympy.Expr,
         dims: dict[str, str],
-        parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]],
+        parameters: dict[str, str | pint.Quantity | xr.DataArray],
         units: dict[str, pint.Unit],
     ):
         """Initialize the internal data with a mathematical expression."""
@@ -402,8 +402,8 @@ class GenericSeries:
 
     @staticmethod
     def _format_expression_params(
-        parameters: dict[str, Union[pint.Quantity, xr.DataArray]]
-    ) -> dict[str, Union[pint.Quantity, xr.DataArray]]:
+        parameters: dict[str, pint.Quantity | xr.DataArray]
+    ) -> dict[str, pint.Quantity | xr.DataArray]:
         """Create expression parameters as a valid internal type.
 
         Valid types are all input types for the `MathematicalExpression`, with the
@@ -549,7 +549,7 @@ class GenericSeries:
     # properties etc. ---------------------------------------------
 
     @property
-    def coordinates(self) -> Union[DataArrayCoordinates, None]:
+    def coordinates(self) -> DataArrayCoordinates | None:
         """Get the coordinates of the generic series."""
         if self.is_discrete:
             return self.data_array.coords
@@ -561,14 +561,14 @@ class GenericSeries:
         return NotImplemented
 
     @property
-    def data(self) -> Union[pint.Quantity, MathematicalExpression]:
+    def data(self) -> pint.Quantity | MathematicalExpression:
         """Get the internal data."""
         if self.is_discrete:
             return self.data_array.data
         return self._obj
 
     @property
-    def data_array(self) -> Union[xr.DataArray, None]:
+    def data_array(self) -> xr.DataArray | None:
         """Get the internal data as `xarray.DataArray`."""
         if self.is_discrete:
             return self._obj
@@ -634,7 +634,7 @@ class GenericSeries:
         return len(self.dims)
 
     @property
-    def variable_names(self) -> Union[list[str], None]:
+    def variable_names(self) -> list[str] | None:
         """Get the names of all variables."""
         if self.is_expression:
             return list(self._variable_units.keys())
@@ -823,7 +823,7 @@ class SeriesParameter:
     The stored value can be converted to different formats available as properties.
     """
 
-    values: Union[xr.DataArray, pint.Quantity]
+    values: xr.DataArray | pint.Quantity
     """The values of the parameter are stored as quantities or DataArrays"""
     dim: str = None
     """The xarray dimension associated with the parameter."""

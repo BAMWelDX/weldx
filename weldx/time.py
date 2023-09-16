@@ -4,7 +4,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from functools import reduce
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -37,7 +37,7 @@ class TimeDependent(ABC):
 
     @property
     @abstractmethod
-    def reference_time(self) -> Union[Timestamp, None]:
+    def reference_time(self) -> Timestamp | None:
         """Return the reference timestamp if the time data is absolute."""
 
 
@@ -295,7 +295,7 @@ class Time:
         if isinstance(time, pd.Index) and not time.is_monotonic_increasing:
             raise ValueError("The time values passed are not monotonic increasing.")
 
-        self._time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = time
+        self._time: pd.TimedeltaIndex | pd.DatetimeIndex = time
         self._time_ref: pd.Timestamp = time_ref
 
     @staticmethod
@@ -342,7 +342,7 @@ class Time:
         time_ref = None if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
-    def __eq__(self, other: types_time_like) -> Union[bool, list[bool]]:  # type: ignore
+    def __eq__(self, other: types_time_like) -> bool | list[bool]:  # type: ignore
         """Element-wise comparisons between time object and compatible types.
 
         See Also
@@ -455,7 +455,7 @@ class Time:
             q.time_ref = self.reference_time  # type: ignore[attr-defined]
         return q  # type: ignore[return-value]
 
-    def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
+    def as_timedelta(self) -> Timedelta | TimedeltaIndex:
         """Return the data as `pandas.TimedeltaIndex` or `pandas.Timedelta`."""
         if self.is_absolute:
             return self._time - self.reference_time
@@ -474,7 +474,7 @@ class Time:
             raise TypeError("Time object does not represent a timestamp.")
         return self._time
 
-    def as_datetime(self) -> Union[Timestamp, DatetimeIndex]:
+    def as_datetime(self) -> Timestamp | DatetimeIndex:
         """Return the data as `pandas.DatetimeIndex`."""
         if not self.is_absolute:
             raise TypeError("Cannot convert non absolute Time object to datetime")
@@ -482,11 +482,11 @@ class Time:
 
     def as_pandas(
         self,
-    ) -> Union[pd.Timedelta, pd.TimedeltaIndex, pd.Timestamp, pd.DatetimeIndex]:
+    ) -> pd.Timedelta | pd.TimedeltaIndex | pd.Timestamp | pd.DatetimeIndex:
         """Return the underlying pandas time datatype."""
         return self._time
 
-    def as_pandas_index(self) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+    def as_pandas_index(self) -> pd.TimedeltaIndex | pd.DatetimeIndex:
         """Return a pandas index type regardless of length.
 
         This is useful when using time as coordinate in xarray types.
@@ -520,7 +520,7 @@ class Time:
         return da
 
     @property
-    def reference_time(self) -> Union[Timestamp, None]:
+    def reference_time(self) -> Timestamp | None:
         """Get the reference time."""
         if isinstance(self._time, DatetimeIndex):
             return self._time_ref if self._time_ref is not None else self._time[0]
@@ -544,7 +544,7 @@ class Time:
         return isinstance(self._time, pd.Timestamp)
 
     @property
-    def index(self) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+    def index(self) -> pd.TimedeltaIndex | pd.DatetimeIndex:
         """Return a pandas index type regardless of length.
 
         See Also
@@ -581,7 +581,7 @@ class Time:
         """Get the covered time span."""
         return Time(self.max() - self.min())
 
-    def resample(self, number_or_interval: Union[int, types_timedelta_like]):
+    def resample(self, number_or_interval: int | types_timedelta_like):
         """Resample the covered duration.
 
         Parameters
@@ -659,7 +659,7 @@ class Time:
     @staticmethod
     def _convert_quantity(
         time: pint.Quantity,
-    ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+    ) -> pd.TimedeltaIndex | pd.DatetimeIndex:
         """Build a time-like pandas.Index from pint.Quantity."""
         time_ref = getattr(time, "time_ref", None)
         base = "s"  # using low base unit could cause rounding errors
@@ -677,8 +677,8 @@ class Time:
 
     @staticmethod
     def _convert_xarray(
-        time: Union[xr.DataArray, xr.Dataset]
-    ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+        time: xr.DataArray | xr.Dataset,
+    ) -> pd.TimedeltaIndex | pd.DatetimeIndex:
         """Build a time-like pandas.Index from xarray objects."""
         if "time" in time.coords:
             time = time.time
@@ -692,7 +692,7 @@ class Time:
         return time_index
 
     @staticmethod
-    def _convert_other(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+    def _convert_other(time) -> pd.TimedeltaIndex | pd.DatetimeIndex:
         """Try autocasting input to time-like pandas index."""
         _input_type = type(time)
 
@@ -784,14 +784,14 @@ class Time:
 # list of types that are supported to be stored in Time._time
 _data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
 
-types_datetime_like = Union[DatetimeIndex, np.datetime64, List[str], Time]
+types_datetime_like = Union[DatetimeIndex, np.datetime64, list[str], Time]
 """types that define ascending arrays of time stamps."""
 
 types_timestamp_like = Union[Timestamp, str, Time]
 """types that define timestamps."""
 
 types_timedelta_like = Union[
-    TimedeltaIndex, pint.Quantity, np.timedelta64, List[str], Time
+    TimedeltaIndex, pint.Quantity, np.timedelta64, list[str], Time
 ]
 """types that define ascending time delta arrays."""
 

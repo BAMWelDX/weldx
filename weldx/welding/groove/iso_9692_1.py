@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pint
@@ -54,7 +54,7 @@ def _get_bounds(points):
 
 
 def _compute_cross_sect_shape_points(
-    points: list[list[Union[Point2D, tuple]]]
+    points: list[list[Point2D | tuple]],
 ) -> pint.Quantity:
     # Assumes that we have two separate shapes for each workpiece
     # 1. compute the total area of all workpieces
@@ -1621,7 +1621,7 @@ def _helperfunction(segment: list[str], array: np.ndarray) -> geo.Shape:
         geo.Shape
 
     """
-    segment_list: list[Union[geo.LineSegment, geo.ArcSegment]] = []
+    segment_list: list[geo.LineSegment | geo.ArcSegment] = []
     counter = 0
     for elem in segment:
         if elem == "line":

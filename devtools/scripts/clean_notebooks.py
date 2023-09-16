@@ -2,10 +2,9 @@
 from __future__ import annotations
 
 import json
-from typing import Union
 
 
-def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
+def _clean_notebook(file: str | Path):  # pragma: no cover
     """Clean ID metadata, output and execution count from jupyter notebook cells.
 
     This function overrides the existing notebook file, use with caution!

@@ -38,7 +38,7 @@ except ModuleNotFoundError as mnf:
 
         class _Hint(_MagickMock):  # warn again, if actual features are requested.
             def __init__(self, *args, **kwargs):
-                super(_Hint, self).__init__(*args, **kwargs)
+                super().__init__(*args, **kwargs)
                 _warn(stacklevel=3)
 
         CoordinateSystemManagerVisualizerK3D = _Hint

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Union
 
 import asdf
 import pkg_resources
@@ -102,7 +101,7 @@ class QualityStandard:
         """Get the quality standards name."""
         return self._name
 
-    def get_mappings(self, version: Union[AsdfVersion, str] = None):
+    def get_mappings(self, version: AsdfVersion | str = None):
         """Get the manifest and schema mapping for the specified version.
 
         Parameters
@@ -152,7 +151,7 @@ class Config:
         Config._standards[standard.name] = standard
 
     @staticmethod
-    def enable_quality_standard(name: str, version: Union[AsdfVersion, str] = None):
+    def enable_quality_standard(name: str, version: AsdfVersion | str = None):
         """Enable a quality standard.
 
         All corresponding schemas will be used for validation during serialization and
@@ -177,7 +176,7 @@ class Config:
         """Load all standards that are installed to the active virtual environment."""
         for entry_point in pkg_resources.iter_entry_points("weldx.standard"):
             standards = entry_point.load()()
-            if not isinstance(standards, List):
+            if not isinstance(standards, list):
                 standards = [standards]
             for standard in standards:
                 if not isinstance(standard, QualityStandard):
@@ -197,7 +196,7 @@ def add_quality_standard(standard: QualityStandard):
     Config.add_quality_standard(standard)
 
 
-def enable_quality_standard(name: str, version: Union[AsdfVersion, str] = None):
+def enable_quality_standard(name: str, version: AsdfVersion | str = None):
     """Enable a quality standard.
 
     All corresponding schemas will be used for validation during serialization and

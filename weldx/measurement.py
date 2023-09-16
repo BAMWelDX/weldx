@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from warnings import warn
 
 import pint
@@ -47,10 +47,10 @@ class Signal:
 
     def plot(
         self,
-        time: Union[TimedeltaIndex, Quantity] = None,
+        time: TimedeltaIndex | Quantity = None,
         axes: matplotlib.axes.Axes = None,
         data_name: str = "values",
-        time_unit: Union[str, Unit] = None,
+        time_unit: str | Unit = None,
         **mpl_kwargs,
     ) -> matplotlib.axes.Axes:
         """Plot the time dependent data of the `Signal`.
@@ -375,7 +375,7 @@ class MeasurementChain:
         source_name: str,
         source_error: Error,
         output_signal_type: str,
-        output_signal_unit: Union[str, Unit],
+        output_signal_unit: str | Unit,
         signal_data: TimeSeries = None,
     ) -> MeasurementChain:
         """Create a new measurement chain without providing a `SignalSource` instance.
@@ -757,7 +757,7 @@ class MeasurementChain:
         name: str,
         error: Error,
         output_signal_type: str = None,
-        output_signal_unit: Union[str, Unit] = None,
+        output_signal_unit: str | Unit = None,
         func: MathematicalExpression = None,
         data: TimeSeries = None,
         input_signal_source: str = None,

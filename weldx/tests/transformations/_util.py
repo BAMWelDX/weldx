@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 from pkg_resources import get_distribution
@@ -42,8 +42,8 @@ def check_coordinate_system_orientation(
 
 def check_coordinate_system(
     lcs: tf.LocalCoordinateSystem,
-    orientation_expected: Union[np.ndarray, list[list[Any]], DataArray],
-    coordinates_expected: Union[np.ndarray, list[Any], DataArray],
+    orientation_expected: np.ndarray | list[list[Any]] | DataArray,
+    coordinates_expected: np.ndarray | list[Any] | DataArray,
     positive_orientation_expected: bool = True,
     time=None,
     time_ref=None,

@@ -4,11 +4,11 @@ from __future__ import annotations
 import functools
 import sys
 import warnings
-from collections.abc import Callable, Sequence, Set
+from collections.abc import Callable, Collection, Hashable, Mapping, Sequence, Set
 from functools import wraps
 from importlib.util import find_spec
 from inspect import getmembers, isfunction
-from typing import ClassVar, Collection, Hashable, Mapping, Union
+from typing import ClassVar, Union
 
 import numpy as np
 import pandas as pd

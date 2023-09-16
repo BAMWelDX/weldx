@@ -1,7 +1,7 @@
 """Contains tools to handle rotations."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 import pint
 from scipy.spatial.transform import Rotation as _Rotation
@@ -59,7 +59,7 @@ class WXRotation(_Rotation):
     def from_euler(
         cls,
         seq: str,
-        angles: Union[pint.Quantity, npt.ArrayLike],
+        angles: pint.Quantity | npt.ArrayLike,
         degrees: bool = False,
     ) -> WXRotation:
         """Initialize from euler angles.

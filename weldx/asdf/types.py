@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import functools
 import re
-from typing import Union
 
 from asdf.asdf import SerializationContext
 from asdf.extension import Converter
@@ -51,7 +50,7 @@ def from_yaml_tree_metadata(func):
     """Wrapper that will add reading metadata and userdata during form_tree methods."""
 
     @functools.wraps(func)
-    def from_yaml_tree_wrapped(self, tree: Union[dict, list, str], tag, ctx):
+    def from_yaml_tree_wrapped(self, tree: dict | list | str, tag, ctx):
         """Call default from_yaml_tree method and add metadata attributes."""
         meta_dict = {}
         if isinstance(tree, dict):  # only valid if we serialize a dict
@@ -89,7 +88,7 @@ class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
     """Base class to inherit from for custom converter classes."""
 
     tags: tuple[str] = None  # note: this will be updated by WeldxConverterMeta.
-    types: tuple[Union[type, str]] = ()
+    types: tuple[type | str] = ()
 
     def to_yaml_tree(self, obj, tag: str, ctx: SerializationContext):
         raise NotImplementedError
