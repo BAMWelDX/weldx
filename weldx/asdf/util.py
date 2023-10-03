@@ -770,7 +770,7 @@ def get_schema_tree(  # noqa: C901, MC0001, RUF100, codacy:ignore
         if isinstance(value, dict) and ("wx_shape" in value):
             if isinstance(value["wx_shape"], list):
                 value = value.copy()
-                value["wx_shape"] = f"[{','.join((str(n) for n in value['wx_shape']))}]"
+                value["wx_shape"] = f"[{','.join(str(n) for n in value['wx_shape'])}]"
         return key, value
 
     def mark_required(path, key, value):
