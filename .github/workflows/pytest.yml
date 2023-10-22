@@ -96,7 +96,7 @@ jobs:
       - name: run pytest on notebooks (append coverage)
         if: matrix.py == '3.10'
         run: |
-          pytest -n 2 --dist loadfile --nbval --nbval-current-env --cov-append ./doc/src/tutorials/
+          pytest -n 2 --dist loadfile --nbval --current-env --cov-append ./doc/src/tutorials/
 
       - name: test with WeldxFile
         if: matrix.py == '3.10'
