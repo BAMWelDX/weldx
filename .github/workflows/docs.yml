@@ -75,7 +75,7 @@ jobs:
       - name: Build docs
         run: sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2 -D nb_execution_mode=${{ env.nb_execution_mode }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: |
           always() && (
           startsWith(github.ref, 'refs/tags/') ||
