@@ -193,13 +193,10 @@ class WeldxFile(_ProtectedViewDict):
     %YAML 1.1
     %TAG ! tag:stsci.edu:asdf/
     --- !core/asdf-1.1.0
-    asdf_library: !core/software-1.0.0 {...
-      name: asdf, version: ...}
+    asdf_library: !core/software-1.0.0 ...
     history:
       extensions:
-      - !core/extension_metadata-1.0.0
-        extension_class: asdf.extension.BuiltinExtension
-        software: !core/software-1.0.0 {name: asdf, version: ...}
+      ...
     name: CXCOMP
     value: 42
     <BLANKLINE>
