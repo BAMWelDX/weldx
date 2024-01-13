@@ -64,7 +64,7 @@ test = [
     "pytest >=6",
     "pytest-cov",
     "pytest-xdist",
-    "nbval",
+    "nbval <0.10",
 ]
 vis = [
     "weldx_widgets >=0.2",
