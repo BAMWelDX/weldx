@@ -44,17 +44,11 @@ except ModuleNotFoundError as mnf:
         CoordinateSystemManagerVisualizerK3D = _Hint
         SpatialDataVisualizer = _Hint
 
-        axes_equal = (
-            draw_coordinate_system_matplotlib
-        ) = (
-            new_3d_figure_and_axes
-        ) = (
+        axes_equal = draw_coordinate_system_matplotlib = new_3d_figure_and_axes = (
             plot_coordinate_system_manager_matplotlib
-        ) = (
-            plot_coordinate_systems
-        ) = (
-            plot_local_coordinate_system_matplotlib
-        ) = plot_spatial_data_matplotlib = _warn
+        ) = plot_coordinate_systems = plot_local_coordinate_system_matplotlib = (
+            plot_spatial_data_matplotlib
+        ) = _warn
     else:
         # something else is missing, pass the exception.
         raise

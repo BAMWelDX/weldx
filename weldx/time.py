@@ -1,4 +1,5 @@
 """Contains classes and functions related to time."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
