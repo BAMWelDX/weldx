@@ -61,7 +61,7 @@ changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
 test = [
-    "pytest >=6",
+    "pytest >=6,<8",
     "pytest-cov",
     "pytest-xdist",
     "nbval <0.10",
