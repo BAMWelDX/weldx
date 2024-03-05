@@ -49,7 +49,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('./environment.yml') }}
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.8.0
+        uses: mamba-org/setup-micromamba@v1.8.1
         with:
           environment-file: ./environment.yml
           environment-name: weldx
