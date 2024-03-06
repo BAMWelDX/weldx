@@ -8,13 +8,15 @@ from weldx.asdf.types import WeldxConverter
 
 __all__ = ["TimedeltaIndexConverter"]
 
+PANDAS_OLD_UNIT_SUFFIXES = dict(H="h", T="min", S="s", L="ms", U="us", N="ns")
+
 
 def _handle_converted_pd_tdi_units(node: TaggedDict):
     """Convert changed units in Pandas.Datetimeindex to valid values."""
-    # TODO: extend this to other changed units, eventually only seconds
-    # are relevant to weldx right now, as it was used in the previous schema version.
-    if "S" in node["freq"]:
-        node["freq"] = node["freq"][:-1] + "s"
+    # todo: would it be safer to use a regex here to avoid ambiguity with modern units?
+    unit = node["freq"][-1]
+    if unit in PANDAS_OLD_UNIT_SUFFIXES.keys():
+        node["freq"] = node["freq"][:-1] + PANDAS_OLD_UNIT_SUFFIXES[unit]
 
 
 class TimedeltaIndexConverter(WeldxConverter):
