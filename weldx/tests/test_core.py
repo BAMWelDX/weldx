@@ -227,10 +227,9 @@ class TestTimeSeries:
 
     ME = MathematicalExpression
     DTI = pd.DatetimeIndex
-    TDI = pd.TimedeltaIndex
     TS = TimeSeries
 
-    time_discrete = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
+    time_discrete = pd.to_timedelta([0, 1, 2, 3, 4], "s")
     value_constant = Q_(1, "m")
     values_discrete = Q_(np.array([10, 11, 12, 14, 16]), "mm")
     me_expr_str = "a*t + b"
@@ -251,7 +250,7 @@ class TestTimeSeries:
         "data, time, interpolation, shape_exp",
         [
             (Q_(1, "m"), None, None, (1,)),
-            (Q_([3, 7, 1], "m"), TDI([0, 1, 2], unit="s"), "step", (3,)),
+            (Q_([3, 7, 1], "m"), pd.to_timedelta([0, 1, 2], unit="s"), "step", (3,)),
             (Q_([3, 7, 1], ""), Q_([0, 1, 2], "s"), "step", (3,)),
             (Q_([3, 7, 1], ""), DTI(["2010", "2011", "2012"]), "step", (3,)),
         ],
@@ -329,12 +328,17 @@ class TestTimeSeries:
     @pytest.mark.parametrize(
         "data, dims, coords, exception_type",
         [
-            (Q_([1, 2, 3], "m"), "time", dict(time=TDI([1, 2, 3])), None),
-            (Q_([1, 2, 3], "m"), "a", dict(a=TDI([1, 2, 3])), KeyError),
-            (Q_([[1, 2]], "m"), ("a", "time"), dict(a=[2], time=TDI([1, 2])), None),
+            (Q_([1, 2, 3], "m"), "time", dict(time=pd.to_timedelta([1, 2, 3])), None),
+            (Q_([1, 2, 3], "m"), "a", dict(a=pd.to_timedelta([1, 2, 3])), KeyError),
+            (
+                Q_([[1, 2]], "m"),
+                ("a", "time"),
+                dict(a=[2], time=pd.to_timedelta([1, 2])),
+                None,
+            ),
             (Q_([1, 2, 3], "m"), "time", None, KeyError),
             (Q_([1, 2, 3], "m"), "time", dict(time=[1, 2, 3]), TypeError),
-            ([1, 2, 3], "time", dict(time=TDI([1, 2, 3])), TypeError),
+            ([1, 2, 3], "time", dict(time=pd.to_timedelta([1, 2, 3])), TypeError),
         ],
     )
     @pytest.mark.parametrize("reference_time", [None, "2000-01-01"])
@@ -382,7 +386,7 @@ class TestTimeSeries:
 
     # test_comparison -------------------------------------
 
-    time_wrong_values = TDI([0, 1, 2, 3, 5], unit="s")
+    time_wrong_values = pd.to_timedelta([0, 1, 2, 3, 5], "s")
     values_discrete_wrong = Q_(np.array([10, 11, 12, 15, 16]), "mm")
     values_unit_wrong = Q_(np.array([10, 11, 12, 14, 16]), "s")
     values_unit_prefix_wrong = Q_(np.array([10, 11, 12, 14, 16]), "m")
