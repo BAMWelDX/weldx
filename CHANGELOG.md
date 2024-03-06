@@ -1,5 +1,12 @@
 # Release Notes
 
+## 0.6.8 (unreleased)
+
+### Dependencies
+
+- pin `pandas<2.1` due to incompatabilities with time related datatypes \[{pull}`917`\]
+- pin `pytest<8` for deprecation \[{pull}`917`\]
+
 ## 0.6.7 (2023.08.24)
 
 ### Added
