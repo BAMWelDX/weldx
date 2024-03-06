@@ -9,6 +9,14 @@ from weldx.asdf.types import WeldxConverter
 __all__ = ["TimedeltaIndexConverter"]
 
 
+def _handle_converted_pd_tdi_units(node: TaggedDict):
+    """convert changed units in Pandas.Datetimeindex to valid valid values."""
+    # TODO: extend this to other changed units, eventually only seconds
+    # are relevant to weldx right now, as it was used in the previous schema version.
+    if "S" in node["freq"]:
+        node["freq"] = node["freq"][:-1] + "s"
+
+
 class TimedeltaIndexConverter(WeldxConverter):
     """A simple implementation of serializing pandas TimedeltaIndex."""
 
@@ -33,6 +41,7 @@ class TimedeltaIndexConverter(WeldxConverter):
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct TimedeltaIndex from tree."""
         if "freq" in node:
+            _handle_converted_pd_tdi_units(node)
             return pd.timedelta_range(
                 start=node["start"], end=node["end"], freq=node["freq"]
             )
@@ -43,6 +52,7 @@ class TimedeltaIndexConverter(WeldxConverter):
     def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
         if "freq" in node:
+            _handle_converted_pd_tdi_units(node)
             tdi_temp = pd.timedelta_range(
                 start=str(node["start"]),  # can't handle TaggedString directly
                 end=str(node["end"]),
