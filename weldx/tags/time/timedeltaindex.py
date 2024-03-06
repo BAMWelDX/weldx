@@ -13,7 +13,6 @@ PANDAS_OLD_UNIT_SUFFIXES = dict(H="h", T="min", S="s", L="ms", U="us", N="ns")
 
 def _handle_converted_pd_tdi_units(node: TaggedDict):
     """Convert changed units in Pandas.Datetimeindex to valid values."""
-    # todo: would it be safer to use a regex here to avoid ambiguity with modern units?
     unit = node["freq"][-1]
     if unit in PANDAS_OLD_UNIT_SUFFIXES.keys():
         node["freq"] = node["freq"][:-1] + PANDAS_OLD_UNIT_SUFFIXES[unit]
