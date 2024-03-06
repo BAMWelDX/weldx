@@ -629,7 +629,7 @@ class Time:
         TimedeltaIndex([       '0 days 00:00:03', '0 days 00:00:04.500000',
                                '0 days 00:00:06', '0 days 00:00:07.500000',
                                '0 days 00:00:09'],
-                       dtype='timedelta64[ns]', freq='1500L')
+                       dtype='timedelta64[ns]', freq='1500ms')
 
         """
         if len(self) <= 1:
