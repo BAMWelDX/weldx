@@ -10,9 +10,8 @@ from warnings import warn
 
 import asdf
 import pint
-from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
-from asdf.extension import Extension
+from asdf.extension import Extension, SerializationContext
 from asdf.tagged import TaggedDict, TaggedList, TaggedString
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
@@ -494,7 +493,7 @@ def dataclass_serialization_class(
 
 def get_weldx_extension(ctx: SerializationContext | AsdfConfig) -> Extension:
     """Grab the weldx extension from list of current active extensions."""
-    if isinstance(ctx, asdf.asdf.SerializationContext):
+    if isinstance(ctx, asdf.extension.SerializationContext):
         extensions = ctx.extension_manager.extensions
     elif isinstance(ctx, asdf.config.AsdfConfig):
         extensions = ctx.extensions
