@@ -10,7 +10,7 @@ __all__ = ["TimedeltaIndexConverter"]
 
 
 def _handle_converted_pd_tdi_units(node: TaggedDict):
-    """convert changed units in Pandas.Datetimeindex to valid valid values."""
+    """convert changed units in Pandas.Datetimeindex to valid values."""
     # TODO: extend this to other changed units, eventually only seconds
     # are relevant to weldx right now, as it was used in the previous schema version.
     if "S" in node["freq"]:
