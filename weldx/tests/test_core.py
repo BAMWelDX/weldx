@@ -430,9 +430,9 @@ class TestTimeSeries:
 
     # test_interp_time -----------------------------------------------------------------
 
-    time_single = pd.TimedeltaIndex([2.1], "s")
+    time_single = pd.to_timedelta([2.1], "s")
     time_single_q = Q_(2.1, "s")
-    time_mul = pd.TimedeltaIndex([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
+    time_mul = pd.to_timedelta([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
     time_mul_q = Q_([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
     results_exp_vec = [
         [-8, 3, -3],

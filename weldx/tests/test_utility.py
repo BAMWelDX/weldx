@@ -333,7 +333,7 @@ _dax_check = xr.DataArray(
         "d1": np.array([-1, 1], dtype=float),
         "d2": np.array([-1, 1], dtype=int),
         "d3": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
-        "d4": pd.TimedeltaIndex([0, 1, 2, 3], "s"),
+        "d4": pd.to_timedelta([0, 1, 2, 3], "s"),
         "d5": ["x", "y", "z"],
     },
 )
@@ -352,7 +352,7 @@ _dax_ref = dict(
         "dtype": ["datetime64[ns]", "timedelta64[ns]"],
     },
     d4={
-        "values": pd.TimedeltaIndex([0, 1, 2, 3], "s"),
+        "values": pd.to_timedelta([0, 1, 2, 3], "s"),
         "dtype": ["datetime64[ns]", "timedelta64[ns]"],
     },
     d5={"values": ["x", "y", "z"], "dtype": "<U1"},
@@ -404,7 +404,7 @@ def test_xr_check_coords_exception(dax, ref_dict, exception_type):
 
 def test_xr_time_ref():
     """Test weldx accessor functions for time handling."""
-    dt = pd.TimedeltaIndex([0, 1, 2, 3], "s")
+    dt = pd.to_timedelta([0, 1, 2, 3], "s")
     da1 = xr.DataArray(
         data=np.ones(4),
         dims=["time"],
@@ -425,7 +425,7 @@ def test_xr_time_ref():
     assert np.all(da.time.data == (dt + t0))
 
     da = da.weldx.reset_reference_time(pd.Timestamp("2021-01-01 00:00:01"))
-    assert np.all(da.time.data == pd.TimedeltaIndex([-1, 0, 1, 2], "s"))
+    assert np.all(da.time.data == pd.to_timedelta([-1, 0, 1, 2], "s"))
 
     da2 = xr.DataArray(
         data=np.ones(4),
@@ -433,7 +433,7 @@ def test_xr_time_ref():
         coords={"time": t0 + dt},
     )
     da2 = da2.weldx.time_ref_restore()
-    assert np.all(da2.time.data == pd.TimedeltaIndex([0, 1, 2, 3], "s"))
+    assert np.all(da2.time.data == pd.to_timedelta([0, 1, 2, 3], "s"))
     assert da2.time.attrs["time_ref"] == t0
 
     da2.weldx.time_ref = t0

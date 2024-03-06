@@ -845,7 +845,7 @@ def test_time_union(
     lcs_time_ref = [None for _ in range(len(lcs_times))]
     for i, _ in enumerate(lcs_times):
         if lcs_times[i] is not None:
-            lcs_times[i] = pd.TimedeltaIndex(lcs_times[i], "D")
+            lcs_times[i] = pd.to_timedelta(lcs_times[i], "D")
         if lcs_ref_time_days[i] is not None:
             lcs_time_ref[i] = pd.Timestamp(f"2010-03-{lcs_ref_time_days[i]}")
 
@@ -871,7 +871,7 @@ def test_time_union(
         csm.add_cs(f"lcs_{i}", "root", lcs_)
 
     # create expected data type
-    exp_time = pd.TimedeltaIndex(exp_time, "D")
+    exp_time = pd.to_timedelta(exp_time, "D")
     if exp_ref_time_day is not None:
         exp_time = pd.Timestamp(f"2010-03-{exp_ref_time_day}") + exp_time
 
@@ -1041,7 +1041,7 @@ def test_get_local_coordinate_system_no_time_dep(
         ),
         # get cs in its parent system - function and CSM have reference times
         (
-            ("cs_1", None, pd.TimedeltaIndex([6, 9, 18], "D"), "2000-03-10"),
+            ("cs_1", None, pd.to_timedelta([6, 9, 18], "D"), "2000-03-10"),
             ["2000-03-16", None, None, None],
             [np.eye(3) for _ in range(3)],
             [[i, 0, 0] for i in [0, 0.25, 1]],
@@ -1105,7 +1105,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - all systems and CSM have a
         # reference time
         (
-            ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D")),
+            ("cs_3", "root", pd.to_timedelta([-4, 8, 20], "D")),
             ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
             r_mat_x([0, 1, 0]),
             [[i, 0, 0] for i in [1, 1.5, 1]],
@@ -1115,7 +1115,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - some systems, CSM and function
         # have a reference time
         (
-            ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D"), "2000-03-08"),
+            ("cs_3", "root", pd.to_timedelta([-4, 8, 20], "D"), "2000-03-08"),
             ["2000-03-10", "2000-03-04", None, "2000-03-16"],
             r_mat_x([0, 1, 0]),
             [[i, 0, 0] for i in [1, 1.5, 1]],
@@ -1125,7 +1125,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - all systems, CSM and function
         # have a reference time
         (
-            ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D"), "2000-03-08"),
+            ("cs_3", "root", pd.to_timedelta([-4, 8, 20], "D"), "2000-03-08"),
             ["2000-03-02", "2000-03-04", "2000-03-10", "2000-03-16"],
             r_mat_x([0, 1, 0]),
             [[i, 0, 0] for i in [1, 1.5, 1]],
@@ -1135,7 +1135,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - all systems, and the function
         # have a reference time
         (
-            ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D"), "2000-03-08"),
+            ("cs_3", "root", pd.to_timedelta([-4, 8, 20], "D"), "2000-03-08"),
             [None, "2000-03-04", "2000-03-10", "2000-03-16"],
             r_mat_x([0, 1, 0]),
             [[i, 0, 0] for i in [1, 1.5, 1]],
@@ -1145,7 +1145,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - the function and the CSM have a
         # reference time
         (
-            ("cs_4", "root", pd.TimedeltaIndex([0, 6, 12, 18], "D"), "2000-03-08"),
+            ("cs_4", "root", pd.to_timedelta([0, 6, 12, 18], "D"), "2000-03-08"),
             ["2000-03-14", None, None, None],
             r_mat_x([0, 0, 1, 2]),
             [[0, 1, 0], [0, 1, 0], [0, -1, 0], [0, 1, 0]],
@@ -1163,7 +1163,7 @@ def test_get_local_coordinate_system_no_time_dep(
         ),
         # get transformed cs at specific times - no reference times
         (
-            ("cs_4", "root", pd.TimedeltaIndex([0, 3, 6, 9, 12], "D")),
+            ("cs_4", "root", pd.to_timedelta([0, 3, 6, 9, 12], "D")),
             [None, None, None, None],
             r_mat_x([0, 0.5, 1, 1.5, 2]),
             [[0, 1, 0], [0, 0, 1], [0, -1, 0], [0, 0, -1], [0, 1, 0]],
@@ -1293,7 +1293,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # passing just a time delta results in an undefined reference timestamp of
         # the resulting coordinate system
         (
-            ("cs_3", "root", pd.TimedeltaIndex([0, 8, 20], "D")),
+            ("cs_3", "root", pd.to_timedelta([0, 8, 20], "D")),
             [None, "2000-03-04", "2000-03-10", "2000-03-16"],
             None,
             None,
@@ -1304,7 +1304,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # a reference time, passing one to the function results in undefined
         # behavior
         (
-            ("cs_3", "root", pd.TimedeltaIndex([0, 8, 20], "D"), "2000-03-16"),
+            ("cs_3", "root", pd.to_timedelta([0, 8, 20], "D"), "2000-03-16"),
             [None, None, None, None],
             None,
             None,
@@ -1410,7 +1410,7 @@ def test_get_local_coordinate_system_time_dep(
         # create expected time data
         exp_time = exp_time_data[0]
         if exp_time is not None:
-            exp_time = pd.TimedeltaIndex(exp_time, "D")
+            exp_time = pd.to_timedelta(exp_time, "D")
         exp_time_ref = exp_time_data[1]
         if exp_time_ref is not None:
             exp_time_ref = pd.Timestamp(exp_time_ref)
