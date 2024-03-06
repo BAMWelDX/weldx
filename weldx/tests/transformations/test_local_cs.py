@@ -401,7 +401,7 @@ def test_reset_reference_time_exceptions(
     """
     orientation = WXRotation.from_euler("z", [1, 2, 3]).as_matrix()
     coordinates = Q_([[i, i, i] for i in range(3)], "mm")
-    time = TDI([1, 2, 3], "D")
+    time = pd.to_timedelta([1, 2, 3], "D")
 
     lcs = tf.LocalCoordinateSystem(orientation, coordinates, time, time_ref=time_ref)
 
@@ -483,7 +483,7 @@ def test_interp_time_discrete(
     lcs = tf.LocalCoordinateSystem(
         orientation=r_mat_z([0, 0.5, 1, 0.5]),
         coordinates=Q_([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]], "mm"),
-        time=TDI([10, 14, 18, 22], "D"),
+        time=pd.to_timedelta([10, 14, 18, 22], "D"),
         time_ref=time_ref_lcs,
     )
 
@@ -736,7 +736,7 @@ def test_interp_time_exceptions(
     """
     orientation = r_mat_z([1, 2, 3])
     coordinates = Q_([[i, i, i] for i in range(3)], "mm")
-    time_lcs = TDI([1, 2, 3], "D")
+    time_lcs = pd.to_timedelta([1, 2, 3], "D")
 
     lcs = tf.LocalCoordinateSystem(
         orientation, coordinates, time_lcs, time_ref=time_ref_lcs
@@ -1184,8 +1184,8 @@ def test_comparison_coords_timeseries(
 def test_coordinate_system_init():
     """Check the __init__ method with and without time dependency."""
     # reference data
-    time_0 = TDI([1, 3, 5], "s")
-    time_1 = TDI([2, 4, 6], "s")
+    time_0 = pd.to_timedelta([1, 3, 5], "s")
+    time_1 = pd.to_timedelta([2, 4, 6], "s")
 
     orientation_fix = r_mat_z(1)
     orientation_tdp = r_mat_z([0, 0.25, 0.5])
@@ -1261,7 +1261,7 @@ def test_coordinate_system_init():
         orientation=xr_orientation_tdp_0, coordinates=xr_coordinates_tdp_1
     )
 
-    time_exp = TDI([1, 2, 3, 4, 5, 6], "s")
+    time_exp = pd.to_timedelta([1, 2, 3, 4, 5, 6], "s")
     coordinates_exp = Q_(
         [
             [3, 7, 1],
@@ -1366,7 +1366,7 @@ def test_coordinate_system_factories_time_dependent():
     rot_mat_x = WXRotation.from_euler("x", angles_x).as_matrix()
     rot_mat_y = WXRotation.from_euler("y", angles_y).as_matrix()
 
-    time = TDI([0, 6, 12, 18], "H")
+    time = pd.to_timedelta([0, 6, 12, 18], "h")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = Q_([[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]], "mm")
 
@@ -1408,7 +1408,7 @@ def test_coordinate_system_invert():
     )
 
     # time dependent ----------------------------
-    time = TDI([1, 2, 3, 4], "s")
+    time = pd.to_timedelta([1, 2, 3, 4], "s")
     orientation = r_mat_z([0, 0.5, 1, 0.5])
     coordinates = Q_([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]], "mm")
 
@@ -1467,7 +1467,7 @@ def coordinate_system_time_interpolation_test_case(
 
 def test_coordinate_system_time_interpolation():
     """Test the local coordinate systems interp_time and interp_like functions."""
-    time_0 = TDI([10, 14, 18, 22], "D")
+    time_0 = pd.to_timedelta([10, 14, 18, 22], "D")
     orientation = r_mat_z([0, 0.5, 1, 0.5])
     coordinates = Q_([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]], "mm")
 

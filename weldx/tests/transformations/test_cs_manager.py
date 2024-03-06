@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import TimedeltaIndex as TDI
 from pandas import Timestamp as TS
 
 import weldx.transformations as tf
@@ -953,7 +952,7 @@ def test_time_union_time_series_coords(
         )
 
     if exp_time is not None:
-        exp_time = TDI(exp_time, unit="s")
+        exp_time = pd.to_timedelta(exp_time, unit="s")
     assert np.all(exp_time == csm.time_union(list_of_edges))
 
 
@@ -1378,19 +1377,19 @@ def test_get_local_coordinate_system_time_dep(
     time_refs = [t if t is None else pd.Timestamp(t) for t in time_refs]
 
     # moves in positive x-direction
-    time_1 = TDI([0, 3, 12], "D")
+    time_1 = pd.to_timedelta([0, 3, 12], "D")
     time_ref_1 = time_refs[1]
     orientation_1 = None
     coordinates_1 = Q_([[i, 0, 0] for i in [0, 0.25, 1]], "mm")
 
     # moves in negative x-direction and rotates positively around the x-axis
-    time_2 = TDI([0, 4, 8, 12], "D")
+    time_2 = pd.to_timedelta([0, 4, 8, 12], "D")
     time_ref_2 = time_refs[2]
     coordinates_2 = Q_([[-i, 0, 0] for i in [0, 1 / 3, 2 / 3, 1]], "mm")
     orientation_2 = r_mat_x([0, 2 / 3, 4 / 3, 2])
 
     # rotates negatively around the x-axis
-    time_3 = TDI([0, 3, 6, 9, 12], "D")
+    time_3 = pd.to_timedelta([0, 3, 6, 9, 12], "D")
     time_ref_3 = time_refs[3]
     coordinates_3 = Q_([1, 0, 0], "mm")
     orientation_3 = r_mat_x([0, -0.5, -1, -1.5, -2])
@@ -1523,8 +1522,8 @@ def test_get_local_coordinate_system_exceptions(
 
     """
     # setup
-    time_1 = TDI([0, 3], "D")
-    time_2 = TDI([4, 7], "D")
+    time_1 = pd.to_timedelta([0, 3], "D")
+    time_2 = pd.to_timedelta([4, 7], "D")
 
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
     csm.create_cs("cs_1", "root", r_mat_z(0.5), Q_([1, 2, 3], "mm"))
@@ -1691,7 +1690,7 @@ def test_merge_reference_times(
     # setup
     lcs_static = tf.LocalCoordinateSystem(coordinates=Q_([1, 1, 1], "mm"))
     lcs_dynamic = tf.LocalCoordinateSystem(
-        coordinates=Q_([[0, 4, 2], [7, 2, 4]], "mm"), time=TDI([4, 8], "D")
+        coordinates=Q_([[0, 4, 2], [7, 2, 4]], "mm"), time=pd.to_timedelta([4, 8], "D")
     )
     time_ref_parent = None
     if time_ref_day_parent is not None:
@@ -2532,18 +2531,18 @@ def _coordinates_from_value(val, clip_min=None, clip_max=None):
 @pytest.mark.parametrize(
     "time, time_ref, systems, csm_has_time_ref, num_abs_systems",
     [
-        (TDI([1, 7, 11, 20], "D"), None, None, False, 0),
-        (TDI([3], "D"), None, None, False, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), None, None, False, 0),
+        (pd.to_timedelta([3], "D"), None, None, False, 0),
         (pd.Timedelta(3, "D"), None, None, False, 0),
         (Q_([1, 7, 11, 20], "days"), None, None, False, 0),
         (["5days", "8days"], None, None, False, 0),
-        (TDI([1, 7, 11, 20], "D"), None, ["lcs_1"], False, 0),
-        (TDI([1, 7, 11, 20], "D"), None, ["lcs_1", "lcs_2"], False, 0),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-10", None, True, 0),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 0),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, False, 3),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 3),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 2),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), None, ["lcs_1"], False, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), None, ["lcs_1", "lcs_2"], False, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-10", None, True, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-13", None, True, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-13", None, False, 3),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-13", None, True, 3),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-13", None, True, 2),
         (["2000-01-13", "2000-01-17"], None, None, True, 2),
     ],
 )
@@ -2745,7 +2744,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     rot_mat_x = WXRotation.from_euler("x", angles_x).as_matrix()
     rot_mat_y = WXRotation.from_euler("y", angles_y).as_matrix()
 
-    time = TDI([0, 6, 12, 18], "H")
+    time = pd.to_timedelta([0, 6, 12, 18], "h")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = Q_([[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]], "mm")
 
