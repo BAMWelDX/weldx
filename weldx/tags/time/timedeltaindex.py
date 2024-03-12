@@ -13,9 +13,8 @@ PANDAS_OLD_UNIT_SUFFIXES = dict(H="h", T="min", S="s", L="ms", U="us", N="ns")
 
 def _handle_converted_pd_tdi_units(node: TaggedDict):
     """Convert changed units in Pandas.Datetimeindex to valid values."""
-    unit = node["freq"][-1]
-    if unit in PANDAS_OLD_UNIT_SUFFIXES.keys():
-        node["freq"] = node["freq"][:-1] + PANDAS_OLD_UNIT_SUFFIXES[unit]
+    for suf in PANDAS_OLD_UNIT_SUFFIXES:
+        node["freq"] = node["freq"].replace(suf, PANDAS_OLD_UNIT_SUFFIXES[suf])
 
 
 class TimedeltaIndexConverter(WeldxConverter):
