@@ -1,4 +1,5 @@
 """Contains the serialization class for the weldx.core.TimeSeries."""
+
 from __future__ import annotations
 
 import pint

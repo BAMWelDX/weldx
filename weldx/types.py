@@ -1,4 +1,5 @@
 """Common type definitions."""
+
 import pathlib
 from io import IOBase
 from typing import Protocol, Union, runtime_checkable

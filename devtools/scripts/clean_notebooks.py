@@ -1,4 +1,5 @@
 """Clean up jupyter notebooks in main directory."""
+
 from __future__ import annotations
 
 import json

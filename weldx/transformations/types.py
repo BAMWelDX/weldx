@@ -1,4 +1,5 @@
 """shared type definitions."""
+
 from typing import Union
 
 import numpy.typing as npt

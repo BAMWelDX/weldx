@@ -1,4 +1,5 @@
 """Tests for the WeldxFile class."""
+
 import itertools
 import os
 import pathlib

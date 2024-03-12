@@ -1,4 +1,5 @@
 """Test graph serializations."""
+
 import unittest
 from uuid import uuid4
 

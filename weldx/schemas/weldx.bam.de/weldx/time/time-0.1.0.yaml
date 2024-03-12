@@ -34,7 +34,7 @@ examples:
         values: !<asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.0>
           start: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2021-01-01T00:00:00'
           end: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2021-01-01T00:00:02'
-          freq: S
+          freq: s
           min: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2021-01-01T00:00:00'
           max: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2021-01-01T00:00:02'
         reference_time: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2021-01-01T00:00:00'

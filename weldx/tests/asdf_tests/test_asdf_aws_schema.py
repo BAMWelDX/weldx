@@ -1,4 +1,5 @@
 """Test ASDF serialization of AWS schema definitions."""
+
 import pytest
 
 from weldx.asdf.util import write_read_buffer_context

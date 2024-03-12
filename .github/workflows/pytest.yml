@@ -47,7 +47,7 @@ jobs:
           setup_requires: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.7.3
+        uses: mamba-org/setup-micromamba@v1.8.1
         with:
           environment-file: ./environment.yml
           environment-name: weldx
@@ -120,7 +120,7 @@ jobs:
 
       - name: codecov.io
         if: matrix.py == '3.10'
-        uses: codecov/codecov-action@v3.1.4
+        uses: codecov/codecov-action@v4.1.0
 
   compat:
     name: pytest
@@ -147,7 +147,7 @@ jobs:
           setup_requires: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.7.3
+        uses: mamba-org/setup-micromamba@v1.8.1
         with:
           environment-file: ./environment.yml
           environment-name: weldx

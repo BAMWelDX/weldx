@@ -1,4 +1,5 @@
 """Contains the SpatialSeries class."""
+
 from __future__ import annotations
 
 import pint
