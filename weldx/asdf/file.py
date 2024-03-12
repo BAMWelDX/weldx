@@ -1,4 +1,5 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
+
 from __future__ import annotations
 
 import copy
@@ -211,8 +212,7 @@ class WeldxFile(_ProtectedViewDict):
         write_kwargs: Mapping = None,
         tree: Mapping = None,
         sync: bool = True,
-        custom_schema: None
-        | (
+        custom_schema: None | (
             types_path_like,
             tuple[None, types_path_like],
         ) = None,

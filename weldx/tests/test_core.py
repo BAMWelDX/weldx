@@ -1,4 +1,5 @@
 """Tests of the core package."""
+
 import warnings
 
 import numpy as np

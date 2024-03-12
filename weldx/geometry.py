@@ -1,4 +1,5 @@
 """Provides classes to define lines and surfaces."""
+
 from __future__ import annotations
 
 import copy

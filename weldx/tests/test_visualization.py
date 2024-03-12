@@ -1,4 +1,5 @@
 """Perform some checks regarding the import redirection if weldx_widgets is missing."""
+
 from unittest.mock import patch
 
 import pytest

@@ -1,4 +1,5 @@
 """ASDF-extensions for weldx types."""
+
 from __future__ import annotations
 
 from asdf.extension import ManifestExtension

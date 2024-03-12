@@ -1,4 +1,5 @@
 """Tests the geometry package."""
+
 from __future__ import annotations
 
 import copy

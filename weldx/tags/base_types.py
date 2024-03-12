@@ -1,4 +1,5 @@
 """Module providing ASDF implementations for basic python types."""
+
 from uuid import UUID
 
 from asdf.asdf import SerializationContext
