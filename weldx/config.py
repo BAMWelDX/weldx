@@ -1,4 +1,5 @@
 """Classes and functions to configure the WelDX package."""
+
 from __future__ import annotations
 
 from pathlib import Path

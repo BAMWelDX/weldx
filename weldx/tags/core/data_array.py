@@ -1,4 +1,5 @@
 """Serialization for xarray.DataArray."""
+
 from __future__ import annotations
 
 import pint

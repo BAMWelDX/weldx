@@ -1,4 +1,5 @@
 """Contains classes for the asdf serialization of an external file."""
+
 from copy import deepcopy
 
 import numpy as np

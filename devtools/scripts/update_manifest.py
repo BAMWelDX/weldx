@@ -1,4 +1,5 @@
 """Update the manifest file with schema files found in this directory."""
+
 from pathlib import Path
 
 import yaml
