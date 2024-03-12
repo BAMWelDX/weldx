@@ -1,10 +1,20 @@
 # Release Notes
 
+## 0.6.8 (unreleased)
+
+### Changes
+
+- use pandas.to_timedelta function to pass units to the TimeDeltaIndex object \[{pull}`918`\].
+
+### Dependencies
+
+- unpin nbval testing dependency.
+
 ## 0.6.7 (2023.08.24)
 
 ### Added
 
-- added `weldx.exceptions` module with `WeldxException` \[{pull}`871`\] .
+- added `weldx.exceptions` module with `WeldxException` \[{pull}`871`\].
 
 ### Fixes
 

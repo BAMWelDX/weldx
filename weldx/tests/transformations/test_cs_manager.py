@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import TimedeltaIndex as TDI
 from pandas import Timestamp as TS
 
 import weldx.transformations as tf
@@ -847,7 +846,7 @@ def test_time_union(
     lcs_time_ref = [None for _ in range(len(lcs_times))]
     for i, _ in enumerate(lcs_times):
         if lcs_times[i] is not None:
-            lcs_times[i] = pd.TimedeltaIndex(lcs_times[i], "D")
+            lcs_times[i] = pd.to_timedelta(lcs_times[i], "D")
         if lcs_ref_time_days[i] is not None:
             lcs_time_ref[i] = pd.Timestamp(f"2010-03-{lcs_ref_time_days[i]}")
 
@@ -873,7 +872,7 @@ def test_time_union(
         csm.add_cs(f"lcs_{i}", "root", lcs_)
 
     # create expected data type
-    exp_time = pd.TimedeltaIndex(exp_time, "D")
+    exp_time = pd.to_timedelta(exp_time, "D")
     if exp_ref_time_day is not None:
         exp_time = pd.Timestamp(f"2010-03-{exp_ref_time_day}") + exp_time
 
@@ -954,7 +953,7 @@ def test_time_union_time_series_coords(
         )
 
     if exp_time is not None:
-        exp_time = TDI(exp_time, unit="s")
+        exp_time = pd.to_timedelta(exp_time, unit="s")
     assert np.all(exp_time == csm.time_union(list_of_edges))
 
 
@@ -1043,7 +1042,7 @@ def test_get_local_coordinate_system_no_time_dep(
         ),
         # get cs in its parent system - function and CSM have reference times
         (
-            ("cs_1", None, pd.TimedeltaIndex([6, 9, 18], "D"), "2000-03-10"),
+            ("cs_1", None, pd.to_timedelta([6, 9, 18], "D"), "2000-03-10"),
             ["2000-03-16", None, None, None],
             [np.eye(3) for _ in range(3)],
             [[i, 0, 0] for i in [0, 0.25, 1]],
@@ -1107,7 +1106,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - all systems and CSM have a
         # reference time
         (
-            ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D")),
+            ("cs_3", "root", pd.to_timedelta([-4, 8, 20], "D")),
             ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
             r_mat_x([0, 1, 0]),
             [[i, 0, 0] for i in [1, 1.5, 1]],
@@ -1117,7 +1116,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - some systems, CSM and function
         # have a reference time
         (
-            ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D"), "2000-03-08"),
+            ("cs_3", "root", pd.to_timedelta([-4, 8, 20], "D"), "2000-03-08"),
             ["2000-03-10", "2000-03-04", None, "2000-03-16"],
             r_mat_x([0, 1, 0]),
             [[i, 0, 0] for i in [1, 1.5, 1]],
@@ -1127,7 +1126,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - all systems, CSM and function
         # have a reference time
         (
-            ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D"), "2000-03-08"),
+            ("cs_3", "root", pd.to_timedelta([-4, 8, 20], "D"), "2000-03-08"),
             ["2000-03-02", "2000-03-04", "2000-03-10", "2000-03-16"],
             r_mat_x([0, 1, 0]),
             [[i, 0, 0] for i in [1, 1.5, 1]],
@@ -1137,7 +1136,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - all systems, and the function
         # have a reference time
         (
-            ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D"), "2000-03-08"),
+            ("cs_3", "root", pd.to_timedelta([-4, 8, 20], "D"), "2000-03-08"),
             [None, "2000-03-04", "2000-03-10", "2000-03-16"],
             r_mat_x([0, 1, 0]),
             [[i, 0, 0] for i in [1, 1.5, 1]],
@@ -1147,7 +1146,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times - the function and the CSM have a
         # reference time
         (
-            ("cs_4", "root", pd.TimedeltaIndex([0, 6, 12, 18], "D"), "2000-03-08"),
+            ("cs_4", "root", pd.to_timedelta([0, 6, 12, 18], "D"), "2000-03-08"),
             ["2000-03-14", None, None, None],
             r_mat_x([0, 0, 1, 2]),
             [[0, 1, 0], [0, 1, 0], [0, -1, 0], [0, 1, 0]],
@@ -1165,7 +1164,7 @@ def test_get_local_coordinate_system_no_time_dep(
         ),
         # get transformed cs at specific times - no reference times
         (
-            ("cs_4", "root", pd.TimedeltaIndex([0, 3, 6, 9, 12], "D")),
+            ("cs_4", "root", pd.to_timedelta([0, 3, 6, 9, 12], "D")),
             [None, None, None, None],
             r_mat_x([0, 0.5, 1, 1.5, 2]),
             [[0, 1, 0], [0, 0, 1], [0, -1, 0], [0, 0, -1], [0, 1, 0]],
@@ -1295,7 +1294,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # passing just a time delta results in an undefined reference timestamp of
         # the resulting coordinate system
         (
-            ("cs_3", "root", pd.TimedeltaIndex([0, 8, 20], "D")),
+            ("cs_3", "root", pd.to_timedelta([0, 8, 20], "D")),
             [None, "2000-03-04", "2000-03-10", "2000-03-16"],
             None,
             None,
@@ -1306,7 +1305,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # a reference time, passing one to the function results in undefined
         # behavior
         (
-            ("cs_3", "root", pd.TimedeltaIndex([0, 8, 20], "D"), "2000-03-16"),
+            ("cs_3", "root", pd.to_timedelta([0, 8, 20], "D"), "2000-03-16"),
             [None, None, None, None],
             None,
             None,
@@ -1379,19 +1378,19 @@ def test_get_local_coordinate_system_time_dep(
     time_refs = [t if t is None else pd.Timestamp(t) for t in time_refs]
 
     # moves in positive x-direction
-    time_1 = TDI([0, 3, 12], "D")
+    time_1 = pd.to_timedelta([0, 3, 12], "D")
     time_ref_1 = time_refs[1]
     orientation_1 = None
     coordinates_1 = Q_([[i, 0, 0] for i in [0, 0.25, 1]], "mm")
 
     # moves in negative x-direction and rotates positively around the x-axis
-    time_2 = TDI([0, 4, 8, 12], "D")
+    time_2 = pd.to_timedelta([0, 4, 8, 12], "D")
     time_ref_2 = time_refs[2]
     coordinates_2 = Q_([[-i, 0, 0] for i in [0, 1 / 3, 2 / 3, 1]], "mm")
     orientation_2 = r_mat_x([0, 2 / 3, 4 / 3, 2])
 
     # rotates negatively around the x-axis
-    time_3 = TDI([0, 3, 6, 9, 12], "D")
+    time_3 = pd.to_timedelta([0, 3, 6, 9, 12], "D")
     time_ref_3 = time_refs[3]
     coordinates_3 = Q_([1, 0, 0], "mm")
     orientation_3 = r_mat_x([0, -0.5, -1, -1.5, -2])
@@ -1412,7 +1411,7 @@ def test_get_local_coordinate_system_time_dep(
         # create expected time data
         exp_time = exp_time_data[0]
         if exp_time is not None:
-            exp_time = pd.TimedeltaIndex(exp_time, "D")
+            exp_time = pd.to_timedelta(exp_time, "D")
         exp_time_ref = exp_time_data[1]
         if exp_time_ref is not None:
             exp_time_ref = pd.Timestamp(exp_time_ref)
@@ -1524,8 +1523,8 @@ def test_get_local_coordinate_system_exceptions(
 
     """
     # setup
-    time_1 = TDI([0, 3], "D")
-    time_2 = TDI([4, 7], "D")
+    time_1 = pd.to_timedelta([0, 3], "D")
+    time_2 = pd.to_timedelta([4, 7], "D")
 
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
     csm.create_cs("cs_1", "root", r_mat_z(0.5), Q_([1, 2, 3], "mm"))
@@ -1692,7 +1691,7 @@ def test_merge_reference_times(
     # setup
     lcs_static = tf.LocalCoordinateSystem(coordinates=Q_([1, 1, 1], "mm"))
     lcs_dynamic = tf.LocalCoordinateSystem(
-        coordinates=Q_([[0, 4, 2], [7, 2, 4]], "mm"), time=TDI([4, 8], "D")
+        coordinates=Q_([[0, 4, 2], [7, 2, 4]], "mm"), time=pd.to_timedelta([4, 8], "D")
     )
     time_ref_parent = None
     if time_ref_day_parent is not None:
@@ -2533,18 +2532,18 @@ def _coordinates_from_value(val, clip_min=None, clip_max=None):
 @pytest.mark.parametrize(
     "time, time_ref, systems, csm_has_time_ref, num_abs_systems",
     [
-        (TDI([1, 7, 11, 20], "D"), None, None, False, 0),
-        (TDI([3], "D"), None, None, False, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), None, None, False, 0),
+        (pd.to_timedelta([3], "D"), None, None, False, 0),
         (pd.Timedelta(3, "D"), None, None, False, 0),
         (Q_([1, 7, 11, 20], "days"), None, None, False, 0),
         (["5days", "8days"], None, None, False, 0),
-        (TDI([1, 7, 11, 20], "D"), None, ["lcs_1"], False, 0),
-        (TDI([1, 7, 11, 20], "D"), None, ["lcs_1", "lcs_2"], False, 0),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-10", None, True, 0),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 0),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, False, 3),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 3),
-        (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 2),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), None, ["lcs_1"], False, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), None, ["lcs_1", "lcs_2"], False, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-10", None, True, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-13", None, True, 0),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-13", None, False, 3),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-13", None, True, 3),
+        (pd.to_timedelta([1, 7, 11, 20], "D"), "2000-01-13", None, True, 2),
         (["2000-01-13", "2000-01-17"], None, None, True, 2),
     ],
 )
@@ -2746,7 +2745,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     rot_mat_x = WXRotation.from_euler("x", angles_x).as_matrix()
     rot_mat_y = WXRotation.from_euler("y", angles_y).as_matrix()
 
-    time = TDI([0, 6, 12, 18], "H")
+    time = pd.to_timedelta([0, 6, 12, 18], "h")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = Q_([[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]], "mm")
 
