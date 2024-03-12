@@ -7,7 +7,6 @@ import pytest
 import xarray as xr
 from pandas import DatetimeIndex as DTI
 from pandas import Timedelta, Timestamp, date_range
-from pandas import TimedeltaIndex as TDI
 from pint import DimensionalityError
 
 from weldx.constants import Q_
@@ -77,7 +76,7 @@ def _initialize_time_type(
 
 def _is_timedelta(cls_type):
     """Return ``True`` if the passed type is a timedelta type."""
-    return cls_type in [TDI, Timedelta, np.timedelta64] or (
+    return cls_type in [pd.to_timedelta, Timedelta, np.timedelta64] or (
         cls_type is Time and not Time.is_absolute
     )
 
@@ -143,7 +142,9 @@ class TestTime:
             val = [v + offset for v in delta_val]
 
         val = val[0] if data_was_scalar else val
-        exp_timedelta = Timedelta(val, "s") if data_was_scalar else TDI(val, "s")
+        exp_timedelta = (
+            Timedelta(val, "s") if data_was_scalar else pd.to_timedelta(val, "s")
+        )
 
         # expected datetime
         exp_datetime = None
@@ -168,7 +169,7 @@ class TestTime:
             (str, "timedelta"),
             (Time, "timedelta"),
             (Q_, "timedelta"),
-            TDI,
+            pd.to_timedelta,
             Timedelta,
             np.timedelta64,
             (str, "datetime"),
@@ -209,7 +210,7 @@ class TestTime:
         # skip matrix cases that do not work --------------------
         if arr and input_type in [Timedelta, Timestamp]:
             return
-        if not arr and input_type in [DTI, TDI]:
+        if not arr and input_type in [DTI, pd.to_timedelta]:
             return
 
         # create input values -----------------------------------
@@ -247,7 +248,7 @@ class TestTime:
             LocalCoordinateSystem(
                 coordinates=Q_(np.zeros((2, 3)), "mm"), time=["2000", "2001"]
             ),
-            TimeSeries(Q_([2, 4, 1], "m"), TDI([1, 2, 3], "s")),
+            TimeSeries(Q_([2, 4, 1], "m"), pd.to_timedelta([1, 2, 3], "s")),
             TimeSeries(Q_([2, 4, 1], "m"), ["2001", "2002", "2003"]),
         ],
     )
@@ -262,7 +263,7 @@ class TestTime:
     @pytest.mark.parametrize(
         "time, time_ref, raises",
         [
-            (TDI([3, 2, 1]), None, ValueError),
+            (pd.to_timedelta([3, 2, 1]), None, ValueError),
             (DTI(["2010", "2000"]), None, ValueError),
             (["2010", "2000"], None, ValueError),
             (Q_([3, 2, 1], "s"), None, ValueError),
@@ -290,7 +291,7 @@ class TestTime:
             (str, "timedelta"),
             (Time, "timedelta"),
             (Q_, "timedelta"),
-            TDI,
+            pd.to_timedelta,
             Timedelta,
             np.timedelta64,
             (str, "datetime"),
@@ -331,7 +332,7 @@ class TestTime:
         # skip array cases where the type does not support arrays
         if other_type in [Timedelta, Timestamp] and other_is_array:
             return
-        if not other_is_array and other_type in [DTI, TDI]:
+        if not other_is_array and other_type in [DTI, pd.to_timedelta]:
             return
 
         # skip __radd__ cases where we got conflicts with the other types' __add__
@@ -341,7 +342,7 @@ class TestTime:
             np.timedelta64,
             np.datetime64,
             DTI,
-            TDI,
+            pd.to_timedelta,
         ):
             return
 
@@ -392,7 +393,7 @@ class TestTime:
             str,
             Time,
             Q_,
-            TDI,
+            pd.to_timedelta,
             Timedelta,
             np.timedelta64,
         ],
@@ -421,11 +422,16 @@ class TestTime:
         # skip array cases where the type does not support arrays
         if other_type in [Timedelta, Timestamp] and other_is_array:
             return
-        if not other_is_array and other_type in [DTI, TDI]:
+        if not other_is_array and other_type in [DTI, pd.to_timedelta]:
             return
 
         # skip __radd__ cases where we got conflicts with the other types' __add__
-        if not other_on_rhs and other_type in (Q_, np.ndarray, np.timedelta64, TDI):
+        if not other_on_rhs and other_type in (
+            Q_,
+            np.ndarray,
+            np.timedelta64,
+            pd.to_timedelta,
+        ):
             return
 
         # setup rhs
@@ -477,7 +483,7 @@ class TestTime:
             (str, "timedelta"),
             (Time, "timedelta"),
             (Q_, "timedelta"),
-            TDI,
+            pd.to_timedelta,
             Timedelta,
             np.timedelta64,
             (str, "datetime"),
@@ -532,7 +538,7 @@ class TestTime:
         # skip array cases where the type does not support arrays or scalars
         if other_type in [Timedelta, Timestamp] and other_is_array:
             return
-        if not other_is_array and other_type in [DTI, TDI]:
+        if not other_is_array and other_type in [DTI, pd.to_timedelta]:
             return
 
         # skip __rsub__ cases where we got conflicts with the other types' __sub__
@@ -542,7 +548,7 @@ class TestTime:
             np.timedelta64,
             np.datetime64,
             DTI,
-            TDI,
+            pd.to_timedelta,
         ):
             return
 
@@ -612,13 +618,16 @@ class TestTime:
         "arg, expected",
         [
             # timedeltas
-            (TDI([42], unit="ns"), TDI([42], unit="ns")),
+            (pd.to_timedelta([42], unit="ns"), pd.to_timedelta([42], unit="ns")),
             (pd.timedelta_range("0s", "20s", 10), pd.timedelta_range("0s", "20s", 10)),
-            (np.timedelta64(42), TDI([42], unit="ns")),
-            (np.array([-10, 0, 20]).astype("timedelta64[ns]"), TDI([-10, 0, 20], "ns")),
-            (Q_(42, "ns"), TDI([42], unit="ns")),
-            ("10s", TDI(["10s"])),
-            (["5ms", "10s", "2D"], TDI(["5 ms", "10s", "2D"])),
+            (np.timedelta64(42), pd.to_timedelta([42], unit="ns")),
+            (
+                np.array([-10, 0, 20]).astype("timedelta64[ns]"),
+                pd.to_timedelta([-10, 0, 20], "ns"),
+            ),
+            (Q_(42, "ns"), pd.to_timedelta([42], unit="ns")),
+            ("10s", pd.to_timedelta(["10s"])),
+            (["5ms", "10s", "2D"], pd.to_timedelta(["5 ms", "10s", "2D"])),
             # datetimes
             (np.datetime64(50, "Y"), DTI(["2020-01-01"])),
             ("2020-01-01", DTI(["2020-01-01"])),
@@ -647,10 +656,10 @@ class TestTime:
             ("1s", "ms", 1000),
             ("1s", "us", 1000000),
             ("1s", "ns", 1000000000),
-            (TDI([1, 2, 3], "s"), "s", [1, 2, 3]),
-            (TDI([1, 2, 3], "s"), "ms", np.array([1, 2, 3]) * 1e3),
-            (TDI([1, 2, 3], "s"), "us", np.array([1, 2, 3]) * 1e6),
-            (TDI([1, 2, 3], "s"), "ns", np.array([1, 2, 3]) * 1e9),
+            (pd.to_timedelta([1, 2, 3], "s"), "s", [1, 2, 3]),
+            (pd.to_timedelta([1, 2, 3], "s"), "ms", np.array([1, 2, 3]) * 1e3),
+            (pd.to_timedelta([1, 2, 3], "s"), "us", np.array([1, 2, 3]) * 1e6),
+            (pd.to_timedelta([1, 2, 3], "s"), "ns", np.array([1, 2, 3]) * 1e9),
             ("2020-01-01", "s", 0),
         ],
     )
@@ -775,7 +784,14 @@ class TestTime:
                 ],
                 date_range("2020-02-01", periods=8, freq="1D"),
             ),
-            ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
+            (
+                [
+                    pd.to_timedelta([1, 5]),
+                    pd.to_timedelta([2, 6, 7]),
+                    pd.to_timedelta([1, 3, 7]),
+                ],
+                pd.to_timedelta([1, 2, 3, 5, 6, 7]),
+            ),
         ],
     )
     @pytest.mark.parametrize("test_instance", [True, False])

@@ -629,7 +629,7 @@ class Time:
         TimedeltaIndex([       '0 days 00:00:03', '0 days 00:00:04.500000',
                                '0 days 00:00:06', '0 days 00:00:07.500000',
                                '0 days 00:00:09'],
-                       dtype='timedelta64[ns]', freq='1500L')
+                       dtype='timedelta64[ns]', freq='1500ms')
 
         """
         if len(self) <= 1:
@@ -670,7 +670,7 @@ class Time:
             # necessary interfaces so that the function works as expected
             time = np.expand_dims(time, 0)  # type: ignore[assignment]
 
-        delta = pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
+        delta = pd.to_timedelta(time.to(base).magnitude, base)
         if time_ref is not None:
             delta = delta + time_ref
         return delta
