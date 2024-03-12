@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Event File
           path: ${{ github.event_path }}
@@ -47,7 +47,7 @@ jobs:
           setup_requires: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.4.4
+        uses: mamba-org/setup-micromamba@v1.8.1
         with:
           environment-file: ./environment.yml
           environment-name: weldx
@@ -88,7 +88,7 @@ jobs:
 
       - name: Upload Test Results
         if: always() && (matrix.py == '3.10')
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Unit Test Results
           path: pytest.xml
@@ -120,7 +120,7 @@ jobs:
 
       - name: codecov.io
         if: matrix.py == '3.10'
-        uses: codecov/codecov-action@v3.1.4
+        uses: codecov/codecov-action@v3.1.5
 
   compat:
     name: pytest
@@ -147,7 +147,7 @@ jobs:
           setup_requires: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.4.4
+        uses: mamba-org/setup-micromamba@v1.8.1
         with:
           environment-file: ./environment.yml
           environment-name: weldx

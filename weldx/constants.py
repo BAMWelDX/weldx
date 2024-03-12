@@ -1,4 +1,5 @@
 """Define constants for global library use."""
+
 from pathlib import Path as _Path
 
 import pint

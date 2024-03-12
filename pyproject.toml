@@ -37,7 +37,7 @@ requires-python = ">=3.9"
 dependencies = [
     "numpy >=1.20",
     "asdf >=2.15.1",
-    "pandas >=1.0",
+    "pandas >=1.5",
     "xarray >=2022.9.0",
     "scipy >=1.6.2",
     "sympy >=1.6",
@@ -125,6 +125,7 @@ filterwarnings = [
     "ignore::DeprecationWarning:traittypes.*:",
     "ignore:Passing method to :FutureWarning:xarray.*:",
     "error::pint.UnitStrippedWarning",
+    #"error::FutureWarning",  # todo: we want to enable this, as it notifies us about upcoming failures due to upstream changes.
 ]
 
 [tool.coverage.run]

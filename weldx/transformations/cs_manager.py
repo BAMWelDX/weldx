@@ -1,4 +1,5 @@
 """Contains methods and classes for coordinate transformations."""
+
 from __future__ import annotations
 
 import itertools

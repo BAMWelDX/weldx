@@ -1,4 +1,5 @@
 """Contains classes for the asdf serialization of media files."""
+
 import pathlib
 
 from weldx.asdf.types import WeldxConverter

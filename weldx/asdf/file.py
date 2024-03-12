@@ -1,4 +1,5 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
+
 from __future__ import annotations
 
 import copy
@@ -193,13 +194,10 @@ class WeldxFile(_ProtectedViewDict):
     %YAML 1.1
     %TAG ! tag:stsci.edu:asdf/
     --- !core/asdf-1.1.0
-    asdf_library: !core/software-1.0.0 {...
-      name: asdf, version: ...}
+    asdf_library: !core/software-1.0.0 ...
     history:
       extensions:
-      - !core/extension_metadata-1.0.0
-        extension_class: asdf.extension.BuiltinExtension
-        software: !core/software-1.0.0 {name: asdf, version: ...}
+      ...
     name: CXCOMP
     value: 42
     <BLANKLINE>
@@ -214,8 +212,7 @@ class WeldxFile(_ProtectedViewDict):
         write_kwargs: Mapping = None,
         tree: Mapping = None,
         sync: bool = True,
-        custom_schema: None
-        | (
+        custom_schema: None | (
             types_path_like,
             tuple[None, types_path_like],
         ) = None,

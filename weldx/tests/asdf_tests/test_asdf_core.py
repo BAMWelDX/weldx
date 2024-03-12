@@ -1,4 +1,5 @@
 """Tests asdf implementations of core module."""
+
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -424,12 +425,12 @@ def test_coordinate_system_manager_time_dependencies(
         lcs_tdp_1_time_ref = pd.Timestamp("2000-03-17")
     lcs_tdp_1 = tf.LocalCoordinateSystem(
         coordinates=Q_([[1, 2, 3], [4, 5, 6]], "mm"),
-        time=pd.TimedeltaIndex([1, 2], "D"),
+        time=pd.to_timedelta([1, 2], "D"),
         time_ref=lcs_tdp_1_time_ref,
     )
     lcs_tdp_2 = tf.LocalCoordinateSystem(
         coordinates=Q_([[3, 7, 3], [9, 5, 8]], "mm"),
-        time=pd.TimedeltaIndex([1, 2], "D"),
+        time=pd.to_timedelta([1, 2], "D"),
         time_ref=pd.Timestamp("2000-03-21"),
     )
 

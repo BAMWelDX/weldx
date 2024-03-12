@@ -13,7 +13,7 @@ examples:
       !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
         start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
         end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
-        freq: 2S
+        freq: 2s
         min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
         max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
   -

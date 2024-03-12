@@ -1,4 +1,5 @@
 """Test welding util functions."""
+
 import pint
 import pytest
 

@@ -1,4 +1,5 @@
 """Common util functions used in weldx tutorials."""
+
 from pathlib import Path
 
 tutorials_dir = Path(__file__).parent.absolute()

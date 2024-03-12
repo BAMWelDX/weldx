@@ -1,4 +1,5 @@
 """Tests for the WeldxFile class."""
+
 import itertools
 import os
 import pathlib
@@ -449,7 +450,8 @@ properties:
             # pytest increases memory a bit, but not as much as our large array would
             # occupy in memory.
             assert diff <= large_array.nbytes * 1.1, diff / 1024**2
-        assert np.all(WeldxFile(fn)["x"] == large_array)
+        with WeldxFile(fn) as wf:
+            assert np.all(wf["x"] == large_array)
 
     @staticmethod
     @pytest.mark.parametrize("mode", ("r", "rw"))
