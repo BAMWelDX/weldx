@@ -14,7 +14,7 @@ from weldx.asdf.util import get_converter_for_tag
 
 def update_manifest(
     search_dir: str = "../../weldx/schemas",
-    out: str = f"../../weldx/extensions/weldx-{WELDX_EXTENSION_VERSION}.yaml",
+    out: str = f"../../weldx/manifests/weldx-{WELDX_EXTENSION_VERSION}.yaml",
 ):
     """Create manifest file from existing schemas."""
     # read existing manifest
@@ -23,7 +23,7 @@ def update_manifest(
         Loader=yaml.SafeLoader,
     )
 
-    manifest["id"] = WELDX_MANIFEST_URI
+    manifest["id"] = WELDX_EXTENSION_URI
     manifest["extension_uri"] = WELDX_EXTENSION_URI
 
     # keep only ASDF schema mappings
