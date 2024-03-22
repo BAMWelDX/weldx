@@ -7,7 +7,6 @@ import yaml
 from weldx.asdf.constants import (
     WELDX_EXTENSION_URI,
     WELDX_EXTENSION_VERSION,
-    WELDX_MANIFEST_URI,
 )
 from weldx.asdf.util import get_converter_for_tag
 
