@@ -17,6 +17,7 @@ examples:
         value: 10.0
   -
     - A time series of 4 discrete points
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
         values: !core/ndarray-1.0.0
@@ -33,6 +34,7 @@ examples:
         interpolation: step
   -
     - A time_series describing a sine oscillation in 3d space along the z-axis
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
         expression: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
