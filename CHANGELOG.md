@@ -32,6 +32,7 @@
 
 - update `PintQuantityConverter` and `PintUnitConverter` class assignments for `pint=0.22` \[{pull}`880`\].
 - use `ValidationError` from `asdf` instead of `jsonschema` \[{pull}`886`\].
+- update schemas for upcoming ASDF standard 1.6.0 \[{pull}`910`\].
 
 ### Dependencies
 

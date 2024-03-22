@@ -11,7 +11,11 @@ from warnings import warn
 
 import asdf
 import pint
-from asdf.asdf import SerializationContext
+
+if asdf.__version__ >= "3.0.0":
+    from asdf.extension import SerializationContext
+else:
+    from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
 from asdf.extension import Extension
 from asdf.tagged import TaggedDict, TaggedList, TaggedString
@@ -495,7 +499,7 @@ def dataclass_serialization_class(
 
 def get_weldx_extension(ctx: SerializationContext | AsdfConfig) -> Extension:
     """Grab the weldx extension from list of current active extensions."""
-    if isinstance(ctx, asdf.asdf.SerializationContext):
+    if isinstance(ctx, SerializationContext):
         extensions = ctx.extension_manager.extensions
     elif isinstance(ctx, asdf.config.AsdfConfig):
         extensions = ctx.extensions
