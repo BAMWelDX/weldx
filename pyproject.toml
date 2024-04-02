@@ -172,7 +172,7 @@ module = "xarray"
 follow_imports = "skip"
 ignore_errors = true
 
-[tool.ruff]
+[tool.ruff.lint]
 target-version = "py38"  # designated Python version
 exclude = [
     "__init__.py",
@@ -218,15 +218,18 @@ per-file-ignores."doc/src/conf.py" = ["E501",  # ignore long lines.
 per-file-ignores."**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = ["T2"]
 
 external = ["B950"]
-pydocstyle = {convention = "numpy"}
 
-mccabe = {max-complexity = 15}  # max branches inside a function.
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
 
-[tool.ruff.isort]
+[tool.ruff.lint.mccabe]
+max-complexity = 15  # max branches inside a function.
+
+[tool.ruff.lint.isort]
 known-first-party = ["weldx"]
 required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.flake8-import-conventions]
+[tool.ruff.lint.flake8-import-conventions]
 extend-aliases = {xarray = "xr"}
 
 [tool.nbqa.addopts]
