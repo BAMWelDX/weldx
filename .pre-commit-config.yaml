@@ -28,22 +28,16 @@ repos:
           - mdformat-black
           - mdformat-config
   # ----- Python formatting -----
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.2
-    hooks:
-    - id: pyupgrade
-      args: [--py39-plus]
-  - repo: https://github.com/psf/black
-    rev: 24.3.0
-    hooks:
-      - id: black
-  - repo: https://github.com/astral-sh/ruff-pre-commit
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.3.5
     hooks:
-      - id: ruff
-        args:
-          - --quiet
-          - --fix
+    # Run ruff linter.
+    - id: ruff
+      args:
+      - --quiet
+      - --fix
+    # Run ruff formatter.
+    - id: ruff-format
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.16
     hooks:
