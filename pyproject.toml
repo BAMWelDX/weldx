@@ -172,12 +172,15 @@ module = "xarray"
 follow_imports = "skip"
 ignore_errors = true
 
-[tool.ruff.lint]
+[tool.ruff]
 target-version = "py38"  # designated Python version
+line-length = 88
 exclude = [
     "__init__.py",
     "doc/src/conf.py",
 ]
+
+[tool.ruff.lint]
 # TODO: should be the following list, but Ruff does not yet impl all of them.
 #    W503,W504
 #    E203
@@ -191,7 +194,6 @@ ignore = [
     "D203", "D211", "D213",
     "UP006", "UP007", # see ruff GH#4427
 ]
-line-length = 88
 select = [
     "B",  # flake8-bugbear
     "C",  # flake8-comprehensions
