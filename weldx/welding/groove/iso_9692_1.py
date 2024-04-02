@@ -1115,7 +1115,8 @@ class DUGroove(IsoBaseGroove):
             segment_list.append("line")
 
         x_value = np.append(
-            x_value, (0, -x_upper, -(s_upper + x_upper), -width)  # skipcq: PYL-E1130
+            x_value,
+            (0, -x_upper, -(s_upper + x_upper), -width),  # skipcq: PYL-E1130
         )
         y_value = np.append(y_value, (h2 + c + R, t - (h1 - (R - y_upper)), t, t))
         segment_list += ["arc", "line", "line"]
