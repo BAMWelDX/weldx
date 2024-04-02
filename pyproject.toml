@@ -93,7 +93,7 @@ welding_schema = "weldx.asdf.cli.welding_schema:main"
 [build-system]
 requires = [
   "wheel",
-  "setuptools >= 40.9.0",
+  "setuptools >= 64",
   "setuptools_scm[toml]>=6.2",
 ]
 build-backend = "setuptools.build_meta"
