@@ -173,7 +173,7 @@ follow_imports = "skip"
 ignore_errors = true
 
 [tool.ruff]
-target-version = "py38"  # designated Python version
+target-version = "py39"  # designated Python version
 line-length = 88
 exclude = [
     "__init__.py",
