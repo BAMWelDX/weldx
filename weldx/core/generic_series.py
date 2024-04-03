@@ -233,7 +233,10 @@ class GenericSeries:
             if dims is not None and not isinstance(dims, dict):
                 raise ValueError(f"Argument 'dims' must be dict, not {dims}")
             self._init_expression(
-                obj, dims, parameters, {k: U_(v) for k, v in units.items()}  # catch str
+                obj,
+                dims,
+                parameters,
+                {k: U_(v) for k, v in units.items()},  # catch str
             )
         else:
             raise TypeError(f'The data type "{type(obj)}" is not supported.')
@@ -403,7 +406,7 @@ class GenericSeries:
 
     @staticmethod
     def _format_expression_params(
-        parameters: dict[str, pint.Quantity | xr.DataArray]
+        parameters: dict[str, pint.Quantity | xr.DataArray],
     ) -> dict[str, pint.Quantity | xr.DataArray]:
         """Create expression parameters as a valid internal type.
 
