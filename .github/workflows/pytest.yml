@@ -120,7 +120,7 @@ jobs:
 
       - name: codecov.io
         if: matrix.py == '3.10'
-        uses: codecov/codecov-action@v4.1.1
+        uses: codecov/codecov-action@v4.2.0
 
   compat:
     name: pytest
