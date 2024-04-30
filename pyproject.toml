@@ -1,111 +1,166 @@
 [project]
 name = "weldx"
-dynamic = [  # see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
-    "version",  # version gets derived from git by setuptools_scm.
+description = "Python API for the WelDX file format and standard"
+readme = "README.md"
+keywords = [
+  "bam", # TODO: add more keywords here! think of them as in a journal article.
+  "welding",
+  "weldx",
 ]
+license = {file = "LICENSE", name="BSD License"}
 authors = [
-    {name="Cagtay Fabry", email="cagtay.fabry@bam.de"},
+    {name="Çağtay Fabry", email="cagtay.fabry@bam.de"},
     {name="Volker Hirthammer", email="volker.hirthammer@bam.de"},
     {name="Martin K. Scherer", email="martin.scherer@bam.de"},
 ]
-description = "Python API for the WelDX file format and standard"
-readme = "README.md"
-license = {file = "LICENSE", name="BSD License"}
-keywords = [
-    "welding",
-    "weldx",
-    "bam", # TODO: add more keywords here! think of them as in a journal article.
-]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: BSD License",
-    "Operating System :: OS Independent",
-    "Natural Language :: English",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Topic :: Scientific/Engineering :: Physics", # TODO: add more topics here!
-    "Intended Audience :: Science/Research",
-    "Intended Audience :: Education",
-]
-
-# Dependencies
 requires-python = ">=3.9"
-dependencies = [
-    "numpy >=1.20",
-    "asdf >=2.15.1",
-    "pandas >=1.5",
-    "xarray >=2022.9.0",
-    "scipy >=1.6.2",
-    "sympy >=1.6",
-    "pint >=0.18",
-    "pint-xarray >=0.3",
-    "bottleneck >=1.3.3",
-    "boltons",
-    "bidict",
-    "networkx >=2.8.2",
-    "fs",
-    "meshio",
-    "psutil",
-    "IPython",
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: BSD License",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Physics", # TODO: add more topics here!
 ]
-
-[project.urls]
-documentation = "https://weldx.readthedocs.io"
-repository = "https://github.com/BAMweldx/weldx"
-bug_tracker = "https://github.com/BAMweldx/weldx/issues"
-changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"
-
+dynamic = [
+  # see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
+  "version", # version gets derived from git by setuptools_scm.
+]
+dependencies = [
+  "asdf>=2.15.1",
+  "bidict",
+  "boltons",
+  "bottleneck>=1.3.3",
+  "fs",
+  "IPython",
+  "meshio",
+  "networkx>=2.8.2",
+  "numpy>=1.20",
+  "pandas>=1.5",
+  "pint>=0.18",
+  "pint-xarray>=0.3",
+  "psutil",
+  "scipy>=1.6.2",
+  "sympy>=1.6",
+  "xarray>=2022.9",
+]
 [project.optional-dependencies]
+media = [
+  "av",
+  "dask-image",
+  "pims",
+  "tifffile", # required by dask-image, but not listed in their requirements
+]
 test = [
-    "pytest >=6",
-    "pytest-cov",
-    "pytest-xdist",
-    "nbval",
+  "nbval",
+  "pytest>=6",
+  "pytest-cov",
+  "pytest-xdist",
 ]
 vis = [
-    "weldx_widgets >=0.2",
+  "weldx_widgets>=0.2",
 ]
-media = [
-    "pims",
-    "av",
-    "dask-image",
-    # this is actually required by dask-image, but not listed in their requirements:
-    "tifffile",
-]
-
-# ASDF extension entry points.
-
+[project.urls]
+bug_tracker = "https://github.com/BAMweldx/weldx/issues"
+changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"
+documentation = "https://weldx.readthedocs.io"
+repository = "https://github.com/BAMweldx/weldx"
+[project.scripts]
+welding_schema = "weldx.asdf.cli.welding_schema:main"
 [project.entry-points."asdf.extensions"]
 weldx = "weldx.asdf.extension:get_extensions"
-
 [project.entry-points."asdf.resource_mappings"]
 weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
 
-# console scripts
-[project.scripts]
-welding_schema = "weldx.asdf.cli.welding_schema:main"
-
-# Build system config, pip creates a temporary env with "requires" pkgs.
 [build-system]
-requires = [
-  "wheel",
-  "setuptools >= 40.9.0",
-  "setuptools_scm[toml]>=6.2",
-]
 build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=64",
+  "setuptools_scm[toml]>=6.2",
+  "wheel",
+]
 
-
-# Tool configs
 [tool.setuptools.packages.find]
 where = ["."]
 
 [tool.setuptools_scm]
 write_to = "weldx/_version.py"
 write_to_template = '__version__ = "{version}"'
+
+[tool.ruff]
+target-version = "py39"  # designated Python version
+line-length = 88
+exclude = [
+    "__init__.py",
+    "doc/src/conf.py",
+]
+
+[tool.ruff.lint]
+# TODO: should be the following list, but Ruff does not yet impl all of them.
+#    W503,W504
+#    E203
+#    C408
+ignore = [
+    "C408",
+    #"E203",
+    "E402",
+    #"W503",
+    #"W504",
+    "D203", "D211", "D213",
+    "UP006", "UP007", # see ruff GH#4427
+]
+select = [
+    "B",  # flake8-bugbear
+    "C",  # flake8-comprehensions
+    #"D", # note: all relevant D's will be set by setting pydocstyle.convention=numpy!
+    "E",  # pycodestyles
+    "F",  # pyflakes
+    "W",  # pycodestyle warnings
+    "UP", # pyupgrade
+    "T2",  # flake8-print
+    "I001",  # isort
+    "ICN", # import conventions, e.g. import numpy as np
+    #"B950",  # not yet implemented by Ruff.
+    "RUF100", # ensure 'noqa' declarations are still valid.
+]
+
+# Allow pydocstyle violations in certain areas.
+per-file-ignores."**/{tests,tags,asdf,devtools}/**" = ["D"]
+per-file-ignores."conftest.py" = ["D"]
+per-file-ignores."doc/src/tutorials/*" = ["D"]
+per-file-ignores."doc/src/conf.py" = ["E501",  # ignore long lines.
+    "RUF100",  # do no check if 'noqa' is needed (circular import workaround)
+]
+# Allow prints in certain areas.
+per-file-ignores."**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = ["T2"]
+
+external = ["B950"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15  # max branches inside a function.
+
+[tool.ruff.lint.isort]
+known-first-party = ["weldx"]
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.lint.flake8-import-conventions]
+extend-aliases = {xarray = "xr"}
+
+[tool.nbqa.addopts]
+ruff = [
+    "--extend-ignore=B018"
+]
 
 [tool.pytest.ini_options]
 addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules"
@@ -171,65 +226,3 @@ ignore_errors = true
 module = "xarray"
 follow_imports = "skip"
 ignore_errors = true
-
-[tool.ruff]
-target-version = "py38"  # designated Python version
-exclude = [
-    "__init__.py",
-    "doc/src/conf.py",
-]
-# TODO: should be the following list, but Ruff does not yet impl all of them.
-#    W503,W504
-#    E203
-#    C408
-ignore = [
-    "C408",
-    #"E203",
-    "E402",
-    #"W503",
-    #"W504",
-    "D203", "D211", "D213",
-    "UP006", "UP007", # see ruff GH#4427
-]
-line-length = 88
-select = [
-    "B",  # flake8-bugbear
-    "C",  # flake8-comprehensions
-    #"D", # note: all relevant D's will be set by setting pydocstyle.convention=numpy!
-    "E",  # pycodestyles
-    "F",  # pyflakes
-    "W",  # pycodestyle warnings
-    "UP", # pyupgrade
-    "T2",  # flake8-print
-    "I001",  # isort
-    "ICN", # import conventions, e.g. import numpy as np
-    #"B950",  # not yet implemented by Ruff.
-    "RUF100", # ensure 'noqa' declarations are still valid.
-]
-
-# Allow pydocstyle violations in certain areas.
-per-file-ignores."**/{tests,tags,asdf,devtools}/**" = ["D"]
-per-file-ignores."conftest.py" = ["D"]
-per-file-ignores."doc/src/tutorials/*" = ["D"]
-per-file-ignores."doc/src/conf.py" = ["E501",  # ignore long lines.
-    "RUF100",  # do no check if 'noqa' is needed (circular import workaround)
-]
-# Allow prints in certain areas.
-per-file-ignores."**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = ["T2"]
-
-external = ["B950"]
-pydocstyle = {convention = "numpy"}
-
-mccabe = {max-complexity = 15}  # max branches inside a function.
-
-[tool.ruff.isort]
-known-first-party = ["weldx"]
-required-imports = ["from __future__ import annotations"]
-
-[tool.ruff.flake8-import-conventions]
-extend-aliases = {xarray = "xr"}
-
-[tool.nbqa.addopts]
-ruff = [
-    "--extend-ignore=B018"
-]
