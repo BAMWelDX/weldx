@@ -33,7 +33,7 @@ jobs:
           setup_requires: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.8.1
+        uses: mamba-org/setup-micromamba@v1.9.0
         with:
           environment-file: ./environment.yml
           environment-name: weldx
