@@ -1,0 +1,81 @@
+# Exclude a variety of commonly ignored directories.
+extend-exclude = [
+    "__init__.py",
+    "doc/src/conf.py",
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Assume Python 3.9
+target-version = "py39"
+
+
+[lint]
+# TODO: should be the following list, but Ruff does not yet impl all of them.
+#    W503,W504
+#    E203
+#    C408
+ignore = [
+    "C408",
+    #"E203",
+    "E402",
+    #"W503",
+    #"W504",
+    "D203",
+    "D211",
+    "D213",
+    "UP006",
+    "UP007", # see ruff GH#4427
+]
+select = [
+    "B", # flake8-bugbear
+    "C", # flake8-comprehensions
+    #"D", # note: all relevant D's will be set by setting pydocstyle.convention=numpy!
+    "E",    # pycodestyles
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "UP",   # pyupgrade
+    "T2",   # flake8-print
+    "I001", # isort
+    "ICN",  # import conventions, e.g. import numpy as np
+    #"B950",  # not yet implemented by Ruff.
+    "RUF100", # ensure 'noqa' declarations are still valid.
+]
+
+[lint.extend-per-file-ignores]
+# Allow pydocstyle violations in certain areas.
+"**/{tests,tags,asdf,devtools}/**" = [
+    "D",
+]
+"conftest.py" = [
+    "D",
+]
+"doc/src/tutorials/*" = [
+    "D",
+]
+"doc/src/conf.py" = [
+    "E501",   # ignore long lines.
+    "RUF100", # do no check if 'noqa' is needed (circular import workaround)
+]
+"**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = [
+    "T2",
+] # Allow prints in certain areas.
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[lint.mccabe]
+max-complexity = 15 # max branches inside a function.
+
+[lint.isort]
+known-first-party = [
+    "weldx",
+]
+required-imports = [
+    "from __future__ import annotations",
+]
+
+[flake8-import-conventions]
+extend-aliases = { xarray = "xr" }

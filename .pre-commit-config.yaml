@@ -29,7 +29,7 @@ repos:
           - mdformat-config
   # ----- Python formatting -----
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.3
+    rev: v0.4.7
     hooks:
     # Run ruff linter.
     - id: ruff
@@ -39,11 +39,11 @@ repos:
     # Run ruff formatter.
     - id: ruff-format
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: 1.8.0
+    rev: 2.1.3
     hooks:
     - id: pyproject-fmt
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.16
+    rev: v0.18
     hooks:
       - id: validate-pyproject
   # ----- Jupyter Notebooks -----
@@ -63,7 +63,7 @@ repos:
           - --remove-kernel-metadata
   # ----- spellchecking -----
   - repo: https://github.com/codespell-project/codespell/
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
       - id: codespell
         exclude: doc/src/legal-notice.md

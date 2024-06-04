@@ -443,7 +443,7 @@ class WeldxFile(_ProtectedViewDict):
 
         Examples
         --------
-        Let us define a custom softare entry and use it during file creation.
+        Let us define a custom software entry and use it during file creation.
 
         >>> import weldx
         >>> software = dict(name="MyFancyPackage", author="Me",
