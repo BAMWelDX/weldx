@@ -9,6 +9,7 @@
 ### Dependencies
 
 - unpin nbval testing dependency.
+- pin ``python<3.12`` \[{pull}`933`\].
 
 ## 0.6.7 (2023.08.24)
 
