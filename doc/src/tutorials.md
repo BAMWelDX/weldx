@@ -10,7 +10,7 @@ data processing and visualization.
 ```{toctree}
 :caption: Welding examples
 :maxdepth: 1
-:numbered: true
+:numbered:
 
 tutorials/01_01_introduction
 tutorials/01_02_time_dependent_data
@@ -27,7 +27,7 @@ related tasks.
 ```{toctree}
 :caption: Welding examples
 :maxdepth: 1
-:numbered: true
+:numbered:
 
 tutorials/welding_example_01_basics
 tutorials/custom_metadata
@@ -45,7 +45,7 @@ The API tutorials provide more detailed usages and examples of core
 ```{toctree}
 :caption: API tutorials
 :maxdepth: 1
-:numbered: true
+:numbered:
 
 tutorials/transformations_01_coordinate_systems
 tutorials/transformations_02_coordinate_system_manager
