@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.6.8 (unreleased)
+## 0.6.8 (07.06.2024)
 
 ### Changes
 
