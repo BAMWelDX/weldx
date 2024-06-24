@@ -366,7 +366,7 @@ def get_coordinate_system_manager_with_subsystems(nested: bool):
     # robot head system
     csm_head = tf.CoordinateSystemManager("head", "Head system")
     csm_head.add_cs("torch tcp", "head", lcs[3])
-    csm_head.add_cs("camera tcp", "head", lcs[4], lsc_child_in_parent=False)
+    csm_head.add_cs("camera tcp", "head", lcs[4], lcs_child_in_parent=False)
     csm_head.add_cs("scanner 1 tcp", "head", lcs[5])
     csm_head.add_cs("scanner 2 tcp", "head", lcs[6])
 
