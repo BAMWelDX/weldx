@@ -67,6 +67,7 @@ required: [weld_seam]
 examples:
   -
     - Two seams with a single layer and bead, but the first seam has two weldments while the second has only one.
+    - asdf-standard-1.5.0
     - |
       !<tag:stsci.edu:asdf/core/asdf-1.1.0>
         weld_seam:

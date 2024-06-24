@@ -11,6 +11,7 @@ description: |
 examples:
   -
     - A "xyz" euler rotation with 10, 20 and 60 degree angles as euler representation.
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.0>
         angles: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0>
@@ -22,6 +23,7 @@ examples:
         sequence: xyz
   -
     - The quaternion rotation representation
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.0>
         quaternions: !core/ndarray-1.0.0
@@ -30,6 +32,7 @@ examples:
           shape: [4]
   -
     - The matrix rotation representation.
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.0>
         matrix: !core/ndarray-1.0.0
@@ -41,6 +44,7 @@ examples:
           shape: [3, 3]
   -
     - The rotation vector representation.
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.0>
         rotvec: !core/ndarray-1.0.0

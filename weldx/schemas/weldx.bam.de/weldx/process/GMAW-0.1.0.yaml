@@ -34,6 +34,7 @@ examples:
           tag: CLOOS/pulse
   -
     - A spray arc process where the voltage decreases linearly from 40 V to 20 V over 10 s
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/process/CLOOS/spray_arc-0.1.0>
         base_process: spray
