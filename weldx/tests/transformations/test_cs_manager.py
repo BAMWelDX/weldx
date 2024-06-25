@@ -56,7 +56,7 @@ def list_of_csm_and_lcs_instances():
     csm_1.add_cs("lcs4", "lcs0", lcs[4])
 
     csm_2 = CSM("lcs5", "csm2")
-    csm_2.add_cs("lcs3", "lcs5", lcs[5], lsc_child_in_parent=False)
+    csm_2.add_cs("lcs3", "lcs5", lcs[5], lcs_child_in_parent=False)
     csm_2.add_cs("lcs6", "lcs5", lcs[6])
 
     csm_3 = CSM("lcs6", "csm3")
@@ -64,7 +64,7 @@ def list_of_csm_and_lcs_instances():
     csm_3.add_cs("lcs8", "lcs6", lcs[8])
 
     csm_4 = CSM("lcs9", "csm4")
-    csm_4.add_cs("lcs3", "lcs9", lcs[9], lsc_child_in_parent=False)
+    csm_4.add_cs("lcs3", "lcs9", lcs[9], lcs_child_in_parent=False)
 
     csm_5 = CSM("lcs7", "csm5")
     csm_5.add_cs("lcs10", "lcs7", lcs[10])

@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.6.9 (unreleased)
+
+### Fixes
+
+- rename (fix typo) argument to `lcs_child_in_parent` in `CoordinateSystemManager.add_cs`  \[{pull}`936`\].
+
 ## 0.6.8 (07.06.2024)
 
 ### Changes
