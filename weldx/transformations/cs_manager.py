@@ -14,7 +14,7 @@ import xarray as xr
 
 from weldx import util
 from weldx.core import TimeSeries
-from weldx.exceptions import WeldxException
+from weldx.exceptions import WeldxDeprecationWarning, WeldxException
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.util import check_matplotlib_available, dataclass_nested_eq
@@ -440,6 +440,7 @@ class CoordinateSystemManager:
         coordinate_system_name: str,
         reference_system_name: str,
         lcs: LocalCoordinateSystem,
+        lcs_child_in_parent: bool = True,
         lsc_child_in_parent: bool = True,
     ):
         """Add a coordinate system to the coordinate system manager.
@@ -469,12 +470,26 @@ class CoordinateSystemManager:
             An instance of
             `LocalCoordinateSystem` that describes how the new
             coordinate system is oriented in its parent system.
-        lsc_child_in_parent
+        lcs_child_in_parent
             If set to `True`, the passed `LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
+        lsc_child_in_parent
+            DEPRECATED. Use ``lcs_child_in_parent`` instead.
 
         """
+        if not lsc_child_in_parent:
+            warnings.warn(
+                (
+                    "Argument 'lsc_child_in_parent' is deprecated"
+                    " and will be removed in 0.7 please use 'lcs_child_in_parent'"
+                ),
+                category=WeldxDeprecationWarning,
+                stacklevel=2,
+            )
+            if lcs_child_in_parent:
+                lcs_child_in_parent = lsc_child_in_parent
+
         if not isinstance(lcs, LocalCoordinateSystem):
             raise TypeError(
                 "'local_coordinate_system' must be an instance of LocalCoordinateSystem"
@@ -508,7 +523,7 @@ class CoordinateSystemManager:
                     f'Can not update coordinate system. "{reference_system_name}" is '
                     f"not a neighbor of {coordinate_system_name}"
                 )
-            if lsc_child_in_parent:
+            if lcs_child_in_parent:
                 self._update_local_coordinate_system(
                     coordinate_system_name,
                     reference_system_name,
@@ -523,7 +538,7 @@ class CoordinateSystemManager:
         else:
             self._check_coordinate_system_exists(reference_system_name)
             self._add_coordinate_system_node(coordinate_system_name)
-            if lsc_child_in_parent:
+            if lcs_child_in_parent:
                 self._add_edges(
                     coordinate_system_name,
                     reference_system_name,
@@ -648,7 +663,7 @@ class CoordinateSystemManager:
         coordinates: types_coordinates = None,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
-        lsc_child_in_parent: bool = True,
+        lcs_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -674,7 +689,7 @@ class CoordinateSystemManager:
             Time data for time dependent coordinate systems.
         time_ref :
             Reference time for time dependent coordinate systems
-        lsc_child_in_parent :
+        lcs_child_in_parent :
             If set to `True`, the passed `LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
@@ -682,7 +697,7 @@ class CoordinateSystemManager:
         """
         lcs = LocalCoordinateSystem(orientation, coordinates, time, time_ref)
         self.add_cs(
-            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+            coordinate_system_name, reference_system_name, lcs, lcs_child_in_parent
         )
 
     def create_cs_from_euler(
@@ -695,7 +710,7 @@ class CoordinateSystemManager:
         coordinates: types_coordinates = None,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
-        lsc_child_in_parent: bool = True,
+        lcs_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -735,7 +750,7 @@ class CoordinateSystemManager:
             Time data for time dependent coordinate systems.
         time_ref :
             Reference time for time dependent coordinate systems
-        lsc_child_in_parent :
+        lcs_child_in_parent :
             If set to `True`, the passed `LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
@@ -746,7 +761,7 @@ class CoordinateSystemManager:
             sequence, angles, degrees, coordinates, time, time_ref
         )
         self.add_cs(
-            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+            coordinate_system_name, reference_system_name, lcs, lcs_child_in_parent
         )
 
     def create_cs_from_axis_vectors(
@@ -759,7 +774,7 @@ class CoordinateSystemManager:
         coordinates: types_coordinates = None,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
-        lsc_child_in_parent: bool = True,
+        lcs_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the `CoordinateSystemManager`.
 
@@ -784,7 +799,7 @@ class CoordinateSystemManager:
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
             Optional reference timestamp if ``time`` is a time delta.
-        lsc_child_in_parent :
+        lcs_child_in_parent :
             If set to `True`, the passed `LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
@@ -812,7 +827,7 @@ class CoordinateSystemManager:
             x, y, z, coordinates, time, time_ref
         )
         self.add_cs(
-            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+            coordinate_system_name, reference_system_name, lcs, lcs_child_in_parent
         )
 
     def delete_cs(self, coordinate_system_name: str, delete_children: bool = False):
