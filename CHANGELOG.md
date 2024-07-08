@@ -8,7 +8,7 @@
 
 ### Dependencies
 
-- pin `weldx-widgets>=0.2.3` for viz
+- pin `weldx-widgets>=0.2.3` for viz \[{pull}`939`\].
 
 ## 0.6.8 (07.06.2024)
 
