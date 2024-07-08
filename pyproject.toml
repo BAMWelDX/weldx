@@ -71,7 +71,7 @@ optional-dependencies.test = [
   "pytest-xdist",
 ]
 optional-dependencies.vis = [
-  "weldx-widgets>=0.2",
+  "weldx-widgets>=0.2.3",
 ]
 urls.bug_tracker = "https://github.com/BAMweldx/weldx/issues"
 urls.changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"

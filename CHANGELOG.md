@@ -6,6 +6,10 @@
 
 - rename (fix typo) argument to `lcs_child_in_parent` in `CoordinateSystemManager.add_cs`  \[{pull}`936`\].
 
+### Dependencies
+
+- pin `weldx-widgets>=0.2.3` for viz \[{pull}`939`\].
+
 ## 0.6.8 (07.06.2024)
 
 ### Changes

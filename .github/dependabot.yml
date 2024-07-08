@@ -10,3 +10,5 @@ updates:
       interval: "weekly"
       day: "sunday"
       timezone: "Europe/Berlin"
+    labels:
+      - "dependabot"
