@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import asdf
-import pkg_resources
+import importlib.metadata
 import yaml
 from asdf.config import ResourceMappingProxy
 from asdf.versioning import AsdfVersion, split_tag_version
@@ -175,7 +175,7 @@ class Config:
     @staticmethod
     def load_installed_standards():
         """Load all standards that are installed to the active virtual environment."""
-        for entry_point in pkg_resources.iter_entry_points("weldx.standard"):
+        for entry_point in importlib.metadata.entry_points()["weldx.standard"]:
             standards = entry_point.load()()
             if not isinstance(standards, list):
                 standards = [standards]

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-from pkg_resources import get_distribution
+import importlib.metadata
 from xarray import DataArray
 
 import weldx.transformations as tf
@@ -79,7 +79,7 @@ def check_coordinate_system(
     )
 
     atol_unit = 1.0
-    if get_distribution("pint").version >= "0.21":
+    if tuple(int(part) for part in importlib.metadata.version("pint").split(".")) >= (0, 21):
         atol_unit = coordinates_expected.u
 
     assert np.allclose(

@@ -6,6 +6,8 @@
 
 - rename (fix typo) argument to `lcs_child_in_parent` in `CoordinateSystemManager.add_cs`  \[{pull}`936`\].
 
+- replace usages of ``pkg_resources`` with ``importlib.metadata`` [#941]
+
 ### Dependencies
 
 - pin `weldx-widgets>=0.2.3` for viz \[{pull}`939`\].
