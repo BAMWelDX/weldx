@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.metadata
 from collections.abc import Callable, Hashable, Mapping, MutableMapping, Set
 from contextlib import contextmanager
 from io import BytesIO, TextIOBase
@@ -149,7 +150,7 @@ def read_buffer_context(
         Buffer containing ASDF file contents
     open_kwargs
         Additional keywords to pass to `asdf.AsdfFile.open`
-        Extensions are always set, ``copy_arrays=True`` is set by default.
+        Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
     -------
@@ -158,7 +159,11 @@ def read_buffer_context(
 
     """
     if open_kwargs is None:
-        open_kwargs = {"copy_arrays": True, "lazy_load": False}
+        open_kwargs = {"memmap": False, "lazy_load": False}
+
+    if "memmap" in open_kwargs and tuple(int(part) for part in importlib.metadata.version("asdf").split(".")) < (3, 1, 0):
+        open_kwargs["copy_arrays"] = not open_kwargs["memmap"]
+        del open_kwargs["memmap"]
 
     buffer.seek(0)
 
@@ -190,7 +195,7 @@ def read_buffer(
         Buffer containing ASDF file contents
     open_kwargs
         Additional keywords to pass to `asdf.AsdfFile.open`
-        Extensions are always set, ``copy_arrays=True`` is set by default.
+        Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
     -------
@@ -220,7 +225,7 @@ def write_read_buffer_context(
         Extensions are always set.
     open_kwargs
         Additional keywords to pass to `asdf.AsdfFile.open`
-        Extensions are always set, ``copy_arrays=True`` is set by default.
+        Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
     -------
@@ -248,7 +253,7 @@ def write_read_buffer(
         Extensions are always set.
     open_kwargs
         Additional keywords to pass to `asdf.AsdfFile.open`
-        Extensions are always set, ``copy_arrays=True`` is set by default.
+        Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
     -------

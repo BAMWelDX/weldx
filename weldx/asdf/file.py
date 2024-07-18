@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import importlib.metadata
 import io
 import pathlib
 import warnings
@@ -42,10 +43,17 @@ from weldx.util import (
 __all__ = [
     "WeldxFile",
     "DEFAULT_ARRAY_COMPRESSION",
-    "DEFAULT_ARRAY_COPYING",
+    "DEFAULT_MEMORY_MAPPING",
     "DEFAULT_ARRAY_INLINE_THRESHOLD",
     "_PROTECTED_KEYS",
 ]
+
+
+def asdf_open_memory_mapping_kwarg(memmap: bool) -> dict:
+    if tuple(int(part) for part in importlib.metadata.version("asdf").split(".")) >= (3, 1, 0):
+        return {"memmap": memmap}
+    else :
+        return {"copy_arrays": not memmap}
 
 
 @contextmanager
@@ -66,8 +74,8 @@ def reset_file_position(fh: SupportsFileReadWrite):
 DEFAULT_ARRAY_COMPRESSION = "input"
 """All arrays will be compressed using this algorithm, if not specified by user."""
 
-DEFAULT_ARRAY_COPYING = True
-"""Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
+DEFAULT_MEMORY_MAPPING = False
+"""Stored Arrays will be memory-mapped, or not. If True, use memory mapping."""
 
 DEFAULT_ARRAY_INLINE_THRESHOLD = 10
 """Arrays with less or equal elements will be inlined (stored as string, not binary)."""
@@ -148,8 +156,8 @@ class WeldxFile(_ProtectedViewDict):
         - ``lz4``: Use lz4 compression.
         - ``input``: Use the same compression as in the file read.
           If there is no prior file, acts as None.
-    copy_arrays :
-        When `False`, when reading files, attempt to memory map (memmap) underlying data
+    memmap :
+        When `True`, when reading files, attempt to memory map (memmap) underlying data
         arrays when possible. This avoids blowing the memory when working with very
         large datasets.
     array_inline_threshold :
@@ -219,19 +227,19 @@ class WeldxFile(_ProtectedViewDict):
         ) = None,
         software_history_entry: Mapping = None,
         compression: str = DEFAULT_ARRAY_COMPRESSION,
-        copy_arrays: bool = DEFAULT_ARRAY_COPYING,
+        memmap: bool = DEFAULT_MEMORY_MAPPING,
         array_inline_threshold: int = DEFAULT_ARRAY_INLINE_THRESHOLD,
     ):
         if write_kwargs is None:
             write_kwargs = dict(all_array_compression=compression)
 
         if asdffile_kwargs is None:
-            asdffile_kwargs = dict(copy_arrays=copy_arrays)
+            asdffile_kwargs = asdf_open_memory_mapping_kwarg(memmap=memmap)
 
         # this parameter is now (asdf-2.8) a asdf.config parameter, so we store it here.
         self._array_inline_threshold = array_inline_threshold
 
-        # TODO: ensure no mismatching args for compression and copy_arrays.
+        # TODO: ensure no mismatching args for compression and memmap.
         self._write_kwargs = write_kwargs
         self._asdffile_kwargs = asdffile_kwargs
 

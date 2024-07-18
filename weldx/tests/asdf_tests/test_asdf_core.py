@@ -121,15 +121,15 @@ def get_xarray_example_data_array():
     return dax
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize("select", [{}, {"d4": "z"}])
-def test_xarray_data_array(copy_arrays, lazy_load, select):
+def test_xarray_data_array(memmap, lazy_load, select):
     """Test ASDF read/write of xarray.DataArray."""
     dax = get_xarray_example_data_array().sel(**select)
     tree = {"dax": dax}
     with write_read_buffer_context(
-        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        tree, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         dax_file = data["dax"]
         assert dax.identical(dax_file)
@@ -172,13 +172,13 @@ def get_xarray_example_dataset():
     return dsx
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
-def test_xarray_dataset(copy_arrays, lazy_load):
+def test_xarray_dataset(memmap, lazy_load):
     dsx = get_xarray_example_dataset()
     tree = {"dsx": dsx}
     with write_read_buffer_context(
-        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        tree, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         dsx_file = data["dsx"]
         assert dsx.identical(dsx_file)
@@ -228,25 +228,25 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
 
 @pytest.mark.parametrize("time_dep_orientation", [False, True])
 @pytest.mark.parametrize("time_dep_coordinates", [False, True])
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 def test_local_coordinate_system(
-    time_dep_orientation, time_dep_coordinates, copy_arrays, lazy_load
+    time_dep_orientation, time_dep_coordinates, memmap, lazy_load
 ):
     """Test (de)serialization of LocalCoordinateSystem in ASDF."""
     lcs = get_local_coordinate_system(time_dep_orientation, time_dep_coordinates)
     with write_read_buffer_context(
-        {"lcs": lcs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        {"lcs": lcs}, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         assert data["lcs"] == lcs
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize("has_ref_time", [True, False])
 @pytest.mark.parametrize("has_tdp_orientation", [True, False])
 def test_local_coordinate_system_coords_timeseries(
-    copy_arrays, lazy_load, has_ref_time, has_tdp_orientation
+    memmap, lazy_load, has_ref_time, has_tdp_orientation
 ):
     """Test reading and writing a LCS with a `TimeSeries` as coordinates to asdf."""
     # create inputs to lcs __init__
@@ -270,7 +270,7 @@ def test_local_coordinate_system_coords_timeseries(
 
     # round trip and compare
     with write_read_buffer_context(
-        {"lcs": lcs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        {"lcs": lcs}, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         lcs_buffer = data["lcs"]
         assert lcs_buffer == lcs
@@ -337,13 +337,13 @@ def get_example_coordinate_system_manager():
     return csm
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
-def test_coordinate_system_manager(copy_arrays, lazy_load):
+def test_coordinate_system_manager(memmap, lazy_load):
     csm = get_example_coordinate_system_manager()
     tree = {"cs_hierarchy": csm}
     with write_read_buffer_context(
-        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        tree, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         csm_file = data["cs_hierarchy"]
         assert csm == csm_file
@@ -400,24 +400,24 @@ def get_coordinate_system_manager_with_subsystems(nested: bool):
     return csm_global
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize("nested", [True, False])
-def test_coordinate_system_manager_with_subsystems(copy_arrays, lazy_load, nested):
+def test_coordinate_system_manager_with_subsystems(memmap, lazy_load, nested):
     csm = get_coordinate_system_manager_with_subsystems(nested)
     tree = {"cs_hierarchy": csm}
     with write_read_buffer_context(
-        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        tree, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         csm_file = data["cs_hierarchy"]
         assert csm == csm_file
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize("csm_time_ref", [None, "2000-03-16"])
 def test_coordinate_system_manager_time_dependencies(
-    copy_arrays, lazy_load, csm_time_ref
+    memmap, lazy_load, csm_time_ref
 ):
     """Test serialization of time components from CSM and its attached LCS."""
     lcs_tdp_1_time_ref = None
@@ -449,15 +449,15 @@ def test_coordinate_system_manager_time_dependencies(
 
     tree = {"cs_hierarchy": csm_root}
     with write_read_buffer_context(
-        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        tree, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         csm_file = data["cs_hierarchy"]
         assert csm_root == csm_file
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
-def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
+def test_coordinate_system_manager_with_data(memmap, lazy_load):
     """Test if data attached to a CSM is stored and read correctly."""
     csm = tf.CoordinateSystemManager("root", "csm")
     csm.create_cs("cs_1", "root", coordinates=Q_([1, 1, 1], "mm"))
@@ -483,7 +483,7 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
 
     tree = {"csm": csm}
     with write_read_buffer_context(
-        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        tree, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as buffer:
         csm_buffer = buffer["csm"]
 
@@ -498,7 +498,7 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
 # --------------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize(
     "ts",
@@ -518,9 +518,9 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
         ),
     ],
 )
-def test_time_series(ts, copy_arrays, lazy_load):
+def test_time_series(ts, memmap, lazy_load):
     with write_read_buffer_context(
-        {"ts": ts}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        {"ts": ts}, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         ts_file = data["ts"]
         if isinstance(ts.data, ME):
@@ -536,7 +536,7 @@ def test_time_series(ts, copy_arrays, lazy_load):
 # --------------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize(
     "coords, interpolation",
@@ -546,21 +546,21 @@ def test_time_series(ts, copy_arrays, lazy_load):
         (dict(time=Q_([1, 2, 3], "s"), space=Q_([4, 5, 6, 7], "m")), "step"),
     ],
 )
-def test_generic_series_discrete(coords, interpolation, copy_arrays, lazy_load):
+def test_generic_series_discrete(coords, interpolation, memmap, lazy_load):
     shape = tuple(len(v) for v in coords.values())
     data = Q_(np.ones(shape), "m")
 
     gs = GenericSeries(data, coords=coords, interpolation=interpolation)
 
     with write_read_buffer_context(
-        {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        {"gs": gs}, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         gs_file = data["gs"]
 
         assert gs == gs_file
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize(
     "expr, params, units, dims",
@@ -581,11 +581,11 @@ def test_generic_series_discrete(coords, interpolation, copy_arrays, lazy_load):
         ),
     ],
 )
-def test_generic_series_expression(expr, params, units, dims, copy_arrays, lazy_load):
+def test_generic_series_expression(expr, params, units, dims, memmap, lazy_load):
     gs = GenericSeries(expr, parameters=params, units=units, dims=dims)
 
     with write_read_buffer_context(
-        {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        {"gs": gs}, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         gs_file = data["gs"]
 
@@ -746,16 +746,16 @@ class TestExternalFile:
     # test_asdf_serialization ----------------------------------------------------------
 
     @staticmethod
-    @pytest.mark.parametrize("copy_arrays", [True, False])
+    @pytest.mark.parametrize("memmap", [True, False])
     @pytest.mark.parametrize("lazy_load", [True, False])
     @pytest.mark.parametrize("store_content", [True, False])
-    def test_asdf_serialization(copy_arrays, lazy_load, store_content):
+    def test_asdf_serialization(memmap, lazy_load, store_content):
         """Test the asdf serialization of the `ExternalFile` class.
 
         Parameters
         ----------
-        copy_arrays : bool
-            If `False`, arrays are accessed via memory mapping whenever possible while
+        memmap : bool
+            If `True`, arrays are accessed via memory mapping whenever possible while
             reading them.
         lazy_load : bool
             If `True`, items from the asdf file are not loaded until accessed.
@@ -769,7 +769,7 @@ class TestExternalFile:
         )
         tree = {"file": ef}
         with write_read_buffer_context(
-            tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+            tree, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
         ) as data:
             ef_file = data["file"]
 
@@ -801,10 +801,10 @@ class TestExternalFile:
 
 class TestPointCloud:
     @staticmethod
-    @pytest.mark.parametrize("copy_arrays", [True, False])
+    @pytest.mark.parametrize("memmap", [True, False])
     @pytest.mark.parametrize("lazy_load", [True, False])
     @pytest.mark.parametrize("reshape", [True, False])
-    def test_asdf_serialization(copy_arrays, lazy_load, reshape):
+    def test_asdf_serialization(memmap, lazy_load, reshape):
         time = None
         coordinates = [
             [0.0, 0.0, 0.0],
@@ -822,7 +822,7 @@ class TestPointCloud:
         pc = SpatialData(coordinates=coordinates, triangles=triangles, time=time)
         tree = {"point_cloud": pc}
         with write_read_buffer_context(
-            tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+            tree, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
         ) as data:
             pc_file = data["point_cloud"]
 
