@@ -416,9 +416,7 @@ def test_coordinate_system_manager_with_subsystems(memmap, lazy_load, nested):
 @pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize("csm_time_ref", [None, "2000-03-16"])
-def test_coordinate_system_manager_time_dependencies(
-    memmap, lazy_load, csm_time_ref
-):
+def test_coordinate_system_manager_time_dependencies(memmap, lazy_load, csm_time_ref):
     """Test serialization of time components from CSM and its attached LCS."""
     lcs_tdp_1_time_ref = None
     if csm_time_ref is None:
