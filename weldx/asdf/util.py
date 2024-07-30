@@ -162,8 +162,8 @@ def read_buffer_context(
         open_kwargs = {"memmap": False, "lazy_load": False}
 
     if "memmap" in open_kwargs and tuple(
-        int(part) for part in importlib.metadata.version("asdf").split(".")
-    ) < (3, 1, 0):
+        importlib.metadata.version("asdf").split(".")
+    ) < ("3", "1", "0"):
         open_kwargs["copy_arrays"] = not open_kwargs["memmap"]
         del open_kwargs["memmap"]
 
