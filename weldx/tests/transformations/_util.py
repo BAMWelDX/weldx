@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-import importlib.metadata
 from xarray import DataArray
 
 import weldx.transformations as tf
@@ -78,9 +77,7 @@ def check_coordinate_system(
         lcs.orientation, orientation_expected, positive_orientation_expected
     )
 
-    atol_unit = 1.0
-    if tuple(int(part) for part in importlib.metadata.version("pint").split(".")) >= (0, 21):
-        atol_unit = coordinates_expected.u
+    atol_unit = coordinates_expected.u
 
     assert np.allclose(
         lcs.coordinates.data, coordinates_expected, atol=1e-9 * atol_unit

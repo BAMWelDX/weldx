@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import importlib.metadata
 from pathlib import Path
 
 import asdf
-import importlib.metadata
 import yaml
 from asdf.config import ResourceMappingProxy
 from asdf.versioning import AsdfVersion, split_tag_version

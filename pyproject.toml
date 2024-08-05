@@ -51,7 +51,7 @@ dependencies = [
   "networkx>=2.8.2",
   "numpy>=1.20,<2",
   "pandas>=1.5",
-  "pint>=0.18",
+  "pint>=0.21",
   "pint-xarray>=0.3",
   "psutil",
   "scipy>=1.6.2",
