@@ -16,7 +16,6 @@ WELDX_PATH = _Path(__file__).parent.resolve()
 
 WELDX_UNIT_REGISTRY = pint.UnitRegistry(
     preprocessors=[
-        lambda string: string.replace("%", "percent"),  # allow %-sign
         lambda string: string.replace("Δ°", "delta_deg"),  # parse Δ° for temperature
     ],
     force_ndarray_like=True,

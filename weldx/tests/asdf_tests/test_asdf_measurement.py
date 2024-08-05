@@ -80,17 +80,17 @@ def measurement_chain_with_equipment() -> MeasurementChain:
     return mc
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("memmap", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize(
     "measurement_chain",
     [measurement_chain_without_equipment(), measurement_chain_with_equipment()],
 )
-def test_measurement_chain(copy_arrays, lazy_load, measurement_chain):
+def test_measurement_chain(memmap, lazy_load, measurement_chain):
     """Test the asdf serialization of the measurement chain."""
     tree = {"m_chain": measurement_chain}
     with write_read_buffer_context(
-        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        tree, open_kwargs={"memmap": memmap, "lazy_load": lazy_load}
     ) as data:
         mc_file = data["m_chain"]
         assert measurement_chain == mc_file
