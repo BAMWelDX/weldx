@@ -1,23 +1,30 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=64",
+  "setuptools-scm[toml]>=6.2",
+  "wheel",
+]
+
 [project]
 name = "weldx"
 description = "Python API for the WelDX file format and standard"
 readme = "README.md"
 keywords = [
-  "bam", # TODO: add more keywords here! think of them as in a journal article.
+  "bam",     # TODO: add more keywords here! think of them as in a journal article.
   "welding",
   "weldx",
 ]
-license = {file = "LICENSE", name="BSD License"}
+license = { file = "LICENSE", name = "BSD License" }
 authors = [
-    {name="Çağtay Fabry", email="cagtay.fabry@bam.de"},
-    {name="Volker Hirthammer", email="volker.hirthammer@bam.de"},
-    {name="Martin K. Scherer", email="martin.scherer@bam.de"},
+  { name = "Çağtay Fabry", email = "cagtay.fabry@bam.de" },
+  { name = "Volker Hirthammer", email = "volker.hirthammer@bam.de" },
+  { name = "Martin K. Scherer", email = "martin.scherer@bam.de" },
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.12"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Education",
-  "Intended Audience :: Science/Research",
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: BSD License",
   "Natural Language :: English",
@@ -27,8 +34,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Topic :: Scientific/Engineering :: Physics", # TODO: add more topics here!
+  "Topic :: Scientific/Engineering :: Physics",  # TODO: add more topics here!
 ]
 dynamic = [
   # see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
@@ -40,126 +46,63 @@ dependencies = [
   "boltons",
   "bottleneck>=1.3.3",
   "fs",
-  "IPython",
+  "ipython",
   "meshio",
   "networkx>=2.8.2",
-  "numpy>=1.20",
+  "numpy>=1.20,<2",
   "pandas>=1.5",
-  "pint>=0.18",
+  "pint>=0.21",
   "pint-xarray>=0.3",
   "psutil",
   "scipy>=1.6.2",
   "sympy>=1.6",
   "xarray>=2022.9",
 ]
-[project.optional-dependencies]
-media = [
+optional-dependencies.docs = [
+  "docutils>=0.19",
+  "numpydoc>=0.5",
+  "pydata-sphinx-theme<0.15",             # parallel-write-unsafe
+  "sphinx>=4.1.1,==7.2",
+  "sphinx-autodoc-typehints>=1.21.8,==2",
+  "sphinx-copybutton==0.5",
+  "typing-extensions",
+  "urllib3<2",
+]
+optional-dependencies.media = [
   "av",
   "dask-image",
   "pims",
-  "tifffile", # required by dask-image, but not listed in their requirements
+  "tifffile",   # required by dask-image, but not listed in their requirements
 ]
-test = [
+optional-dependencies.test = [
   "nbval",
   "pytest>=6",
   "pytest-cov",
   "pytest-xdist",
 ]
-vis = [
-  "weldx_widgets>=0.2",
+optional-dependencies.vis = [
+  "weldx-widgets>=0.2.3",
 ]
-[project.urls]
-bug_tracker = "https://github.com/BAMweldx/weldx/issues"
-changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"
-documentation = "https://weldx.readthedocs.io"
-repository = "https://github.com/BAMweldx/weldx"
-[project.scripts]
-welding_schema = "weldx.asdf.cli.welding_schema:main"
-[project.entry-points."asdf.extensions"]
-weldx = "weldx.asdf.extension:get_extensions"
-[project.entry-points."asdf.resource_mappings"]
-weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
-
-[build-system]
-build-backend = "setuptools.build_meta"
-requires = [
-  "setuptools>=64",
-  "setuptools_scm[toml]>=6.2",
-  "wheel",
-]
+urls.bug_tracker = "https://github.com/BAMweldx/weldx/issues"
+urls.changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"
+urls.documentation = "https://weldx.readthedocs.io"
+urls.repository = "https://github.com/BAMweldx/weldx"
+scripts.welding_schema = "weldx.asdf.cli.welding_schema:main"
+entry-points."asdf.extensions".weldx = "weldx.asdf.extension:get_extensions"
+entry-points."asdf.resource_mappings".weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = [
+  ".",
+]
 
 [tool.setuptools_scm]
 write_to = "weldx/_version.py"
 write_to_template = '__version__ = "{version}"'
 
-[tool.ruff]
-target-version = "py39"  # designated Python version
-line-length = 88
-exclude = [
-    "__init__.py",
-    "doc/src/conf.py",
-]
-
-[tool.ruff.lint]
-# TODO: should be the following list, but Ruff does not yet impl all of them.
-#    W503,W504
-#    E203
-#    C408
-ignore = [
-    "C408",
-    #"E203",
-    "E402",
-    #"W503",
-    #"W504",
-    "D203", "D211", "D213",
-    "UP006", "UP007", # see ruff GH#4427
-]
-select = [
-    "B",  # flake8-bugbear
-    "C",  # flake8-comprehensions
-    #"D", # note: all relevant D's will be set by setting pydocstyle.convention=numpy!
-    "E",  # pycodestyles
-    "F",  # pyflakes
-    "W",  # pycodestyle warnings
-    "UP", # pyupgrade
-    "T2",  # flake8-print
-    "I001",  # isort
-    "ICN", # import conventions, e.g. import numpy as np
-    #"B950",  # not yet implemented by Ruff.
-    "RUF100", # ensure 'noqa' declarations are still valid.
-]
-
-# Allow pydocstyle violations in certain areas.
-per-file-ignores."**/{tests,tags,asdf,devtools}/**" = ["D"]
-per-file-ignores."conftest.py" = ["D"]
-per-file-ignores."doc/src/tutorials/*" = ["D"]
-per-file-ignores."doc/src/conf.py" = ["E501",  # ignore long lines.
-    "RUF100",  # do no check if 'noqa' is needed (circular import workaround)
-]
-# Allow prints in certain areas.
-per-file-ignores."**/{cli,tests,tutorials,devtools}/**/*{.py,ipynb}" = ["T2"]
-
-external = ["B950"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "numpy"
-
-[tool.ruff.lint.mccabe]
-max-complexity = 15  # max branches inside a function.
-
-[tool.ruff.lint.isort]
-known-first-party = ["weldx"]
-required-imports = ["from __future__ import annotations"]
-
-[tool.ruff.lint.flake8-import-conventions]
-extend-aliases = {xarray = "xr"}
-
 [tool.nbqa.addopts]
 ruff = [
-    "--extend-ignore=B018"
+  "--extend-ignore=B018",
 ]
 
 [tool.pytest.ini_options]
@@ -168,37 +111,39 @@ addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:ski
 testpaths = "weldx"
 # custom test markers, see https://docs.pytest.org/en/latest/example/markers.html#mark-examples
 markers = "slow: marks tests as slow to run (skipped by default, enable with --runslow option)"
-asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn't we just use the entry points to resolve this?
+asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"                                           # TODO: couldn't we just use the entry points to resolve this?
 #asdf_schema_tests_enabled = true
 #asdf_schema_skip_tests =
 #    weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml
 norecursedirs = [
-    "doc",
-    ".ipynb_checkpoints",
+  "doc",
+  ".ipynb_checkpoints",
 ]
 filterwarnings = [
-    "ignore::DeprecationWarning:traittypes.*:",
-    "ignore:Passing method to :FutureWarning:xarray.*:",
-    "error::pint.UnitStrippedWarning",
-    #"error::FutureWarning",  # todo: we want to enable this, as it notifies us about upcoming failures due to upstream changes.
+  "ignore::DeprecationWarning:traittypes.*:",
+  "ignore:Passing method to :FutureWarning:xarray.*:",
+  "error::pint.UnitStrippedWarning",
+  #"error::FutureWarning",  # todo: we want to enable this, as it notifies us about upcoming failures due to upstream changes.
 ]
 
 [tool.coverage.run]
-source = ["weldx"]
+source = [
+  "weldx",
+]
 
 [tool.coverage.report]
 omit = [
-    "weldx/_version.py",
-    "weldx/tests/*",
+  "weldx/_version.py",
+  "weldx/tests/*",
 ]
 exclude_lines = [
-# Have to re-enable the standard pragma
-    "pragma: no cover",
+  # Have to re-enable the standard pragma
+  "pragma: no cover",
 
-# ignore class __repr__-like functions:
-    "def __repr__",
-    "def __str__",
-    "def _ipython_display_",
+  # ignore class __repr__-like functions:
+  "def __repr__",
+  "def __str__",
+  "def _ipython_display_",
 ]
 
 [tool.mypy]
@@ -215,13 +160,20 @@ sqlite_cache = true
 
 # MyPy per-module options:
 [[tool.mypy.overrides]]
-module = ["weldx.asdf.*", "weldx.tags.*", "weldx.tests.*", "weldx.welding.groove.*",  "weldx.geometry.*" ]
+module = [
+  "weldx.asdf.*",
+  "weldx.tags.*",
+  "weldx.tests.*",
+  "weldx.welding.groove.*",
+  "weldx.geometry.*",
+]
 ignore_errors = true
 
 # this is a workaround for an xarray related mypy bug
 # see https://github.com/python/mypy/pull/9495
 # and https://github.com/space-physics/msise00/commit/8b59a9383dd6fcc54b7dac74eb95a350308d7b62
 # TODO: is this still mandatory?
+
 [[tool.mypy.overrides]]
 module = "xarray"
 follow_imports = "skip"

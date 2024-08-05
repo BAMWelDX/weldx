@@ -47,14 +47,14 @@ jobs:
           fetch-depth: 0 # Fetch all history for all tags and branches
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.8.1
+        uses: mamba-org/setup-micromamba@v1.9.0
         with:
           environment-file: ./doc/rtd_environment.yml
           environment-name: rtd
           init-shell: >-
             bash
             powershell
-          cache-environment: true
+          cache-environment: false
 
       - name: activate build env
         run: micromamba activate rtd

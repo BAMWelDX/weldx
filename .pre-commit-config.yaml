@@ -12,7 +12,7 @@ exclude: '.*.weldx$|.*.wx$|.*.asdf$'
 repos:
   # ----- general formatting -----
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
@@ -28,8 +28,8 @@ repos:
           - mdformat-black
           - mdformat-config
   # ----- Python formatting -----
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.3.5
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.6
     hooks:
     # Run ruff linter.
     - id: ruff
@@ -39,16 +39,16 @@ repos:
     # Run ruff formatter.
     - id: ruff-format
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: 1.7.0
+    rev: 2.2.1
     hooks:
     - id: pyproject-fmt
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.16
+    rev: v0.18
     hooks:
       - id: validate-pyproject
   # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.8.5
+    rev: 1.8.7
     hooks:
       - id: nbqa-black
       - id: nbqa-ruff  # ruff handles isort
@@ -63,7 +63,7 @@ repos:
           - --remove-kernel-metadata
   # ----- spellchecking -----
   - repo: https://github.com/codespell-project/codespell/
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
       - id: codespell
         exclude: doc/src/legal-notice.md

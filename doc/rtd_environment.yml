@@ -5,7 +5,7 @@ dependencies:
   - python=3.10
   - setuptools_scm
   # weldx base dependencies
-  - numpy>=1.18
+  - numpy>=1.18,<2
   - pandas>=1.0
   - xarray>=0.15
   - pint>=0.11
@@ -21,16 +21,16 @@ dependencies:
   - weldx_widgets>=0.2.1
   # documentation
   - docutils>=0.19
-  - sphinx>=4.1.1
+  - sphinx>=4.1.1,=7.2
   - urllib3<2
   #- jinja2=3.0
-  - sphinx-copybutton
+  - sphinx-copybutton=0.5
   - pydata-sphinx-theme<0.15 # parallel-write-unsafe
   - numpydoc>=0.5
-  - sphinx-autodoc-typehints>=1.21.8
+  - sphinx-autodoc-typehints>=1.21.8,=2.0
   - typing_extensions
   # pip packages
   - pip
   - pip:
-    - ../
-    - ./json_mime_render_plugin/
+    - weldx @ file:/../..//
+    - json_mime_render_plugin @ file:/..//json_mime_render_plugin

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+from _warnings import warn
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
-from _warnings import warn
 
 from weldx import Q_
 from weldx import util as ut

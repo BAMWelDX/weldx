@@ -39,15 +39,15 @@ jobs:
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
-      - uses: CagtayFabry/pydeps2env@main
+      - uses: CagtayFabry/pydeps2env@v1.1.0
         with:
-          file: 'pyproject.toml'
+          files: 'pyproject.toml'
           channels: 'conda-forge defaults'
           extras: 'test vis media'
-          setup_requires: 'include'
+          build_system: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.8.1
+        uses: mamba-org/setup-micromamba@v1.9.0
         with:
           environment-file: ./environment.yml
           environment-name: weldx
@@ -120,7 +120,7 @@ jobs:
 
       - name: codecov.io
         if: matrix.py == '3.10'
-        uses: codecov/codecov-action@v4.3.0
+        uses: codecov/codecov-action@v4.5.0
 
   compat:
     name: pytest
@@ -139,15 +139,15 @@ jobs:
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
-      - uses: CagtayFabry/pydeps2env@main
+      - uses: CagtayFabry/pydeps2env@v1.1.0
         with:
-          file: 'pyproject.toml'
+          files: 'pyproject.toml'
           channels: 'conda-forge defaults'
           extras: 'test vis media'
-          setup_requires: 'include'
+          build_system: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.8.1
+        uses: mamba-org/setup-micromamba@v1.9.0
         with:
           environment-file: ./environment.yml
           environment-name: weldx

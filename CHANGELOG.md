@@ -1,6 +1,19 @@
 # Release Notes
 
-## 0.6.8 (unreleased)
+## 0.6.9 (unreleased)
+
+### Fixes
+
+- rename (fix typo) argument to `lcs_child_in_parent` in `CoordinateSystemManager.add_cs`  \[{pull}`936`\].
+- replace usages of `pkg_resources` with `importlib.metadata` \[{pull}`941`\].
+- replace usages of `copy_arrays` with `memmap` for `asdf>=3.1.0` \[{pull}`940`\].
+
+### Dependencies
+
+- pin `weldx-widgets>=0.2.3` for viz \[{pull}`939`\].
+- pin `pint>=0.21` \[{pull}`941`\].
+
+## 0.6.8 (07.06.2024)
 
 ### Changes
 
@@ -9,6 +22,7 @@
 ### Dependencies
 
 - unpin nbval testing dependency.
+- pin `python<3.12` \[{pull}`933`\].
 
 ## 0.6.7 (2023.08.24)
 
