@@ -177,7 +177,7 @@ class Config:
     def load_installed_standards():
         """Load all standards that are installed to the active virtual environment."""
         if sys.version_info < (3, 10):
-            entry_points = importlib.metadata.entry_points()["weldx.standard"]
+            entry_points = importlib.metadata.entry_points().get("weldx.standard", [])
         else:
             entry_points = importlib.metadata.entry_points().select(
                 group="weldx.standard"
