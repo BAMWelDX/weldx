@@ -58,6 +58,16 @@ dependencies = [
   "sympy>=1.6",
   "xarray>=2022.9",
 ]
+optional-dependencies.docs = [
+  "docutils>=0.19",
+  "numpydoc>=0.5",
+  "pydata-sphinx-theme<0.15",             # parallel-write-unsafe
+  "sphinx>=4.1.1,==7.2",
+  "sphinx-autodoc-typehints>=1.21.8,==2",
+  "sphinx-copybutton==0.5",
+  "typing-extensions",
+  "urllib3<2",
+]
 optional-dependencies.media = [
   "av",
   "dask-image",
