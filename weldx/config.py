@@ -175,7 +175,9 @@ class Config:
     @staticmethod
     def load_installed_standards():
         """Load all standards that are installed to the active virtual environment."""
-        for entry_point in importlib.metadata.entry_points()["weldx.standard"]:
+        for entry_point in importlib.metadata.entry_points().select(
+            group="weldx.standard"
+        ):
             standards = entry_point.load()()
             if not isinstance(standards, list):
                 standards = [standards]
