@@ -32,5 +32,5 @@ dependencies:
   # pip packages
   - pip
   - pip:
-    - ../
-    - ./json_mime_render_plugin/
+    - weldx @ file:/../..//
+    - json_mime_render_plugin @ file:/..//json_mime_render_plugin

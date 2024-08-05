@@ -51,12 +51,22 @@ dependencies = [
   "networkx>=2.8.2",
   "numpy>=1.20,<2",
   "pandas>=1.5",
-  "pint>=0.18",
+  "pint>=0.21",
   "pint-xarray>=0.3",
   "psutil",
   "scipy>=1.6.2",
   "sympy>=1.6",
   "xarray>=2022.9",
+]
+optional-dependencies.docs = [
+  "docutils>=0.19",
+  "numpydoc>=0.5",
+  "pydata-sphinx-theme<0.15",             # parallel-write-unsafe
+  "sphinx>=4.1.1,==7.2",
+  "sphinx-autodoc-typehints>=1.21.8,==2",
+  "sphinx-copybutton==0.5",
+  "typing-extensions",
+  "urllib3<2",
 ]
 optional-dependencies.media = [
   "av",

@@ -4,7 +4,6 @@ from typing import Any
 
 import numpy as np
 import pint
-from pkg_resources import get_distribution
 
 from weldx.constants import Q_
 from weldx.geometry import _vector_is_close as vector_is_close
@@ -130,7 +129,7 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
         return False
 
     atol_unit = 1.0
-    if isinstance(mat_b, pint.Quantity) and get_distribution("pint").version >= "0.21":
+    if isinstance(mat_b, pint.Quantity):
         atol_unit = mat_b.u
 
     return np.all(np.isclose(mat_a, mat_b, atol=abs_tol * atol_unit)).__bool__()
