@@ -140,7 +140,7 @@ jobs:
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
-      - uses: CagtayFabry/pydeps2env@v1.2.0
+      - uses: marscher/pydeps2env@999
         with:
           files: 'pyproject.toml'
           channels: 'conda-forge defaults'
@@ -148,7 +148,7 @@ jobs:
           build_system: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v1.9.0
+        uses: mamba-org/setup-micromamba@v2
         with:
           environment-file: ./environment.yml
           environment-name: weldx
