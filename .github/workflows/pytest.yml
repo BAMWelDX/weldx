@@ -55,7 +55,8 @@ jobs:
           init-shell: >-
             bash
             powershell
-          cache-environment: true
+          # persist on the same day.
+          cache-environment-key: environment-${{ steps.date.outputs.date }}
           create-args: >-
             python=${{ matrix.py }}
             wheel
@@ -140,7 +141,7 @@ jobs:
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
-      - uses: marscher/pydeps2env@999
+      - uses: marscher/pydeps2env@v999
         with:
           files: 'pyproject.toml'
           channels: 'conda-forge defaults'
@@ -155,7 +156,8 @@ jobs:
           init-shell: >-
             bash
             powershell
-          cache-environment: true
+          # persist on the same day.
+          cache-environment-key: environment-${{ steps.date.outputs.date }}
           create-args: >-
             python=${{ matrix.py }}
             wheel
