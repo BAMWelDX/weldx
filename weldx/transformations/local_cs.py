@@ -574,8 +574,12 @@ class LocalCoordinateSystem(TimeDependent):
             Local coordinate system
 
         """
-        orientation = transformation_matrix[:, :3, :3]
-        coordinates = Q_(transformation_matrix[:, :3, 3], translation_unit)
+        if transformation_matrix.ndim == 3:
+            orientation = transformation_matrix[:, :3, :3]
+            coordinates = Q_(transformation_matrix[:, :3, 3], translation_unit)
+        else:
+            orientation = transformation_matrix[:3, :3]
+            coordinates = Q_(transformation_matrix[:3, 3], translation_unit)
         return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @property
