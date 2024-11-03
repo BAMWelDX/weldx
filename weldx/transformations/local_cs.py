@@ -728,6 +728,32 @@ class LocalCoordinateSystem(TimeDependent):
         """
         return Rot.from_matrix(self.orientation.values)
 
+    def as_homogeneous_matrix(self, translation_unit: QuantityLike) -> np.ndarray:
+        """Get a homogeneous transformation matrix from the coordinate system
+        orientation.
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array representing the homogeneous transformation matrix.
+
+        """
+
+        if self.is_time_dependent:
+            time_dim = self.time.shape[0]
+        else:
+            time_dim = 1
+
+        rotation = np.resize(self.orientation.data, (time_dim, 3, 3))
+        translation = np.resize(
+            self.coordinates.data.to(translation_unit).m, (time_dim, 3)
+        )
+        homogeneous_matrix = np.zeros((time_dim, 4, 4))
+        homogeneous_matrix[:, :3, :3] = rotation
+        homogeneous_matrix[:, :3, 3] = translation
+
+        return homogeneous_matrix
+
     def _interp_time_orientation(self, time: Time) -> xr.DataArray:
         """Interpolate the orientation in time."""
         if "time" not in self.orientation.dims:  # don't interpolate static
