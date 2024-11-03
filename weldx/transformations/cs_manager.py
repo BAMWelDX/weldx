@@ -17,10 +17,11 @@ from weldx.core import TimeSeries
 from weldx.exceptions import WeldxDeprecationWarning, WeldxException
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
+from weldx.types import QuantityLike
 from weldx.util import check_matplotlib_available, dataclass_nested_eq
 
 from .local_cs import LocalCoordinateSystem
-from .types import types_coordinates, types_orientation
+from .types import types_coordinates, types_homogeneous, types_orientation
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
@@ -825,6 +826,51 @@ class CoordinateSystemManager:
         """
         lcs = LocalCoordinateSystem.from_axis_vectors(
             x, y, z, coordinates, time, time_ref
+        )
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lcs_child_in_parent
+        )
+
+    def create_cs_from_homogenous_transformation(
+        self,
+        coordinate_system_name: str,
+        reference_system_name: str,
+        transformation_matrix: types_homogeneous,
+        translation_unit: QuantityLike,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
+        lcs_child_in_parent: bool = True,
+    ):
+        """Create a coordinate system from a homogeneous transformation matrix and add
+        it to the coordinate system manager.
+
+        This function uses the `LocalCoordinateSystem.from_homogeneous_transformation`
+        method of the `LocalCoordinateSystem` class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        transformation_matrix :
+            Describes the homogeneous transformation matrix that includes the rotation
+            and the translation (coordinates).
+        translation_unit :
+            Unit describing the value of the translation. Necessary, because the
+            homogeneous transformation matrix is unitless.
+        time :
+            Time data for time dependent coordinate systems.
+        time_ref :
+            Reference time for time dependent coordinate systems
+        lcs_child_in_parent :
+            If set to `True`, the passed `LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
+            how the parent system is positioned in its new child system.
+
+        """
+        lcs = LocalCoordinateSystem.from_homogenous_transformation(
+            transformation_matrix, translation_unit, time, time_ref
         )
         self.add_cs(
             coordinate_system_name, reference_system_name, lcs, lcs_child_in_parent

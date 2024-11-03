@@ -18,8 +18,13 @@ from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
 from weldx.exceptions import WeldxException
 from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
-from weldx.transformations.types import types_coordinates, types_orientation
+from weldx.transformations.types import (
+    types_coordinates,
+    types_homogeneous,
+    types_orientation,
+)
 from weldx.transformations.util import normalize
+from weldx.types import QuantityLike
 
 __all__ = ("LocalCoordinateSystem",)
 
@@ -539,6 +544,39 @@ class LocalCoordinateSystem(TimeDependent):
         mat = np.array(mat)
         t_axes = (1, 0) if mat.ndim == 2 else (1, 2, 0)
         return cls(mat.transpose(t_axes), coordinates, time, time_ref)
+
+    @classmethod
+    def from_homogeneous_transformation(
+        cls,
+        transformation_matrix: types_homogeneous,
+        translation_unit: QuantityLike,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
+    ) -> LocalCoordinateSystem:
+        """Construct a local coordinate system from a homogeneous transformation matrix.
+
+        Parameters
+        ----------
+        transformation_matrix :
+            Describes the homogeneous transformation matrix that includes the rotation
+            and the translation (coordinates).
+        translation_unit :
+            Unit describing the value of the translation. Necessary, because the
+            homogeneous transformation matrix is unitless.
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Optional reference timestamp if ``time`` is a time delta.
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Local coordinate system
+
+        """
+        orientation = transformation_matrix[:, :3, :3]
+        coordinates = Q_(transformation_matrix[:, :3, 3], translation_unit)
+        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @property
     def orientation(self) -> xr.DataArray:
