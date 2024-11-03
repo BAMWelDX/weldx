@@ -748,11 +748,11 @@ class LocalCoordinateSystem(TimeDependent):
         translation = np.resize(
             self.coordinates.data.to(translation_unit).m, (time_dim, 3)
         )
-        homogeneous_matrix = np.zeros((time_dim, 4, 4))
+        homogeneous_matrix = np.resize(np.identity(4), (time_dim, 4, 4))
         homogeneous_matrix[:, :3, :3] = rotation
         homogeneous_matrix[:, :3, 3] = translation
 
-        return homogeneous_matrix
+        return np.squeeze(homogeneous_matrix)
 
     def _interp_time_orientation(self, time: Time) -> xr.DataArray:
         """Interpolate the orientation in time."""
