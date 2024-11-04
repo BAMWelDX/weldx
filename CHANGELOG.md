@@ -12,6 +12,7 @@
 
 - pin `weldx-widgets>=0.2.3` for viz \[{pull}`939`\].
 - pin `pint>=0.21` \[{pull}`941`\].
+- pin `python<3.13` \[{pull}`896`\].
 
 ## 0.6.8 (07.06.2024)
 
