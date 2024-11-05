@@ -9,7 +9,7 @@ from scipy.spatial.transform import Rotation
 
 types_coordinates = Union[xr.DataArray, npt.ArrayLike, pint.Quantity]
 types_orientation = Union[xr.DataArray, npt.ArrayLike, Rotation]
-types_homogeneous = Union[xr.DataArray, npt.ArrayLike]
+types_homogeneous = npt.ArrayLike
 
 
 __all__ = [
