@@ -736,6 +736,12 @@ class LocalCoordinateSystem(TimeDependent):
         """Get a homogeneous transformation matrix from the coordinate system
         orientation.
 
+        Parameters
+        ----------
+        translation_unit : QuantityLike
+            Unit the translation part of the homogeneous transformation matrix
+            should represent.
+
         Returns
         -------
         numpy.ndarray
