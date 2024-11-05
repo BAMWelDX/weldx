@@ -575,13 +575,15 @@ class LocalCoordinateSystem(TimeDependent):
 
         """
         if isinstance(transformation_matrix, xr.DataArray):
-            transformation_matrix = transformation_matrix.data
+            transformation_matrix = np.array(transformation_matrix.data)
         if transformation_matrix.ndim == 3:
             orientation = transformation_matrix[:, :3, :3]
-            coordinates = Q_(transformation_matrix[:, :3, 3], translation_unit)
+            coordinates = transformation_matrix[:, :3, 3]
+            coordinates = Q_(coordinates, translation_unit)
         else:
             orientation = transformation_matrix[:3, :3]
-            coordinates = Q_(transformation_matrix[:3, 3], translation_unit)
+            coordinates = transformation_matrix[:3, 3]
+            coordinates = Q_(coordinates, translation_unit)
         return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @property
