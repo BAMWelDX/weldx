@@ -55,7 +55,7 @@ jobs:
           environment-name: weldx
           cache-environment: true
           create-args: >-
-            python=3.9
+            python=3.10
             mypy
       - name: activate env
         run: micromamba activate weldx
