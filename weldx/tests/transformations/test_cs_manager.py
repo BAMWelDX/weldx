@@ -2751,7 +2751,7 @@ def test_coordinate_system_manager_create_coordinate_system():
 
     transformation_matrix = np.resize(np.identity(4), (4, 4, 4))
     transformation_matrix[:, :3, :3] = orientations
-    transformation_matrix[:, :3, :] = coords.m
+    transformation_matrix[:, :3, 3] = coords.m
 
     csm = tf.CoordinateSystemManager("root")
     lcs_default = tf.LocalCoordinateSystem()
