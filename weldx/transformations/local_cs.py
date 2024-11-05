@@ -574,6 +574,8 @@ class LocalCoordinateSystem(TimeDependent):
             Local coordinate system
 
         """
+        if isinstance(transformation_matrix, xr.DataArray):
+            transformation_matrix = transformation_matrix.data
         if transformation_matrix.ndim == 3:
             orientation = transformation_matrix[:, :3, :3]
             coordinates = Q_(transformation_matrix[:, :3, 3], translation_unit)
