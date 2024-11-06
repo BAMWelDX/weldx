@@ -2749,6 +2749,10 @@ def test_coordinate_system_manager_create_coordinate_system():
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = Q_([[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]], "mm")
 
+    transformation_matrix = np.resize(np.identity(4), (4, 4, 4))
+    transformation_matrix[:, :3, :3] = orientations
+    transformation_matrix[:, :3, 3] = coords.m
+
     csm = tf.CoordinateSystemManager("root")
     lcs_default = tf.LocalCoordinateSystem()
 
@@ -2784,6 +2788,18 @@ def test_coordinate_system_manager_create_coordinate_system():
     )
     check_coordinate_system(
         csm.get_cs("lcs_euler_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from homogeneous transformation ---------------------
+    csm.create_cs_from_homogeneous_transformation(
+        "lcs_homogeneous_default", "root", transformation_matrix, coords.u, time
+    )
+    check_coordinate_system(
+        csm.get_cs("lcs_homogeneous_default"),
         orientations,
         coords,
         True,

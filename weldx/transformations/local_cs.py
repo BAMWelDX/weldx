@@ -18,8 +18,13 @@ from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
 from weldx.exceptions import WeldxException
 from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
-from weldx.transformations.types import types_coordinates, types_orientation
+from weldx.transformations.types import (
+    types_coordinates,
+    types_homogeneous,
+    types_orientation,
+)
 from weldx.transformations.util import normalize
+from weldx.types import UnitLike
 
 __all__ = ("LocalCoordinateSystem",)
 
@@ -540,6 +545,45 @@ class LocalCoordinateSystem(TimeDependent):
         t_axes = (1, 0) if mat.ndim == 2 else (1, 2, 0)
         return cls(mat.transpose(t_axes), coordinates, time, time_ref)
 
+    @classmethod
+    def from_homogeneous_transformation(
+        cls,
+        transformation_matrix: types_homogeneous,
+        translation_unit: UnitLike,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
+    ) -> LocalCoordinateSystem:
+        """Construct a local coordinate system from a homogeneous transformation matrix.
+
+        Parameters
+        ----------
+        transformation_matrix :
+            Describes the homogeneous transformation matrix that includes the rotation
+            and the translation (coordinates).
+        translation_unit :
+            Unit describing the value of the translation. Necessary, because the
+            homogeneous transformation matrix is unitless.
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Optional reference timestamp if ``time`` is a time delta.
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Local coordinate system
+
+        """
+        if isinstance(transformation_matrix, xr.DataArray):
+            transformation_matrix = np.array(transformation_matrix.data)
+        if transformation_matrix.ndim == 3:
+            orientation = transformation_matrix[:, :3, :3]
+            coordinates = Q_(transformation_matrix[:, :3, 3], translation_unit)
+        else:
+            orientation = transformation_matrix[:3, :3]
+            coordinates = Q_(transformation_matrix[:3, 3], translation_unit)
+        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
+
     @property
     def orientation(self) -> xr.DataArray:
         """Get the coordinate systems orientation matrix.
@@ -689,6 +733,44 @@ class LocalCoordinateSystem(TimeDependent):
 
         """
         return Rot.from_matrix(self.orientation.values)
+
+    def as_homogeneous_matrix(self, translation_unit: UnitLike) -> np.ndarray:
+        """Get a homogeneous transformation matrix from the coordinate system
+        orientation.
+
+        Parameters
+        ----------
+        translation_unit : UnitLike
+            Unit the translation part of the homogeneous transformation matrix
+            should represent.
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array representing the homogeneous transformation matrix.
+
+        """
+
+        if self.is_time_dependent:
+            time_dim = self.time.shape[0]
+        else:
+            time_dim = 1
+
+        rotation = np.resize(self.orientation.data, (time_dim, 3, 3))
+        coordinates = self.coordinates
+        if not isinstance(coordinates, TimeSeries):
+            translation = np.resize(
+                coordinates.data.to(translation_unit).m, (time_dim, 3)
+            )
+            homogeneous_matrix = np.resize(np.identity(4), (time_dim, 4, 4))
+            homogeneous_matrix[:, :3, :3] = rotation
+            homogeneous_matrix[:, :3, 3] = translation
+
+            return np.squeeze(homogeneous_matrix)
+        else:
+            raise NotImplementedError(
+                "Cannot convert LCS with `TimeSeries` coordinates to homogeneous matrix"
+            )
 
     def _interp_time_orientation(self, time: Time) -> xr.DataArray:
         """Interpolate the orientation in time."""
