@@ -17,7 +17,7 @@ from weldx.core import TimeSeries
 from weldx.exceptions import WeldxDeprecationWarning, WeldxException
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
-from weldx.types import QuantityLike
+from weldx.types import UnitLike
 from weldx.util import check_matplotlib_available, dataclass_nested_eq
 
 from .local_cs import LocalCoordinateSystem
@@ -836,7 +836,7 @@ class CoordinateSystemManager:
         coordinate_system_name: str,
         reference_system_name: str,
         transformation_matrix: types_homogeneous,
-        translation_unit: QuantityLike,
+        translation_unit: UnitLike,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         lcs_child_in_parent: bool = True,

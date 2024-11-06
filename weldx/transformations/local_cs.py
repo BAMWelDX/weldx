@@ -24,7 +24,7 @@ from weldx.transformations.types import (
     types_orientation,
 )
 from weldx.transformations.util import normalize
-from weldx.types import QuantityLike
+from weldx.types import UnitLike
 
 __all__ = ("LocalCoordinateSystem",)
 
@@ -549,7 +549,7 @@ class LocalCoordinateSystem(TimeDependent):
     def from_homogeneous_transformation(
         cls,
         transformation_matrix: types_homogeneous,
-        translation_unit: QuantityLike,
+        translation_unit: UnitLike,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
     ) -> LocalCoordinateSystem:
@@ -736,13 +736,13 @@ class LocalCoordinateSystem(TimeDependent):
         """
         return Rot.from_matrix(self.orientation.values)
 
-    def as_homogeneous_matrix(self, translation_unit: QuantityLike) -> np.ndarray:
+    def as_homogeneous_matrix(self, translation_unit: UnitLike) -> np.ndarray:
         """Get a homogeneous transformation matrix from the coordinate system
         orientation.
 
         Parameters
         ----------
-        translation_unit : QuantityLike
+        translation_unit : UnitLike
             Unit the translation part of the homogeneous transformation matrix
             should represent.
 
