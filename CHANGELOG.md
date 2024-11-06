@@ -5,7 +5,7 @@
 ### Changes
 
 - added support for homogeneous transformation matrices \[{pull}`949`\]:
-  - added `create_cs_from_homogenous_transformation` to `CoordinateSystemManager`
+  - added `create_cs_from_homogeneous_transformation` to `CoordinateSystemManager`
   - added `from_homogeneous_transformation` to `LocalCoordinateSystem`
   - added `as_homogeneous_matrix` to `LocalCoordinateSystem`
 

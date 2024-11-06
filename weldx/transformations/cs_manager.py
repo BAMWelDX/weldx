@@ -831,7 +831,7 @@ class CoordinateSystemManager:
             coordinate_system_name, reference_system_name, lcs, lcs_child_in_parent
         )
 
-    def create_cs_from_homogenous_transformation(
+    def create_cs_from_homogeneous_transformation(
         self,
         coordinate_system_name: str,
         reference_system_name: str,

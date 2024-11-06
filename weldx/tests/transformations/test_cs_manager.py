@@ -2795,7 +2795,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     )
 
     # from homogeneous transformation ---------------------
-    csm.create_cs_from_homogenous_transformation(
+    csm.create_cs_from_homogeneous_transformation(
         "lcs_homogeneous_default", "root", transformation_matrix, coords.u, time
     )
     check_coordinate_system(
