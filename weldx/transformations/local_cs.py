@@ -578,12 +578,10 @@ class LocalCoordinateSystem(TimeDependent):
             transformation_matrix = np.array(transformation_matrix.data)
         if transformation_matrix.ndim == 3:
             orientation = transformation_matrix[:, :3, :3]
-            coordinates = transformation_matrix[:, :3, 3]
-            coordinates = Q_(coordinates, translation_unit)
+            coordinates = Q_(transformation_matrix[:, :3, 3], translation_unit)
         else:
             orientation = transformation_matrix[:3, :3]
-            coordinates = transformation_matrix[:3, 3]
-            coordinates = Q_(coordinates, translation_unit)
+            coordinates = Q_(transformation_matrix[:3, 3], translation_unit)
         return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @property
