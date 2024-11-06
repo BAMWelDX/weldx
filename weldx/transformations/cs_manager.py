@@ -869,7 +869,7 @@ class CoordinateSystemManager:
             how the parent system is positioned in its new child system.
 
         """
-        lcs = LocalCoordinateSystem.from_homogenous_transformation(
+        lcs = LocalCoordinateSystem.from_homogeneous_transformation(
             transformation_matrix, translation_unit, time, time_ref
         )
         self.add_cs(
