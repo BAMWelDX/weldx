@@ -18,6 +18,7 @@ examples:
         max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
   -
     - An irregular timedeltaindex representing timestamps at 0 s, 4 s, 6 s and 10 s
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
         values: !core/ndarray-1.0.0

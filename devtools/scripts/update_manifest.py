@@ -7,7 +7,6 @@ import yaml
 from weldx.asdf.constants import (
     WELDX_EXTENSION_URI,
     WELDX_EXTENSION_VERSION,
-    WELDX_MANIFEST_URI,
 )
 from weldx.asdf.util import get_converter_for_tag
 
@@ -23,7 +22,7 @@ def update_manifest(
         Loader=yaml.SafeLoader,
     )
 
-    manifest["id"] = WELDX_MANIFEST_URI
+    manifest["id"] = WELDX_EXTENSION_URI
     manifest["extension_uri"] = WELDX_EXTENSION_URI
 
     # keep only ASDF schema mappings
