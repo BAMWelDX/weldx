@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.6.9 (unreleased)
+## 0.6.9 (19.11.2024)
 
 ### Changes
 
