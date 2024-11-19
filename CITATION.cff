@@ -1,8 +1,8 @@
 # YAML 1.2
 ---
 title: weldx
-version: 0.6.8
-date-released: 2024-07-06
+version: 0.6.9
+date-released: 2024-11-19
 authors:
   - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
     email: cagtay.fabry@bam.de
@@ -24,6 +24,11 @@ authors:
     family-names: Pittner
     given-names: Andreas
     orcid: "https://orcid.org/0000-0002-5019-7775"
+  - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
+    email: michael.winkler@bam.de
+    family-names: Winkler
+    given-names: Michael
+    orcid: "https://orcid.org/0000-0003-3719-4817"
 message: "If you use this software in your work, please cite it using the following metadata."
 repository-code: "https://github.com/BAMWelDX/weldx"
 keywords:
