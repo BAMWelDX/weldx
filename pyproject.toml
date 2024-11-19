@@ -20,6 +20,7 @@ authors = [
   { name = "Çağtay Fabry", email = "cagtay.fabry@bam.de" },
   { name = "Volker Hirthammer", email = "volker.hirthammer@bam.de" },
   { name = "Martin K. Scherer", email = "martin.scherer@bam.de" },
+  { name = "Michael Winkler", email = "michael.winkler@bam.de" },
 ]
 requires-python = ">=3.9,<3.13"
 classifiers = [
