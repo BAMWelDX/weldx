@@ -47,7 +47,7 @@ jobs:
           build_system: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v2.0.1
+        uses: mamba-org/setup-micromamba@v2.0.2
         with:
           micromamba-version: "2.0.2-0"
           environment-file: ./environment.yml
@@ -149,7 +149,7 @@ jobs:
           build_system: 'include'
 
       - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v2.0.1
+        uses: mamba-org/setup-micromamba@v2.0.2
         with:
           environment-file: ./environment.yml
           environment-name: weldx
