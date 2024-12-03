@@ -20,7 +20,7 @@ repos:
       - id: check-yaml
         exclude: devtools/conda.recipe/meta.yaml  # doesn't play nice with jinja
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.18
+    rev: 0.7.19
     hooks:
       - id: mdformat
         additional_dependencies:
@@ -29,7 +29,7 @@ repos:
           - mdformat-config
   # ----- Python formatting -----
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.7.2
+    rev: v0.8.1
     hooks:
     # Run ruff linter.
     - id: ruff
@@ -43,12 +43,12 @@ repos:
     hooks:
     - id: pyproject-fmt
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.22
+    rev: v0.23
     hooks:
       - id: validate-pyproject
   # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.8.7
+    rev: 1.9.1
     hooks:
       - id: nbqa-black
       - id: nbqa-ruff  # ruff handles isort
