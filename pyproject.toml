@@ -36,6 +36,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: Physics",  # TODO: add more topics here!
 ]
 dynamic = [
@@ -51,7 +52,7 @@ dependencies = [
   "ipython",
   "meshio",
   "networkx>=2.8.2",
-  "numpy>=1.20,<2",
+  "numpy>=1.20",
   "pandas>=1.5",
   "pint>=0.21",
   "pint-xarray>=0.3",
@@ -83,7 +84,7 @@ optional-dependencies.test = [
   "pytest-xdist",
 ]
 optional-dependencies.vis = [
-  "weldx-widgets>=0.2.3",
+  "weldx-widgets>=0.2.5",
 ]
 urls.bug_tracker = "https://github.com/BAMweldx/weldx/issues"
 urls.changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"
