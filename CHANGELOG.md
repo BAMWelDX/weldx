@@ -23,7 +23,7 @@
 
 ### Fixes
 
-- rename (fix typo) argument to `lcs_child_in_parent` in `CoordinateSystemManager.add_cs`  \[{pull}`936`\].
+- rename (fix typo) argument to `lcs_child_in_parent` in `CoordinateSystemManager.add_cs` \[{pull}`936`\].
 - replace usages of `pkg_resources` with `importlib.metadata` \[{pull}`941`\].
 - replace usages of `copy_arrays` with `memmap` for `asdf>=3.1.0` \[{pull}`940`\].
 
