@@ -3,9 +3,13 @@ from __future__ import annotations
 import functools
 import re
 
-from asdf.asdf import SerializationContext
+import asdf
+
+if asdf.__version__ >= "3.0.0":
+    from asdf.extension import SerializationContext
+else:
+    from asdf.asdf import SerializationContext
 from asdf.extension import Converter
-from asdf.versioning import AsdfSpec
 from boltons.iterutils import remap
 
 from weldx.constants import META_ATTR, USER_ATTR
@@ -116,8 +120,5 @@ def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="we
 
     if version is None:
         return tag
-
-    if isinstance(version, AsdfSpec):
-        version = str(version.spec)
 
     return f"{tag}-{version}"
