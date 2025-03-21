@@ -99,7 +99,7 @@ where = [
 ]
 
 [tool.setuptools_scm]
-version_file = = "weldx/_version.py"
+version_file = "weldx/_version.py"
 
 [tool.nbqa.addopts]
 ruff = [
