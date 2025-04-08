@@ -61,7 +61,7 @@ def test_asdf_groove(groove: IsoBaseGroove, expected_dtype):
         )
 
         # call plot function
-        with _close_plot():  # noqa: PYL-E1129
+        with _close_plot():  # skipcq: PYL-E1129
             groove.plot()
 
 
