@@ -1127,7 +1127,7 @@ class Shape:
             normal / np.sqrt(dot_product) * distance_to_origin, _DEFAULT_LEN_UNIT
         )
 
-        self.apply_translation(-offset)
+        self.apply_translation(-1.0 * offset)
         self.apply_transformation(householder_matrix)
         self.apply_translation(offset)
 
