@@ -716,8 +716,7 @@ class Time:
                     continue
 
         raise TypeError(
-            f"Could not convert {_input_type} "
-            f"to pd.DatetimeIndex or pd.TimedeltaIndex"
+            f"Could not convert {_input_type} to pd.DatetimeIndex or pd.TimedeltaIndex"
         )
 
     class _UnionDescriptor:

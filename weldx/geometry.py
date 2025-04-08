@@ -322,7 +322,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
             p_idx = 0
             p_name = f"translation_{p_idx}"
             while p_name in params:
-                p_name = f"translation{(p_idx:= p_idx +1)}"
+                p_name = f"translation{(p_idx := p_idx + 1)}"
 
             p = sympy.symbols(p_name)
             params[p_name] = vector
@@ -2064,7 +2064,7 @@ class VariableProfile:
 
         if not len(interpolation_schemes) == len(profiles) - 1:
             raise ValueError(
-                "Number of interpolations must be 1 less than number of " "profiles."
+                "Number of interpolations must be 1 less than number of profiles."
             )
 
         for i in range(len(profiles) - 1):

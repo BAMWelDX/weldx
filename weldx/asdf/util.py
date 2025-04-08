@@ -301,7 +301,7 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> str | dict:
     if isinstance(file, types_file_like.__args__):
         if isinstance(file, TextIOBase):
             raise ValueError(
-                "cannot read files opened in text mode. " "Please open in binary mode."
+                "cannot read files opened in text mode. Please open in binary mode."
             )
         if isinstance(file, SupportsFileReadWrite):
             file.seek(0)

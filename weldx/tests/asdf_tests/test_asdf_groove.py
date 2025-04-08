@@ -48,17 +48,17 @@ def test_asdf_groove(groove: IsoBaseGroove, expected_dtype):
     tree = {k: groove}
 
     with write_read_buffer_context(tree) as data:
-        assert isinstance(
-            data[k], expected_dtype
-        ), f"Did not match expected type {expected_dtype} on item {data[k]}"
+        assert isinstance(data[k], expected_dtype), (
+            f"Did not match expected type {expected_dtype} on item {data[k]}"
+        )
         # test content equality using dataclass built-in functions
-        assert (
-            groove == data[k]
-        ), f"Could not correctly reconstruct groove of type {type(groove)}"
+        assert groove == data[k], (
+            f"Could not correctly reconstruct groove of type {type(groove)}"
+        )
         # test to_profile
-        assert isinstance(
-            groove.to_profile(), Profile
-        ), f"Error calling plot function of {type(groove)} "
+        assert isinstance(groove.to_profile(), Profile), (
+            f"Error calling plot function of {type(groove)} "
+        )
 
         # call plot function
         with _close_plot():
