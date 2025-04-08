@@ -20,6 +20,6 @@ jobs:
           path: ~/.cache/pip
           key: pip-cffconvert-0
       - name: pip installs
-        run: pip install cffconvert
+        run: pip install git+https://github.com/citation-file-format/cffconvert.git
       - name: run cffconvert validate
         run: cffconvert --validate

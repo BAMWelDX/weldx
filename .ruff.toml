@@ -54,6 +54,7 @@ select = [
 ]
 "doc/src/tutorials/*" = [
     "D",
+    "B018",
 ]
 "doc/src/conf.py" = [
     "E501",   # ignore long lines.
