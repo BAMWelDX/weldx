@@ -2,7 +2,7 @@
 build-backend = "setuptools.build_meta"
 requires = [
   "setuptools>=64",
-  "setuptools-scm[toml]>=6.2",
+  "setuptools-scm[toml]>=8",
   "wheel",
 ]
 
@@ -99,8 +99,7 @@ where = [
 ]
 
 [tool.setuptools_scm]
-write_to = "weldx/_version.py"
-write_to_template = '__version__ = "{version}"'
+version_file = "weldx/_version.py"
 
 [tool.nbqa.addopts]
 ruff = [

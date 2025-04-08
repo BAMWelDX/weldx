@@ -2127,7 +2127,7 @@ def check_trace_segment_length(segment, tolerance=1e-9):
         if math.isclose(relative_change, 1, abs_tol=tolerance / 10):
             break
         assert i < num_iterations - 1, (
-            "Segment length could not be " "determined numerically"
+            "Segment length could not be determined numerically"
         )
 
     assert math.isclose(length_numeric, segment.length.m, abs_tol=tolerance)
