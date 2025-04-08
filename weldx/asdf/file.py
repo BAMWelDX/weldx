@@ -348,7 +348,7 @@ class WeldxFile(_ProtectedViewDict):
                     schema = get_schema_path(schema)
                 except ValueError as ve:
                     raise ValueError(
-                        f"provided custom_schema '{schema}' " "does not exist."
+                        f"provided custom_schema '{schema}' does not exist."
                     ) from ve
             return schema
 
@@ -427,7 +427,7 @@ class WeldxFile(_ProtectedViewDict):
         new_file_created = False
         exists = pathlib.Path(filename).exists()
         if not exists and mode == "r":
-            raise RuntimeError(f"file {filename} has be created," " but mode is 'r'.")
+            raise RuntimeError(f"file {filename} has be created, but mode is 'r'.")
 
         if mode == "rw":
             if not exists:

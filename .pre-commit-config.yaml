@@ -20,7 +20,7 @@ repos:
       - id: check-yaml
         exclude: devtools/conda.recipe/meta.yaml  # doesn't play nice with jinja
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.21
+    rev: 0.7.22
     hooks:
       - id: mdformat
         additional_dependencies:
@@ -29,7 +29,7 @@ repos:
           - mdformat-config
   # ----- Python formatting -----
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.6
+    rev: v0.11.4
     hooks:
     # Run ruff linter.
     - id: ruff
@@ -39,11 +39,11 @@ repos:
     # Run ruff formatter.
     - id: ruff-format
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.5.0
+    rev: v2.5.1
     hooks:
     - id: pyproject-fmt
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.23
+    rev: v0.24.1
     hooks:
       - id: validate-pyproject
   # ----- Jupyter Notebooks -----
@@ -63,7 +63,7 @@ repos:
           - --remove-kernel-metadata
   # ----- spellchecking -----
   - repo: https://github.com/codespell-project/codespell/
-    rev: v2.3.0
+    rev: v2.4.1
     hooks:
       - id: codespell
         exclude: doc/src/legal-notice.md

@@ -760,8 +760,7 @@ def test_comparison_data():
 
 
 @pytest.mark.parametrize(
-    "csm_ref_time_day, lcs_times, lcs_ref_time_days, edges,"
-    "exp_time, exp_ref_time_day",
+    "csm_ref_time_day, lcs_times, lcs_ref_time_days, edges,exp_time, exp_ref_time_day",
     [
         # all systems are time dependent
         ("21", [[1, 5, 6], [3, 6, 9]], ["22", "21"], None, [2, 3, 6, 7, 9], "21"),
