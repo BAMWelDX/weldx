@@ -284,7 +284,7 @@ def _validate_expected_list(list_expected):
         if "..." in str(exp):
             if "..." != exp:
                 raise WxSyntaxError(
-                    f'"..." should not have additional properties:' f" {exp} was found."
+                    f'"..." should not have additional properties: {exp} was found.'
                 )
             validator = 2
         elif "(" in str(exp):
@@ -417,8 +417,7 @@ def _validate_instance_shape(
 
     if _dict_values is False:
         raise ValidationError(
-            f"Shape {list_test[::-1]} does not match requirement "
-            f"{list_expected[::-1]}"
+            f"Shape {list_test[::-1]} does not match requirement {list_expected[::-1]}"
         )
 
     return _dict_values
