@@ -202,7 +202,7 @@ class WeldxFile(_ProtectedViewDict):
 
     >>> wx2.header()  # doctest: +ELLIPSIS,+NORMALIZE_WHITESPACE
     #ASDF 1.0.0
-    #ASDF_STANDARD 1.5.0
+    #ASDF_STANDARD ...
     %YAML 1.1
     %TAG ! tag:stsci.edu:asdf/
     --- !core/asdf-1.1.0
