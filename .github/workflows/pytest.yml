@@ -33,12 +33,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        py: ['3.9', '3.10', '3.11', '3.12']
-        asdf: ['4']
+        py: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        asdf: ['3']
         include:
           - os: ubuntu-latest
             py: '3.10'
-            asdf: 3
+            asdf: 4
           - os: ubuntu-latest
             py: '3.10'
             asdf: 2
