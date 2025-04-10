@@ -202,7 +202,7 @@ class WeldxFile(_ProtectedViewDict):
 
     >>> wx2.header()  # doctest: +ELLIPSIS,+NORMALIZE_WHITESPACE
     #ASDF 1.0.0
-    #ASDF_STANDARD 1.5.0
+    #ASDF_STANDARD ...
     %YAML 1.1
     %TAG ! tag:stsci.edu:asdf/
     --- !core/asdf-1.1.0
@@ -386,6 +386,11 @@ class WeldxFile(_ProtectedViewDict):
         # 2. file exists, but should be updated with new tree
         if created:
             asdf_file = asdf.AsdfFile(tree=tree, **asdffile_kwargs)
+            if asdf.__version__ >= "4.0.0":
+                # Starting in asdf 4 passing a tree to AsdfFile will
+                # not automatically validate the tree. For those versions
+                # we call validate here to check the tree.
+                asdf_file.validate()
             with self._config_context():
                 asdf_file.write_to(filename_or_path_like, **write_kwargs)
             # Now set the file handle to the newly created AsdfFile instance.
