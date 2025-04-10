@@ -98,7 +98,7 @@ jobs:
           pytest -n 2 --runslow --junit-xml pytest.xml
 
       - name: Upload Test Results
-        if: always() && (matrix.py == '3.10')
+        if: always() && (matrix.py == '3.10') && (matrix.asdf == 4)
         uses: actions/upload-artifact@v4
         with:
           name: Unit Test Results
