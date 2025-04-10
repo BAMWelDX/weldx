@@ -11,6 +11,7 @@ description: |
 examples:
   -
     - A constant transformation describing a translation of 1 mm into the z direction
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
         coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
@@ -26,6 +27,7 @@ examples:
     - |
       A time dependent transformation describing a linear movement from 5 mm to 295 mm
       over 20 seconds along the x-axis direction.
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
         time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
@@ -50,6 +52,7 @@ examples:
             shape: [2, 3]
   -
     - A static transformation describing an euler rotation of 45 degree around the x-axis.
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
         orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
@@ -67,6 +70,7 @@ examples:
     - |
       A time dependent transformation describing an euler rotation around the y-axis from 0 degree to 120 degree
       over 20 seconds.
+    - asdf-standard-1.5.0
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
         time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>

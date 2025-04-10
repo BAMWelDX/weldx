@@ -39,8 +39,7 @@ def download_tutorial_input_file(print_status=True):
     sha256sum_actual = hash_path(out_file)
     if sha256sum_actual != sha256sum:
         raise RuntimeError(
-            f"hash mismatch:\n actual = \t{sha256sum_actual}\n"
-            f"desired = \t{sha256sum}"
+            f"hash mismatch:\n actual = \t{sha256sum_actual}\ndesired = \t{sha256sum}"
         )
     if print_status:
         print("download successful.")

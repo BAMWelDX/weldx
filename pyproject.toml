@@ -2,7 +2,7 @@
 build-backend = "setuptools.build_meta"
 requires = [
   "setuptools>=64",
-  "setuptools-scm[toml]>=6.2",
+  "setuptools-scm[toml]>=8",
   "wheel",
 ]
 
@@ -44,7 +44,7 @@ dynamic = [
   "version", # version gets derived from git by setuptools_scm.
 ]
 dependencies = [
-  "asdf>=2.15.1,<4",
+  "asdf>=2.15.1",
   "bidict",
   "boltons",
   "bottleneck>=1.3.3",
@@ -100,8 +100,7 @@ where = [
 ]
 
 [tool.setuptools_scm]
-write_to = "weldx/_version.py"
-write_to_template = '__version__ = "{version}"'
+version_file = "weldx/_version.py"
 
 [tool.nbqa.addopts]
 ruff = [
