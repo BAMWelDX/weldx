@@ -34,6 +34,14 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         py: ['3.9', '3.10', '3.11', '3.12']
+        asdf: ['4']
+        include:
+          - os: ubuntu-latest
+            py: '3.10'
+            asdf: 3
+          - os: ubuntu-latest
+            py: '3.10'
+            asdf: 2
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,6 +67,7 @@ jobs:
           cache-environment-key: environment-${{ steps.date.outputs.date }}
           create-args: >-
             python=${{ matrix.py }}
+            asdf=${{ matrix.asdf }}
             wheel
             pip
 
