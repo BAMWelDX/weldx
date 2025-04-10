@@ -102,10 +102,10 @@ the creation and conversion of units and dimensions.
 
 ## Installation
 
-The WelDX package can be installed using any conda or mamba package manager from the [Conda-Forge channel](https://conda-forge.org/#about). 
-If you have not yet installed a conda package manager, we recommend installing `Miniforge`. 
-The installer can then be found [here](https://conda-forge.org/download/), and a detailed documentation for the installation process is provided 
-[here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation). 
+The WelDX package can be installed using any conda or mamba package manager from the [Conda-Forge channel](https://conda-forge.org/#about).
+If you have not yet installed a conda package manager, we recommend installing `Miniforge`.
+The installer can then be found [here](https://conda-forge.org/download/), and a detailed documentation for the installation process is provided
+[here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation).
 Once this step has been completed, you will gain access to both the `conda` and the `mamba` command and will be able to proceed with the installation of the WelDX package.
 
 In order to create a new conda environment containing the WeldX package, run the console command:
