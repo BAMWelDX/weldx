@@ -1,20 +1,38 @@
 # Installation guide
 
-The `weldx` package can be installed using *conda* or *mamba* package
-manager from the `conda-forge` channel. These managers originate from
-the freely available [Anaconda Python stack](https://docs.conda.io/en/latest/miniconda.html). If you do not have
-Anaconda or Miniconda installed yet, we ask you to install
-*Miniconda*-3. Documentation for the installation procedure can be found
+The WelDX package can be installed using any conda or mamba package manager from the [Conda-Forge channel](https://conda-forge.org/#about).
+If you have not yet installed a conda package manager, we recommend installing `Miniforge`.
+The installer can then be found [here](https://conda-forge.org/download/), and a detailed documentation for the installation process is provided
 [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation).
+Once this step has been completed, you will gain access to both the `conda` and the `mamba` command and will be able to proceed with the installation of the WelDX package.
 
-After this step you have access to the conda command and can proceed to
-installing the WelDX package:
+If you freshly installed `Miniforge`, open the installed `Anaconda Prompt` command line interface
+and run:
 
 ```shell
-conda create -n weldx -c conda-forge weldx weldx_widgets
+conda init
+mamba init
 ```
 
-The package is also available on pypi and can be installed via *pip*:
+to initialize `conda` and `mamba` as commands in all your shells.
+
+In order to create a new conda environment called `weldx` containing the WeldX package,
+run the console command:
+
+```console
+conda create --name weldx --channel conda-forge weldx weldx_widgets
+```
+
+To install the WeldX package into your existing environment instead, use:
+
+```shell
+conda install weldx weldx_widgets --channel conda-forge
+```
+
+If installed, all `conda` commands can be replaced by `mamba` to take advantage
+of its faster solver.
+
+The package is also available on pypi and can be installed via:
 
 ```shell
 pip install weldx weldx-widgets
@@ -28,21 +46,18 @@ strongly encourage using the conda package.
 
 ## Setting up Jupyter Lab
 
-Weldx provides lots of visualization methods for planning and analysis.
-These methods need a frontend like Jupyter lab or Jupyter notebook. We
-currently recommend to use Jupyter lab, as it is modern and makes
-working with several notebooks easier. You can install Jupyter lab both
-via *conda* or *pip*. If you use conda we suggest that you create a
-separate environment for your weldx installation and jupyter. This keeps
-the environments clean and easier to upgrade (is that really true? think
-of mixed versions of extensions in lab env and weldx env!).
+Weldx provides many visualisation methods for planning and analysis.
+These methods require a frontend such as JupyterLab or Jupyter notebook.
+We recommend using JupyterLab because it is modern and makes it easy to
+work with several notebooks. You can install JupyterLab using either conda, mamba,
+or pip. If you use conda, we recommend that you create a separate environment
+for your weldx installation and Jupyter. This will keep the environments
+clean and easier to upgrade.
 
-Here is a guide on howto setup different kernels for Jupyter [guide](https://ipython.readthedocs.io/en/7.25.0/install/kernel_install.html).
-
-Create an environment named "jlab" via conda that installs `jupyterlab` and the `k3d` extension:
+Create an environment named `jlab` via conda that installs `jupyterlab` and the `k3d` extension:
 
 ```shell
-conda create -n jlab jupyterlab k3d -c conda-forge
+conda create --name jlab --channel conda-forge jupyterlab k3d
 ```
 
 Then we switch to the weldx environment created in the first step and
@@ -55,15 +70,29 @@ python -m ipykernel install --user --name weldx --display-name "Python (weldx)"
 
 This will enable us to select the Python interpreter installed in the
 weldx environment within Jupyter. So when a new notebook is created, we
-can choose "Python (weldx)" to access all the software bundled with the
+can choose `Python (weldx)` to access all the software bundled with the
 weldx Python package.
 
-### fixing DLL errors on Windows systems
+If you wish to setup multiple different kernels for Jupyter a guide can be found
+[here](https://ipython.readthedocs.io/en/7.25.0/install/kernel_install.html).
+
+## Starting the Jupyer Lab
+
+To start JupyterLab run:
+
+```shell
+conda activate jlab
+jupyter lab
+```
+
+A window in your browser will automatically be opened.
+
+## Fixing DLL errors on Windows systems
 
 In case you run into an error when using the weldx kernel on Windows
 systems that fails to read DLLs like:
 
-```
+```shell
 ImportError: DLL load failed: The specified module could not be found
 ```
 
@@ -97,12 +126,11 @@ If you feel lucky, you can try and copy-paste all install commands into
 a shell. Note that if one command fails, all subsequent commands will
 not be executed.
 
-using conda:
-
 ```shell
-conda create -n weldx -c conda-forge weldx weldx_widgets
+conda create --name weldx --channel conda-forge weldx weldx_widgets
+conda create --name jlab jupyterlab k3d --channel conda-forge
 conda activate weldx
 python -m ipykernel install --user --name weldx --display-name "Python (weldx)"
-conda create -n jlab -c conda-forge jupyterlab k3d
 conda activate jlab
+jupyter lab
 ```

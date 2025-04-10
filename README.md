@@ -108,25 +108,33 @@ The installer can then be found [here](https://conda-forge.org/download/), and a
 [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation).
 Once this step has been completed, you will gain access to both the `conda` and the `mamba` command and will be able to proceed with the installation of the WelDX package.
 
-In order to create a new conda environment containing the WeldX package, run the console command:
+In order to create a new conda environment called `weldx` containing the WeldX package,
+run the console command:
 
-```console
-conda create --name weldx_env --channel conda-forge weldx weldx_widgets
+```shell
+conda create --name weldx --channel conda-forge weldx weldx_widgets
 ```
 
 To install the WeldX package into your existing environment instead, use:
 
-```console
+```shell
 conda install weldx weldx_widgets --channel conda-forge
 ```
 
-If mamba is installed, the `conda` commands can be replaced by `mamba`.
+If installed, all `conda` commands can be replaced by `mamba` to take advantage
+of its faster solver.
 
 The package is also available on pypi and can be installed via:
 
-```console
+```shell
 pip install weldx weldx-widgets
 ```
+
+As weldx currently depends on the package `bottleneck`, which contains
+C/C++ code, you will need a working C/C++ compiler. The conda package
+does not have this requirement as it only installs pre-compiled
+binaries. So if you do not know how to install a working compiler, we
+strongly encourage using the conda package.
 
 ## Documentation
 
