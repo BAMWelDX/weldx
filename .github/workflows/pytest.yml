@@ -52,8 +52,8 @@ jobs:
           files: 'pyproject.toml'
           channels: 'conda-forge defaults'
           extras: 'test vis media'
-          additional_requirements: weldx-widgets
-          pip: weldx-widgets weldx@file:/..//
+          additional_requirements: 'weldx-widgets weldx@file:/..//'
+          pip: 'weldx-widgets'
           build_system: 'include'
 
       - name: Setup Conda Environment
