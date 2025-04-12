@@ -22,6 +22,7 @@ if np.__version__ >= "2.0.0":
 else:
     from numpy import NaN
 
+
 def test_deprecation_decorator():
     """Test that the deprecation decorator emits a warning as expected."""
 
