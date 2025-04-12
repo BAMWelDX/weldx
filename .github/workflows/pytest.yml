@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        py: ['3.9', '3.10', '3.11', '3.12']
+        py: ['3.9', '3.10', '3.11', '3.12', '3.13']
         asdf: ['4']
         include:
           - os: ubuntu-latest
@@ -47,11 +47,13 @@ jobs:
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
-      - uses: CagtayFabry/pydeps2env@v1.3.0
+      - uses: CagtayFabry/pydeps2env@main
         with:
           files: 'pyproject.toml'
           channels: 'conda-forge defaults'
           extras: 'test vis media'
+          additional_requirements: 'weldx-widgets weldx@file:/..//'
+          pip: 'weldx-widgets'
           build_system: 'include'
 
       - name: Setup Conda Environment

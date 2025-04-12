@@ -635,7 +635,7 @@ properties:
             tree=dict(x=x), mode="rw", array_inline_threshold=len(x) + 1
         ).file_handle
         buff.seek(0)
-        assert str(list(x)).encode("utf-8") in buff.read()
+        assert str([int(v) for v in x]).encode("utf-8") in buff.read()
 
         # now we create an array longer than the default threshold
         y = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
@@ -643,7 +643,7 @@ properties:
         buff2.seek(0)
         data = buff2.read()
         assert b"BLOCK" in data
-        assert str(list(y)).encode("utf-8") not in data
+        assert str([int(v) for v in x]).encode("utf-8") not in data
 
     @staticmethod
     def test_array_inline_threshold_sync():
