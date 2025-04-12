@@ -47,11 +47,13 @@ jobs:
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
-      - uses: CagtayFabry/pydeps2env@v1.3.0
+      - uses: CagtayFabry/pydeps2env@vmain
         with:
           files: 'pyproject.toml'
           channels: 'conda-forge defaults'
           extras: 'test vis media'
+          additional_requirements: weldx-widgets
+          pip: weldx-widgets weldx@file:/..//
           build_system: 'include'
 
       - name: Setup Conda Environment
