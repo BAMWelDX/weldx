@@ -102,24 +102,39 @@ the creation and conversion of units and dimensions.
 
 ## Installation
 
-The WelDX package can be installed using conda or mamba package manager
-from the [Conda-Forge channel](https://conda-forge.org/#about). These managers originate from
-the freely available [Anaconda Python stack](https://docs.conda.io/en/latest/miniconda.html). If you do not have
-Anaconda or Miniconda installed yet, we ask you to install
-`Miniconda-3`. Documentation for the installation procedure can be
-found [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation).
-After this step you have access to the conda command and can proceed to
-installing the WelDX package.
+The WelDX package can be installed using any conda or mamba package manager from the [Conda-Forge channel](https://conda-forge.org/#about).
+If you have not yet installed a conda package manager, we recommend installing `Miniforge`.
+The installer can then be found [here](https://conda-forge.org/download/), and a detailed documentation for the installation process is provided
+[here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation).
+Once this step has been completed, you will gain access to both the `conda` and the `mamba` command and will be able to proceed with the installation of the WelDX package.
 
-```console
-conda install weldx weldx_widgets -c conda-forge
+In order to create a new conda environment called `weldx` containing the WeldX package,
+run the console command:
+
+```shell
+conda create --name weldx --channel conda-forge weldx weldx_widgets
 ```
 
-The package is also available on pypi.
+To install the WeldX package into your existing environment instead, use:
 
-```console
+```shell
+conda install weldx weldx_widgets --channel conda-forge
+```
+
+If installed, all `conda` commands can be replaced by `mamba` to take advantage
+of its faster solver.
+
+The package is also available on pypi and can be installed via:
+
+```shell
 pip install weldx weldx-widgets
 ```
+
+As weldx currently depends on the package `bottleneck`, which contains
+C/C++ code, you will need a working C/C++ compiler. The conda package
+does not have this requirement as it only installs pre-compiled
+binaries. So if you do not know how to install a working compiler, we
+strongly encourage using the conda package.
 
 ## Documentation
 
