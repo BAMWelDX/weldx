@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from numpy import NaN
 from pint.errors import DimensionalityError
 from xarray import DataArray
 
@@ -18,6 +17,10 @@ from weldx.constants import META_ATTR, Q_, U_, UNITS_KEY
 from weldx.exceptions import WeldxDeprecationWarning
 from weldx.time import Time
 
+if np.__version__ >= "2.0.0":
+    from numpy import nan as NaN
+else:
+    from numpy import NaN
 
 def test_deprecation_decorator():
     """Test that the deprecation decorator emits a warning as expected."""
