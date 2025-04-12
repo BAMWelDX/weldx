@@ -5,6 +5,7 @@
 ### Dependencies
 
 - remove upper pin for `asdf` \[{pull}`910`\].
+- pin `asdf<5` \[{pull}`959`\].
 - remove upper pin for `numpy` \[{pull}`959`\].
 - pin `python<3.14` \[{pull}`959`\].
 - pin `weldx-widgets>=0.2.5` for viz \[{pull}`959`\].
