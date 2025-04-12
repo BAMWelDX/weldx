@@ -44,7 +44,7 @@ dynamic = [
   "version", # version gets derived from git by setuptools_scm.
 ]
 dependencies = [
-  "asdf>=2.15.1",
+  "asdf>=2.15.1,<5",
   "bidict",
   "boltons",
   "bottleneck>=1.3.3",
