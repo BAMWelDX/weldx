@@ -27,6 +27,7 @@ from weldx.asdf.util import (
     get_yaml_header,
     view_tree,
 )
+from weldx.exceptions import WeldxDeprecationWarning
 from weldx.types import (
     SupportsFileReadWrite,
     types_file_like,
@@ -34,7 +35,6 @@ from weldx.types import (
     types_path_like,
 )
 from weldx.util import (
-    deprecated,
     inherit_docstrings,
     is_interactive_session,
     is_jupyterlab_session,
@@ -48,13 +48,11 @@ __all__ = [
     "_PROTECTED_KEYS",
 ]
 
+_asdf_version = tuple(importlib.metadata.version("asdf").split("."))
+
 
 def asdf_open_memory_mapping_kwarg(memmap: bool) -> dict:
-    if tuple(importlib.metadata.version("asdf").split(".")) >= (
-        "3",
-        "1",
-        "0",
-    ):
+    if _asdf_version >= ("3", "1", "0"):
         return {"memmap": memmap}
     else:
         return {"copy_arrays": not memmap}
@@ -239,6 +237,17 @@ class WeldxFile(_ProtectedViewDict):
 
         if asdffile_kwargs is None:
             asdffile_kwargs = asdf_open_memory_mapping_kwarg(memmap=memmap)
+
+        if "copy_arrays" in asdffile_kwargs and _asdf_version >= ("3", "1", "0"):
+            msg = f"""Using deprecated option `copy_arrays` for asdf version
+            {_asdf_version}. Use `memmap` instead."""
+            warnings.warn(
+                msg,
+                WeldxDeprecationWarning,
+                stacklevel=2,
+            )
+            asdffile_kwargs["memmap"] = not asdffile_kwargs["copy_arrays"]
+            del asdffile_kwargs["copy_arrays"]
 
         # this parameter is now (asdf-2.8) a asdf.config parameter, so we store it here.
         self._array_inline_threshold = array_inline_threshold
@@ -925,10 +934,6 @@ class WeldxFile(_ProtectedViewDict):
         return _HeaderVisualizer(self._asdf_handle).show(
             use_widgets=use_widgets, path=path, _interactive=_interactive
         )
-
-    @deprecated("0.6", "0.7", "Please use file.header() instead.")
-    def show_asdf_header(self, *args, **kwargs):
-        return self.header(*args, **kwargs)
 
     def _ipython_display_(self):
         # This will be called in Jupyter Lab, and myst-nb execution,
