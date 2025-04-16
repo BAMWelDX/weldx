@@ -33,6 +33,7 @@ authors:
     orcid: "https://orcid.org/0000-0003-3719-4817"
 message: "If you use this software in your work, please cite it using the following metadata."
 repository-code: "https://github.com/BAMWelDX/weldx"
+doi: "10.5281/zenodo.5565185"
 keywords:
   - weldx
   - welding
