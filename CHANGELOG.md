@@ -2,6 +2,10 @@
 
 ## 0.7.0 (unreleased)
 
+### Fixes
+
+- Handle `copy_arrays` in `WeldxFile` for `asdf>=3.1.0` \[{pull}`972`\].
+
 ### Dependencies
 
 - remove upper pin for `asdf` \[{pull}`910`\].
@@ -13,6 +17,10 @@
 ### ASDF
 
 - update schemas for upcoming ASDF standard 1.6.0 \[{pull}`910`\].
+
+### Deprecations
+
+- remove `WeldxFile.show_asdf_header` \[{pull}`972`\].
 
 # Release Notes
 
