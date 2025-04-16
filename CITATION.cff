@@ -1,8 +1,10 @@
 # YAML 1.2
 ---
 title: weldx
+type: software
 version: 0.6.9
 date-released: 2024-11-19
+license: BSD-3-Clause
 authors:
   - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
     email: cagtay.fabry@bam.de
