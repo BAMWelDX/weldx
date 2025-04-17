@@ -5,6 +5,7 @@
 Release `0.7.0` is a compatibility release to support major new `python`, `numpy` and `asdf` version.
 
 Newly supported version include:
+
 - `python=3.13`
 - `numpy=2`
 - `asdf=4`
