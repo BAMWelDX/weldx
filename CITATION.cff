@@ -3,14 +3,14 @@
 cff-version: 1.2.0
 title: weldx
 type: software
-version: v0.7.0rc2
-date-released: 2025-04-16
+version: v0.7.0
+date-released: 2025-04-17
 license: BSD-3-Clause
 authors:
   - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
     email: cagtay.fabry@bam.de
     family-names: Fabry
-    given-names: Cagtay
+    given-names: Çağtay
     orcid: "https://orcid.org/0000-0002-0788-8079"
   - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
     email: volker.hirthammer@bam.de

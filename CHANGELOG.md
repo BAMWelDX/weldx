@@ -1,6 +1,16 @@
 # Release Notes
 
-## 0.7.0 (unreleased)
+## 0.7.0 (17.04.2025)
+
+Release `0.7.0` is a compatibility release to support major new `python`, `numpy` and `asdf` version.
+
+Newly supported version include:
+
+- `python=3.13`
+- `numpy=2`
+- `asdf=4`
+
+Version `0.7` is planned to be the last release to support `python<3.11`, `numpy<2`and `asdf<4`.
 
 ### Fixes
 
@@ -21,6 +31,7 @@
 ### Deprecations
 
 - remove `WeldxFile.show_asdf_header` \[{pull}`972`\].
+- remove `lsc_child_in_parent` argument in `CoordinateSystemManager.add_cs` \[{pull}`976`\].
 
 # Release Notes
 

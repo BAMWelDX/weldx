@@ -14,7 +14,7 @@ import xarray as xr
 
 from weldx import util
 from weldx.core import TimeSeries
-from weldx.exceptions import WeldxDeprecationWarning, WeldxException
+from weldx.exceptions import WeldxException
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.types import UnitLike
@@ -442,7 +442,6 @@ class CoordinateSystemManager:
         reference_system_name: str,
         lcs: LocalCoordinateSystem,
         lcs_child_in_parent: bool = True,
-        lsc_child_in_parent: bool = True,
     ):
         """Add a coordinate system to the coordinate system manager.
 
@@ -475,22 +474,8 @@ class CoordinateSystemManager:
             If set to `True`, the passed `LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
-        lsc_child_in_parent
-            DEPRECATED. Use ``lcs_child_in_parent`` instead.
 
         """
-        if not lsc_child_in_parent:
-            warnings.warn(
-                (
-                    "Argument 'lsc_child_in_parent' is deprecated"
-                    " and will be removed in 0.7 please use 'lcs_child_in_parent'"
-                ),
-                category=WeldxDeprecationWarning,
-                stacklevel=2,
-            )
-            if lcs_child_in_parent:
-                lcs_child_in_parent = lsc_child_in_parent
-
         if not isinstance(lcs, LocalCoordinateSystem):
             raise TypeError(
                 "'local_coordinate_system' must be an instance of LocalCoordinateSystem"
