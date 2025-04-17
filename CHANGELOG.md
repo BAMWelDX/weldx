@@ -31,6 +31,7 @@ Version `0.7` is planned to be the last release to support `python<3.11`, `numpy
 ### Deprecations
 
 - remove `WeldxFile.show_asdf_header` \[{pull}`972`\].
+- remove `lsc_child_in_parent` argument in `CoordinateSystemManager.add_cs` \[{pull}`976`\].
 
 # Release Notes
 
