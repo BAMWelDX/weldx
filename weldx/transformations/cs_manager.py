@@ -14,7 +14,7 @@ import xarray as xr
 
 from weldx import util
 from weldx.core import TimeSeries
-from weldx.exceptions import WeldxDeprecationWarning, WeldxException
+from weldx.exceptions import WeldxException
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.types import UnitLike
