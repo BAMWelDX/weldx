@@ -3,8 +3,8 @@
 cff-version: 1.2.0
 title: weldx
 type: software
-version: v0.7.0rc2
-date-released: 2025-04-16
+version: v0.7.0
+date-released: 2025-04-17
 license: BSD-3-Clause
 authors:
   - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
