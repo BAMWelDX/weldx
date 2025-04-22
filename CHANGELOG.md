@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.7.1 (unreleased)
+
+### documentation
+
+- use `myst-nb-json` for interactive JSON mime rendering with `myst-nb` \[{pull}`978`\].
+
 ## 0.7.0 (17.04.2025)
 
 Release `0.7.0` is a compatibility release to support major new `python`, `numpy` and `asdf` version.
