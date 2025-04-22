@@ -34,4 +34,4 @@ dependencies:
   - pip
   - pip:
     - weldx @ file:/../..//
-    - myst-nb-json-render-plugin @ git+https://github.com/CagtayFabry/myst-nb-json-render-plugin.git@v0.1.0
+    - myst-nb-json-render-plugin @ git+https://github.com/CagtayFabry/myst-nb-json-render-plugin.git@v1.0.0
