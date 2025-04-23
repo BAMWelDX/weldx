@@ -10,6 +10,7 @@
 ### Dependencies
 
 - require `ipython>=8` \[{pull}`978`\]
+- retrieve version number at runtime via PEP-0566 metadata \[{pull}`981`\]
 
 ## 0.7.0 (17.04.2025)
 

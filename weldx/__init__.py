@@ -118,18 +118,13 @@ and functions are used to read and write weldx data types in the ASDF data forma
 """
 
 # isort:skip_file
-import warnings
+from importlib.metadata import version, PackageNotFoundError
 
 try:
-    from ._version import __version__
-except ModuleNotFoundError:  # pragma: no cover
-    __version__ = None
-    warnings.warn(
-        "Using local weldx package files without version information.\n"
-        "Consider running 'python setup.py --version' or 'pip install -e .' "
-        "in the weldx root repository",
-        category=UserWarning,
-    )
+    __version__ = version("weldx")
+except PackageNotFoundError:
+    # package is not installed
+    pass
 
 # constants - should be imported first, no internal weldx deps
 from weldx.constants import Q_, U_
@@ -212,4 +207,3 @@ __all__ = (
 )
 
 weldx.config.Config.load_installed_standards()
-del warnings  # do not pollute this important namespace!
