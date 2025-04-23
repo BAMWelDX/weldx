@@ -33,5 +33,5 @@ dependencies:
   # pip packages
   - pip
   - pip:
+    - myst-nb-json
     - weldx @ file:/../..//
-    - json_mime_render_plugin @ file:/..//json_mime_render_plugin
