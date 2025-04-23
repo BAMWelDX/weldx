@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         asdf_version:
-          - "2.15"
+          - "2.*"
           - "3.*"
           - "4.*"
     name: pytest asdf
@@ -52,7 +52,7 @@ jobs:
 
       - name: pip install weldx-dev and asdf-matrix-version
         run: |
-          python -m pip install -e . asdf~=${{ matrix.asdf_version }}
+          python -m pip install -e . asdf==${{ matrix.asdf_version }}
 
       - name: run asdf schema pytest
         run: |
