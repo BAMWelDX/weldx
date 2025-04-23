@@ -17,6 +17,8 @@ jobs:
       matrix:
         asdf_version:
           - "2.15"
+          - "3"
+          - "4"
     name: pytest asdf
     runs-on: ubuntu-latest
     steps:
@@ -25,7 +27,7 @@ jobs:
           fetch-depth: 0 # Fetch all history for all tags and branches
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
-      - uses: CagtayFabry/pydeps2env@main
+      - uses: CagtayFabry/pydeps2env@v1.4.0
         with:
           file: 'pyproject.toml'
           channels: 'conda-forge'
