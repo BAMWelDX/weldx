@@ -1,10 +1,10 @@
 # YAML 1.2
 ---
 cff-version: 1.2.0
-title: weldx
+title: "weldx: The welding data exchange format"
 type: software
-version: v0.7.0
-date-released: 2025-04-17
+version: v0.7.1
+date-released: 2025-04-22
 license: BSD-3-Clause
 authors:
   - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"

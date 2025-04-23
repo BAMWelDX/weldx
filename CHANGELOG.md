@@ -1,10 +1,11 @@
 # Release Notes
 
-## 0.7.1 (unreleased)
+## 0.7.1 (23.04.2025)
 
 ### Documentation
 
 - use `myst-nb-json` for interactive JSON mime rendering with `myst-nb` \[{pull}`978`\].
+- Update title in `CITATION.cff`  \[{pull}`981`\].
 
 ### Dependencies
 
