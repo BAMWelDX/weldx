@@ -938,7 +938,7 @@ class WeldxFile(_ProtectedViewDict):
     def _ipython_display_(self):
         # This will be called in Jupyter Lab, and myst-nb execution,
         # but not in a plain notebook.
-        from IPython.core.display import display
+        from IPython.display import display
 
         # Determine widget usage by runtime environment, by passing None.
         display(self.header(use_widgets=None, _interactive=True))
