@@ -40,8 +40,7 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",  # TODO: add more topics here!
 ]
 dynamic = [
-  # see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#dynamic-metadata
-  "version", # version gets derived from git by setuptools_scm.
+  "version",
 ]
 dependencies = [
   "asdf>=2.15.1,<5",
@@ -101,7 +100,7 @@ where = [
 ]
 
 [tool.setuptools_scm]
-version_file = "weldx/_version.py"
+# enable setuptools-scm versioning
 
 [tool.nbqa.addopts]
 ruff = [
@@ -136,7 +135,6 @@ source = [
 
 [tool.coverage.report]
 omit = [
-  "weldx/_version.py",
   "weldx/tests/*",
 ]
 exclude_lines = [

@@ -1,14 +1,16 @@
 # Release Notes
 
-## 0.7.1 (unreleased)
+## 0.7.1 (23.04.2025)
 
 ### Documentation
 
-- use `myst-nb-json` for interactive JSON mime rendering with `myst-nb` \[{pull}`978`\].
+- use `myst-nb-json` for interactive JSON mime rendering with `myst-nb` \[{pull}`978`\]
+- update title in `CITATION.cff` \[{pull}`981`\]
 
 ### Dependencies
 
-- require `ipython>=8` \[{pull}`978`\].
+- require `ipython>=8` \[{pull}`978`\]
+- retrieve version number at runtime via PEP-0566 metadata \[{pull}`981`\]
 
 ## 0.7.0 (17.04.2025)
 

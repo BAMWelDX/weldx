@@ -2,16 +2,15 @@ version = 1
 
 test_patterns = [
   "weldx/tests/**",
-  "test_*.py"
+  "test_*.py",
 ]
 
 exclude_patterns = [
   "doc/**",
   "scripts/**",
-  "weldx/_version.py",
   "weldx/asdf/**",
   "weldx/tags/**",
-  "conftest.py"
+  "conftest.py",
 ]
 
 [[analyzers]]
@@ -21,4 +20,7 @@ runtime_version = "3.x.x"
 
 [analyzers.meta]
 # skip magic and private objects: https://discuss.deepsource.io/t/docstrings-for-private-classes-methods/259/2
-skip_doc_coverage = ["magic", "nonpublic"]
+skip_doc_coverage = [
+  "magic",
+  "nonpublic",
+]
