@@ -135,7 +135,6 @@ source = [
 
 [tool.coverage.report]
 omit = [
-  "weldx/_version.py",
   "weldx/tests/*",
 ]
 exclude_lines = [

@@ -502,7 +502,7 @@ class WeldxFile(_ProtectedViewDict):
     def software_history_entry(self, value: dict):
         """Set the software used for making history entries."""
         if value is None:
-            from weldx._version import __version__ as version
+            from weldx import __version__ as version
 
             self._DEFAULT_SOFTWARE_ENTRY = {
                 "name": "weldx",
