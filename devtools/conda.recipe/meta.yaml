@@ -36,7 +36,9 @@ requirements:
     {% for feature, dep_list in proj.get('optional-dependencies').items() %}
     {% if feature != "test" %}
     {% for dep in dep_list %}
+    {% if dep != "myst-nb-json" %}
     - {{ dep }}
+    {% endif %}
     {% endfor %}
     {% endif %}
     {% endfor %}

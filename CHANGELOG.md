@@ -2,9 +2,13 @@
 
 ## 0.7.1 (unreleased)
 
-### documentation
+### Documentation
 
 - use `myst-nb-json` for interactive JSON mime rendering with `myst-nb` \[{pull}`978`\].
+
+### Dependencies
+
+- require `ipython>=8` \[{pull}`978`\].
 
 ## 0.7.0 (17.04.2025)
 
