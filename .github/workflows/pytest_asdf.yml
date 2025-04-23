@@ -17,8 +17,8 @@ jobs:
       matrix:
         asdf_version:
           - "2.15"
-          - "3"
-          - "4"
+          - "3.*"
+          - "4.*"
     name: pytest asdf
     runs-on: ubuntu-latest
     steps:
