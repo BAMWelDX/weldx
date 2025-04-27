@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0 # Fetch all history for all tags and branches
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
-      - uses: CagtayFabry/pydeps2env@v1.4.0
+      - uses: CagtayFabry/pydeps2env@v1.4.1
         with:
           file: 'pyproject.toml'
           channels: 'conda-forge'

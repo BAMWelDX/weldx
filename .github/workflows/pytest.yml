@@ -47,7 +47,7 @@ jobs:
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
-      - uses: CagtayFabry/pydeps2env@v1.4.0
+      - uses: CagtayFabry/pydeps2env@v1.4.1
         with:
           files: 'pyproject.toml'
           channels: 'conda-forge'
@@ -152,7 +152,7 @@ jobs:
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
-      - uses: CagtayFabry/pydeps2env@v1.4.0
+      - uses: CagtayFabry/pydeps2env@v1.4.1
         with:
           files: 'pyproject.toml'
           channels: 'conda-forge'
