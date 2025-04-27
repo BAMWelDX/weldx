@@ -9,11 +9,11 @@
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.5565185.svg)](https://doi.org/10.5281/zenodo.5565185)
 [![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
-[![package builds](https://github.com/BAMWelDX/weldx/workflows/package%20builds/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22package%20builds%22+branch%3Amaster)
-[![documentation-gh](https://github.com/BAMWelDX/weldx/workflows/documentation%20builds/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Adocumentation%20builds+branch%3Amaster)
+[![package builds](https://github.com/BAMWelDX/weldx/actions/workflows/build_pkg.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/build_pkg.yml)
+[![documentation builds](https://github.com/BAMWelDX/weldx/actions/workflows/docs.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/docs.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/BAMWelDX/weldx/master.svg)](https://results.pre-commit.ci/latest/github/BAMWelDX/weldx/master)
-[![pytest](https://github.com/BAMWelDX/weldx/workflows/pytest/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Apytest+branch%3Amaster)
-[![static analysis](https://github.com/BAMWelDX/weldx/workflows/static%20analysis/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22static+analysis%22+branch%3Amaster)
+[![pytest](https://github.com/BAMWelDX/weldx/actions/workflows/pytest.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/pytest.yml)
+[![static analysis](https://github.com/BAMWelDX/weldx/actions/workflows/static_analysis.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/static_analysis.yml)
 
 ## Overview
 
