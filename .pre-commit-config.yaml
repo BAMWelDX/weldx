@@ -29,7 +29,7 @@ repos:
           - mdformat-config
   # ----- Python formatting -----
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.8
+    rev: v0.11.12
     hooks:
     # Run ruff linter.
     - id: ruff
@@ -39,7 +39,7 @@ repos:
     # Run ruff formatter.
     - id: ruff-format
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.5.1
+    rev: v2.6.0
     hooks:
     - id: pyproject-fmt
   - repo: https://github.com/abravalheri/validate-pyproject
