@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.7.2 (unreleased)
+
+### Dependencies
+
+- pin `pint-xarray<0.5` due to incopatibility in handling of units with xarray coordinates \[{pull}`991`\]
+
 ## 0.7.1 (23.04.2025)
 
 ### Documentation
