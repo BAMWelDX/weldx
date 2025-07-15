@@ -520,7 +520,7 @@ def xr_check_coords(coords: xr.DataArray | Mapping[str, Any], ref: dict) -> bool
 
         if UNITS_KEY in check:
             units = coords[key].attrs.get(UNITS_KEY, None)
-            if not units or not U_(units) == U_(check[UNITS_KEY]):
+            if not units or U_(units) != U_(check[UNITS_KEY]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{units}', expected '{check['units']}'"

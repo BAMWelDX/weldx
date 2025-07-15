@@ -357,8 +357,7 @@ def is_interactive_session() -> bool:
             return False
     except KeyError:
         return False
-    else:
-        return True
+    return True
 
 
 def is_jupyterlab_session() -> bool:

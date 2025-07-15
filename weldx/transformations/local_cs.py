@@ -764,10 +764,9 @@ class LocalCoordinateSystem(TimeDependent):
             homogeneous_matrix[:, :3, 3] = translation
 
             return np.squeeze(homogeneous_matrix)
-        else:
-            raise NotImplementedError(
-                "Cannot convert LCS with `TimeSeries` coordinates to homogeneous matrix"
-            )
+        raise NotImplementedError(
+            "Cannot convert LCS with `TimeSeries` coordinates to homogeneous matrix"
+        )
 
     def _interp_time_orientation(self, time: Time) -> xr.DataArray:
         """Interpolate the orientation in time."""
