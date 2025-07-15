@@ -402,10 +402,7 @@ def view_tree(file: types_path_and_file_like, path: tuple = None, **kwargs):
             return k, str(v)
         return k, v
 
-    if isinstance(file, str):
-        root = file + "/"
-    else:
-        root = "/"
+    root = file + "/" if isinstance(file, str) else "/"
 
     yaml_dict = get_yaml_header(file, parse=True)
     yaml_dict = dict(remap(yaml_dict, _visit))
@@ -678,7 +675,7 @@ class _ProtectedViewDict(MutableMapping):
         self.__data[key] = value
 
     def keys(self) -> Set:
-        return {k for k in self.__data.keys() if k not in self.protected_keys}
+        return {k for k in self.__data if k not in self.protected_keys}
 
     def __iter__(self):
         return (k for k in self.keys())
@@ -688,7 +685,7 @@ class _ProtectedViewDict(MutableMapping):
 
     def update(self, mapping: Mapping[Hashable, Any], **kwargs: Any):  # pylint: disable=W0221
         _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
-        if any(key in self.protected_keys for key in _mapping.keys()):
+        if any(key in self.protected_keys for key in _mapping):
             self._warn_protected_keys()
             _mapping = {
                 k: v for k, v in _mapping.items() if k not in self.protected_keys
@@ -777,10 +774,13 @@ def get_schema_tree(  # noqa: C901, MC0001, RUF100, codacy:ignore
 
     def convert_wx_shape(path, key, value):
         """Parse the list information in wx_shape into a readable string."""
-        if isinstance(value, dict) and ("wx_shape" in value):
-            if isinstance(value["wx_shape"], list):
-                value = value.copy()
-                value["wx_shape"] = f"[{','.join(str(n) for n in value['wx_shape'])}]"
+        if (
+            isinstance(value, dict)
+            and ("wx_shape" in value)
+            and isinstance(value["wx_shape"], list)
+        ):
+            value = value.copy()
+            value["wx_shape"] = f"[{','.join(str(n) for n in value['wx_shape'])}]"
         return key, value
 
     def mark_required(path, key, value):

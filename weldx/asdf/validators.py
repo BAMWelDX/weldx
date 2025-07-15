@@ -282,7 +282,7 @@ def _validate_expected_list(list_expected):
         if validator == 2:
             raise WxSyntaxError('After "..." should not be another dimension.')
         if "..." in str(exp):
-            if "..." != exp:
+            if exp != "...":
                 raise WxSyntaxError(
                     f'"..." should not have additional properties: {exp} was found.'
                 )
@@ -570,17 +570,16 @@ class WxPropertyTagValidator(Validator):
 
         def _tag_validator(tagname, node):
             """Validate against a tag string using ASDF uri match patterns."""
-            if hasattr(node, "_tag"):
+            if hasattr(node, "_tag"):  # noqa: SIM108
                 node_tag = node._tag
             else:
                 # Try tags for known Python builtins
                 node_tag = _type_to_tag(type(node))
 
-            if node_tag is not None:
-                if not uri_match(tagname, node_tag):
-                    yield ValidationError(
-                        f"mismatched tags, wanted '{tagname}', got '{node_tag}'"
-                    )
+            if node_tag is not None and not uri_match(tagname, node_tag):
+                yield ValidationError(
+                    f"mismatched tags, wanted '{tagname}', got '{node_tag}'"
+                )
 
         if not isinstance(wx_property_tag, (str, list)):
             raise WxSyntaxError(

@@ -690,7 +690,7 @@ class GenericSeries:
         _keys = (set(_units.keys()) & set(data_array.dims)) | set(_vals.keys())
 
         ref: dict[str, dict] = {k: {} for k in _keys}
-        for k in ref.keys():
+        for k in ref:
             if k in _units:
                 ref[k]["dimensionality"] = _units[k]
             if k in _vals:
@@ -766,7 +766,7 @@ class GenericSeries:
 
             ref = {k: {"values": v}}
             for param in expr.parameters.values():
-                if isinstance(param, xr.DataArray) and k in param.coords.keys():
+                if isinstance(param, xr.DataArray) and k in param.coords:
                     ut.xr_check_coords(param, ref)
 
             # todo: add limits for dims?

@@ -30,6 +30,7 @@ ignore = [
     "UP007", # see ruff GH#4427
 ]
 select = [
+    # "ANN",  # ruff-annotations
     "B", # flake8-bugbear
     "C", # flake8-comprehensions
     #"D", # note: all relevant D's will be set by setting pydocstyle.convention=numpy!
@@ -37,11 +38,13 @@ select = [
     "F",    # pyflakes
     "W",    # pycodestyle warnings
     "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
     "T2",   # flake8-print
     "I001", # isort
     "ICN",  # import conventions, e.g. import numpy as np
     #"B950",  # not yet implemented by Ruff.
     "RUF100", # ensure 'noqa' declarations are still valid.
+    "PIE", # flake8-pie
 ]
 
 [lint.extend-per-file-ignores]

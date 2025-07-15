@@ -460,7 +460,7 @@ class WeldxFile(_ProtectedViewDict):
             real_mode = "rb"
 
         # create file handle
-        filename = open(filename, mode=real_mode)
+        filename = open(filename, mode=real_mode)  # noqa: SIM115
         return filename, new_file_created
 
     @property

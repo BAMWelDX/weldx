@@ -16,9 +16,10 @@ class WXRotationConverter(WeldxConverter):
         """Convert to python dict."""
         tree = {}
 
-        if not hasattr(obj, ROT_META):  # default to quaternion representation
-            tree["quaternions"] = obj.as_quat()
-        elif getattr(obj, ROT_META)["constructor"] == "from_quat":
+        if (
+            not hasattr(obj, ROT_META)
+            or getattr(obj, ROT_META)["constructor"] == "from_quat"
+        ):  # default to quaternion representation
             tree["quaternions"] = obj.as_quat()
         elif getattr(obj, ROT_META)["constructor"] == "from_matrix":
             tree["matrix"] = obj.as_matrix()
@@ -26,7 +27,7 @@ class WXRotationConverter(WeldxConverter):
             tree["rotvec"] = obj.as_rotvec()
         elif getattr(obj, ROT_META)["constructor"] == "from_euler":
             seq_str = getattr(obj, ROT_META)["seq"]
-            if not len(seq_str) == 3:
+            if len(seq_str) != 3:
                 if all(c in "xyz" for c in seq_str):
                     seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
                 elif all(c in "XYZ" for c in seq_str):

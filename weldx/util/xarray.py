@@ -150,10 +150,7 @@ def xr_matmul(
     if dims_b is None:
         dims_b = dims_a
     if dims_out is None:
-        if len(dims_a) <= len(dims_b):
-            dims_out = dims_a
-        else:
-            dims_out = dims_b
+        dims_out = dims_a if len(dims_a) <= len(dims_b) else dims_b
 
     mul_func = np.matmul
     if len(dims_a) > len(dims_b):
@@ -368,7 +365,7 @@ def xr_interp_like(
                     raise ValueError(
                         "Cannot use fillna=False with single point interpolation"
                     )
-                exclude_dims = [d for d in da_temp.coords if not d == dim]
+                exclude_dims = [d for d in da_temp.coords if d != dim]
                 # TODO: this always fills the dimension (inconsistent with fillna=False)
                 da1 = xr_fill_all(da1.broadcast_like(da_temp, exclude=exclude_dims))
             else:
@@ -523,7 +520,7 @@ def xr_check_coords(coords: xr.DataArray | Mapping[str, Any], ref: dict) -> bool
 
         if UNITS_KEY in check:
             units = coords[key].attrs.get(UNITS_KEY, None)
-            if not units or not U_(units) == U_(check[UNITS_KEY]):
+            if not units or U_(units) != U_(check[UNITS_KEY]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{units}', expected '{check['units']}'"
