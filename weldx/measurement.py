@@ -134,8 +134,8 @@ class MeasurementEquipment:
     """Simple dataclass implementation for generic equipment."""
 
     name: str
-    sources: list = field(default_factory=lambda: [])
-    transformations: list = field(default_factory=lambda: [])
+    sources: list = field(default_factory=list)
+    transformations: list = field(default_factory=list)
 
     def __post_init__(self):
         """Perform some data consistency checks."""

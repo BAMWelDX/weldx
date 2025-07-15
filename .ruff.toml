@@ -44,6 +44,7 @@ select = [
     "ICN",  # import conventions, e.g. import numpy as np
     #"B950",  # not yet implemented by Ruff.
     "RUF100", # ensure 'noqa' declarations are still valid.
+    "PIE", # flake8-pie
 ]
 
 [lint.extend-per-file-ignores]
