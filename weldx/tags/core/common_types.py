@@ -115,7 +115,7 @@ class VariableConverter(WeldxConverter):
         if "units" in node:  # convert to pint.Quantity
             data = Q_(data, node["units"])
 
-        attrs = node.get("attrs", None)
+        attrs = node.get("attrs")
 
         return Variable(node["name"], node["dimensions"], data, attrs)
 

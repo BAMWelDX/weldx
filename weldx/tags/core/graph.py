@@ -90,13 +90,13 @@ def build_tree(
     node = DiNode(name=name)
 
     for n in graph.successors(name):
-        if not n == parent:
+        if n != parent:
             child_node = build_tree(graph, n, parent=name, keep_uuid=keep_uuid)
             if child_node:
                 edge = DiEdge(child_node, attributes=graph.edges[name, n])
                 node.edges.append(edge)
     for n in graph.predecessors(name):
-        if not n == parent:
+        if n != parent:
             child_node = build_tree(graph, n, parent=name, keep_uuid=keep_uuid)
             if child_node:
                 edge = DiEdge(

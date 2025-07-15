@@ -509,10 +509,7 @@ class Time:
             If true (the default) the values of the xarray will always be timedeltas.
 
         """
-        if timedelta_base:
-            t = self.as_timedelta_index()
-        else:
-            t = self.index
+        t = self.as_timedelta_index() if timedelta_base else self.index
         da = xr.DataArray(t, coords={"time": t}, dims=["time"])
         if self.reference_time is not None:
             da.weldx.time_ref = self.reference_time
@@ -652,7 +649,7 @@ class Time:
 
             tdi_new = pd.timedelta_range(start=t0, end=t1, freq=freq)
 
-        if not tdi_new[-1] == t1:
+        if tdi_new[-1] != t1:
             tdi_new = tdi_new.append(pd.Index([t1]))
 
         return Time(tdi_new, self.reference_time)
@@ -684,10 +681,7 @@ class Time:
         if "time" in time.coords:
             time = time.time
         time_ref = time.weldx.time_ref
-        if time.shape:
-            time_index = pd.Index(time.values)
-        else:
-            time_index = pd.Index([time.values])
+        time_index = pd.Index(time.values) if time.shape else pd.Index([time.values])
         if time_ref is not None:
             time_index = time_index + time_ref
         return time_index

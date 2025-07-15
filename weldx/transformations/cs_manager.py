@@ -634,7 +634,7 @@ class CoordinateSystemManager:
 
         nodes = self.graph.nodes
         for cs in nodes:
-            for name in nodes[cs]["data"].keys():
+            for name in nodes[cs]["data"]:
                 if name == data_name:
                     nodes[cs]["data"].pop(data_name)
                     return

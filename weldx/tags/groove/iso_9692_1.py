@@ -21,7 +21,7 @@ class IsoGrooveConverter(WeldxConverter):
 
     tags = [
         format_tag(tag_name=_ISO_GROOVE_SCHEMA + g, version="0.1.*")
-        for g in _groove_name_to_type.keys()
+        for g in _groove_name_to_type
     ] + ["asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*Groove-0.1.*"]
     types = IsoBaseGroove.__subclasses__()
 

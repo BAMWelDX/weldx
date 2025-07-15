@@ -384,10 +384,7 @@ def is_jupyterlab_session() -> bool:
         "JUPYTERHUB_API_TOKEN",
     )
     env = parent.environ()
-    if any(k in env for k in keys):
-        return True
-
-    return False
+    return bool(any(k in env for k in keys))
 
 
 def _patch_mod_all(module_name: str):

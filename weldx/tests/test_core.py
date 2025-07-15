@@ -608,7 +608,7 @@ class TestGenericSeries:
     )
     def test_init_expression(dims, units, parameters, exception):
         if units is None and parameters is not None:
-            units = {k: "m" for k in ["a", "b", "x", "y"] if k not in parameters.keys()}
+            units = {k: "m" for k in ["a", "b", "x", "y"] if k not in parameters}
 
         expr = "a*x + b*y"
         if exception is not None:

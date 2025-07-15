@@ -31,7 +31,7 @@ class _ReadOnlyFile:
         with open(fn, "wb") as fh:
             asdf.AsdfFile(tree=dict(hi="there")).write_to(fh)
         self.mode = "rb"
-        self.file_read_only = open(fn, mode=self.mode)
+        self.file_read_only = open(fn, mode=self.mode)  # noqa: SIM115
 
     def read(self, *args, **kwargs):
         return self.file_read_only.read(*args, **kwargs)

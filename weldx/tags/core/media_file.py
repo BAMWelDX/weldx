@@ -38,6 +38,6 @@ class MediaFileConverter(WeldxConverter):
         else:
             raise RuntimeError("malformed media file. Lacking keys 'data' or 'file'.")
         fps = node["fps"]
-        reference_time = node["reference_time"] if "reference_time" in node else None
+        reference_time = node.get("reference_time")
         result = MediaFile(data, fps=fps, reference_time=reference_time)
         return result

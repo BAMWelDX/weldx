@@ -185,7 +185,7 @@ class TestProtectedView(unittest.TestCase):
 
     def test_protected_keys_hidden(self):
         with pytest.warns(UserWarning, match="tried to manipulate"):
-            assert self.protected_key not in self.view.keys()
+            assert self.protected_key not in self.view.keys()  # noqa: SIM118
             assert self.protected_key not in self.view
             assert (self.protected_key, 42) not in self.view.items()
 

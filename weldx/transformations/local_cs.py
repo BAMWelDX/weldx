@@ -751,10 +751,7 @@ class LocalCoordinateSystem(TimeDependent):
 
         """
 
-        if self.is_time_dependent:
-            time_dim = self.time.shape[0]
-        else:
-            time_dim = 1
+        time_dim = self.time.shape[0] if self.is_time_dependent else 1
 
         rotation = np.resize(self.orientation.data, (time_dim, 3, 3))
         coordinates = self.coordinates

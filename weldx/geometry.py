@@ -44,9 +44,9 @@ def has_cw_ordering(points: np.ndarray):
         https://stackoverflow.com/a/1165943/6700329
 
     """
-    if sum((points[1:, 1] - points[:-1, 1]) * (points[1:, 2] + points[:-1, 2])) < 0:
-        return False
-    return True
+    return (
+        not sum((points[1:, 1] - points[:-1, 1]) * (points[1:, 2] + points[:-1, 2])) < 0
+    )
 
 
 def _vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
@@ -1049,10 +1049,10 @@ class Shape:
         dimension = len(points.shape)
         if dimension == 1:
             points = points[np.newaxis, :]
-        elif not dimension == 2:
+        elif dimension != 2:
             raise ValueError("Invalid input parameter")
 
-        if not points.shape[1] == 2:
+        if points.shape[1] != 2:
             raise ValueError("Invalid point format")
 
         if len(self.segments) > 0:
@@ -1442,7 +1442,7 @@ class Profile:
 
             _, ax = subplots()
         ax.grid(grid)
-        if not ax.name == "3d":
+        if ax.name != "3d":
             ax.axis(axis)
         ax.set_title(title, loc="center", wrap=True)
         if axis_labels is not None:
@@ -2056,7 +2056,7 @@ class VariableProfile:
         )
         interpolation_schemes = _to_list(interpolation_schemes)
 
-        if not locations[0] == 0:
+        if locations[0] != 0:
             locations = [0] + locations
 
         if not len(profiles) == len(locations):

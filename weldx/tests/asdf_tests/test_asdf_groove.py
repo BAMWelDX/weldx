@@ -147,4 +147,4 @@ def test_cross_section(groove):
 def test_igroove_area():
     groove, _ = test_params["i_groove"]
     A = groove.cross_sect_area
-    assert A == groove.t * groove.b
+    assert groove.t * groove.b == A

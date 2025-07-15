@@ -224,7 +224,7 @@ def is_row_in_matrix(row, matrix) -> bool:
         True or False
 
     """
-    if not matrix.shape[1] == np.array(row).size:
+    if matrix.shape[1] != np.array(row).size:
         return False
     # noinspection PyUnresolvedReferences
     return (matrix == row).all(axis=1).any()
@@ -1909,10 +1909,7 @@ def test_shape_interpolation_general():
         shape_c = geo.Shape.interpolate(shape_a, shape_b, weight, interpolations)
 
         # check result
-        if weight > 0.5:
-            last_point_exp = [3, 4]
-        else:
-            last_point_exp = [3, -1]
+        last_point_exp = [3, 4] if weight > 0.5 else [3, -1]
 
         points_exp = [[-1, -1 + 5 * weight], [1, 1], last_point_exp]
         shape_c_exp = geo.Shape().add_line_segments(Q_(points_exp, "mm"))
