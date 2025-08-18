@@ -43,7 +43,7 @@ jobs:
             py: '3.10'
             asdf: 2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
@@ -148,7 +148,7 @@ jobs:
         os: [windows-latest]
         py: ['3.10']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 

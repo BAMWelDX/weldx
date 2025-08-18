@@ -22,7 +22,7 @@ jobs:
     name: pytest asdf
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
           repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -72,7 +72,7 @@ jobs:
     name: validate weldx manifest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
