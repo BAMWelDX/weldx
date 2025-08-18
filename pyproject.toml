@@ -80,6 +80,7 @@ optional-dependencies.media = [
 optional-dependencies.test = [
   "nbval",
   "pytest>=6",
+  "pytest-asdf-plugin",
   "pytest-cov",
   "pytest-xdist",
 ]
