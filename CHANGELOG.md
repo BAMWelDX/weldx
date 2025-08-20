@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.7.3 (unreleased)
+
+### Dependencies
+
+- add `pytest-asdf-plugin` to `test` dependency for schema tests \[{pull}`997`\]
+
 ## 0.7.2 (10.07.2025)
 
 ### Dependencies
