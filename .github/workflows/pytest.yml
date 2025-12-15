@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Upload
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Event File
           path: ${{ github.event_path }}
@@ -101,7 +101,7 @@ jobs:
 
       - name: Upload Test Results
         if: always() && (matrix.py == '3.10') && (matrix.asdf == 4)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Unit Test Results
           path: pytest.xml
