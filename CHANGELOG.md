@@ -5,6 +5,9 @@
 ### Dependencies
 
 - add `pytest-asdf-plugin` to `test` dependency for schema tests \[{pull}`997`\]
+- pin `scipy<1.17` \[{pull}`1015`\]
+- pin `pandas<3` \[{pull}`1015`\]
+- add `setuptools<82` as runtime requirement to provide `pkg_resources` \[{pull}`1015`\]
 
 ## 0.7.2 (10.07.2025)
 
@@ -1045,7 +1048,7 @@ conda builds. \[{pull}`314`\]
   {pull}`99`
   \]
   the following syntax can be used:
-  ```yaml
+  ```
   wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
   wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version
   wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version

@@ -108,7 +108,6 @@ import sys
 import os
 from pathlib import Path
 
-
 # get directory of virtual environment
 p_env = Path(sys.executable).parent
 
