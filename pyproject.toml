@@ -18,9 +18,9 @@ keywords = [
 license = { file = "LICENSE" }
 authors = [
   { name = "Çağtay Fabry", email = "cagtay.fabry@bam.de" },
-  { name = "Volker Hirthammer", email = "volker.hirthammer@bam.de" },
   { name = "Martin K. Scherer", email = "martin.scherer@bam.de" },
   { name = "Michael Winkler", email = "michael.winkler@bam.de" },
+  { name = "Volker Hirthammer", email = "volker.hirthammer@bam.de" },
 ]
 requires-python = ">=3.9,<3.14"
 classifiers = [
@@ -52,11 +52,12 @@ dependencies = [
   "meshio",
   "networkx>=2.8.2",
   "numpy>=1.20",
-  "pandas>=1.5",
+  "pandas>=1.5,<3",
   "pint>=0.21",
   "pint-xarray>=0.3,<0.5",
   "psutil",
-  "scipy>=1.6.2",
+  "scipy>=1.6.2,<1.17",
+  "setuptools<82",
   "sympy>=1.6",
   "xarray>=2022.9",
 ]
@@ -101,6 +102,7 @@ where = [
 ]
 
 [tool.setuptools_scm]
+
 # enable setuptools-scm versioning
 
 [tool.nbqa.addopts]
@@ -129,11 +131,6 @@ filterwarnings = [
   #"error::FutureWarning",  # todo: we want to enable this, as it notifies us about upcoming failures due to upstream changes.
 ]
 
-[tool.coverage.run]
-source = [
-  "weldx",
-]
-
 [tool.coverage.report]
 omit = [
   "weldx/tests/*",
@@ -146,6 +143,11 @@ exclude_lines = [
   "def __repr__",
   "def __str__",
   "def _ipython_display_",
+]
+
+[tool.coverage.run]
+source = [
+  "weldx",
 ]
 
 [tool.mypy]

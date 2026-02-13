@@ -11,6 +11,7 @@ py:class weldx.asdf.types.WeldxConverter
 
 # python
 py:data collections.abc.Callable
+py:data typing.Union
 
 # numpy typing
 py:class numpy._typing._array_like._SupportsArray

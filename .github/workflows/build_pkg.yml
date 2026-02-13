@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
 
@@ -74,7 +74,7 @@ jobs:
     name: pypi build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
       - uses: actions/setup-python@v6
@@ -82,7 +82,7 @@ jobs:
           python-version: '3.10'
 
       - name: Cache pip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           # Increase this value to reset cache if ./setup.cfg has not changed
           CACHE_NUMBER: 0
@@ -99,7 +99,7 @@ jobs:
         run: |
           python -m build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: dist
           path: ./dist/

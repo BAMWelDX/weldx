@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Event File
           path: ${{ github.event_path }}
@@ -43,7 +43,7 @@ jobs:
             py: '3.10'
             asdf: 2
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
@@ -101,7 +101,7 @@ jobs:
 
       - name: Upload Test Results
         if: always() && (matrix.py == '3.10') && (matrix.asdf == 4)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Unit Test Results
           path: pytest.xml
@@ -133,7 +133,7 @@ jobs:
 
       - name: codecov.io
         if: matrix.py == '3.10'
-        uses: codecov/codecov-action@v5.5.1
+        uses: codecov/codecov-action@v5.5.2
 
   compat:
     name: pytest
@@ -148,7 +148,7 @@ jobs:
         os: [windows-latest]
         py: ['3.10']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: '0' # Fetch all history for all tags and branches
 
