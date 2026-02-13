@@ -57,6 +57,7 @@ dependencies = [
   "pint-xarray>=0.3,<0.5",
   "psutil",
   "scipy>=1.6.2,<1.17",
+  "setuptools<82",
   "sympy>=1.6",
   "xarray>=2022.9",
 ]
