@@ -5,6 +5,9 @@
 ### Dependencies
 
 - add `pytest-asdf-plugin` to `test` dependency for schema tests \[{pull}`997`\]
+- pin `scipy<1.17` \[{pull}`10157`\]
+- pin `pandas<3` \[{pull}`10157`\]
+- add `setuptools<82` as runtime requirement to provide `pkg_resources` \[{pull}`10157`\]
 
 ## 0.7.2 (10.07.2025)
 
