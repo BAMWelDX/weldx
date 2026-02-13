@@ -207,7 +207,7 @@ class _EqCompareNested:
             return False
 
         for types, func in _EqCompareNested.compare_funcs.items():
-            if isinstance(x, types):
+            if isinstance(x, types):  # type: ignore[arg-type]
                 return func(x, y)
 
         return x == y
