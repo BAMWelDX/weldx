@@ -18,9 +18,9 @@ keywords = [
 license = { file = "LICENSE" }
 authors = [
   { name = "Çağtay Fabry", email = "cagtay.fabry@bam.de" },
-  { name = "Volker Hirthammer", email = "volker.hirthammer@bam.de" },
   { name = "Martin K. Scherer", email = "martin.scherer@bam.de" },
   { name = "Michael Winkler", email = "michael.winkler@bam.de" },
+  { name = "Volker Hirthammer", email = "volker.hirthammer@bam.de" },
 ]
 requires-python = ">=3.9,<3.14"
 classifiers = [
@@ -102,6 +102,7 @@ where = [
 ]
 
 [tool.setuptools_scm]
+
 # enable setuptools-scm versioning
 
 [tool.nbqa.addopts]
@@ -130,11 +131,6 @@ filterwarnings = [
   #"error::FutureWarning",  # todo: we want to enable this, as it notifies us about upcoming failures due to upstream changes.
 ]
 
-[tool.coverage.run]
-source = [
-  "weldx",
-]
-
 [tool.coverage.report]
 omit = [
   "weldx/tests/*",
@@ -147,6 +143,11 @@ exclude_lines = [
   "def __repr__",
   "def __str__",
   "def _ipython_display_",
+]
+
+[tool.coverage.run]
+source = [
+  "weldx",
 ]
 
 [tool.mypy]
