@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.7.3 (unreleased)
+## 0.7.3 (02.03.2026)
 
 ### Dependencies
 
