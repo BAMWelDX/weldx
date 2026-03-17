@@ -96,64 +96,61 @@ scripts.welding_schema = "weldx.asdf.cli.welding_schema:main"
 entry-points."asdf.extensions".weldx = "weldx.asdf.extension:get_extensions"
 entry-points."asdf.resource_mappings".weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
 
-[tool.setuptools.packages.find]
-where = [
+[tool.setuptools]
+packages.find.where = [
   ".",
 ]
 
 [tool.setuptools_scm]
 
+[tool.nbqa]
 # enable setuptools-scm versioning
 
-[tool.nbqa.addopts]
-ruff = [
+addopts.ruff = [
   "--extend-ignore=B018",
 ]
 
-[tool.pytest.ini_options]
-addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules"
-#addopts = --tb=short --color=yes -rs -p no:cov
-testpaths = "weldx"
+[tool.pytest]
+ini_options.addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules"
+# addopts = --tb=short --color=yes -rs -p no:cov
+ini_options.testpaths = "weldx"
 # custom test markers, see https://docs.pytest.org/en/latest/example/markers.html#mark-examples
-markers = "slow: marks tests as slow to run (skipped by default, enable with --runslow option)"
-asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"                                           # TODO: couldn't we just use the entry points to resolve this?
-#asdf_schema_tests_enabled = true
-#asdf_schema_skip_tests =
+ini_options.markers = "slow: marks tests as slow to run (skipped by default, enable with --runslow option)"
+ini_options.asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn't we just use the entry points to resolve this?
+# asdf_schema_tests_enabled = true
+# asdf_schema_skip_tests =
 #    weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml
-norecursedirs = [
+ini_options.norecursedirs = [
   "doc",
   ".ipynb_checkpoints",
 ]
-filterwarnings = [
+ini_options.filterwarnings = [
   "ignore::DeprecationWarning:traittypes.*:",
   "ignore:Passing method to :FutureWarning:xarray.*:",
   "error::pint.UnitStrippedWarning",
-  #"error::FutureWarning",  # todo: we want to enable this, as it notifies us about upcoming failures due to upstream changes.
+  # "error::FutureWarning",  # todo: we want to enable this, as it notifies us about upcoming failures due to upstream changes.
 ]
 
-[tool.coverage.report]
-omit = [
-  "weldx/tests/*",
+[tool.coverage]
+run.source = [
+  "weldx",
 ]
-exclude_lines = [
-  # Have to re-enable the standard pragma
-  "pragma: no cover",
-
+report.exclude_lines = [
   # ignore class __repr__-like functions:
   "def __repr__",
   "def __str__",
   "def _ipython_display_",
+  # Have to re-enable the standard pragma
+  "pragma: no cover",
 ]
-
-[tool.coverage.run]
-source = [
-  "weldx",
+report.omit = [
+  "weldx/tests/*",
 ]
 
 [tool.mypy]
 python_version = "3.9"
 files = "weldx"
-ignore_missing_imports = true # TODO: this is bad!
+ignore_missing_imports = true  # TODO: this is bad!
 strict_optional = false
 pretty = true
 allow_redefinition = true
