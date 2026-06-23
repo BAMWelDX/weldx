@@ -626,8 +626,9 @@ class ArcSegment(DynamicShapeSegment):
         self._radius = Q_(np.linalg.norm(diff.m), self._points.u)
 
         expr = "(x*cos(a+s*w)+y*sin(a+s*w))*r + o"
-        sign = -1 if np.cross([1, 0], diff.m) < 0 else 1
-        a = np.arccos(np.dot([1, 0], diff.m) / self._radius.m) * sign
+
+        a = np.arccos(np.dot([1, 0], diff.m) / self._radius.m)
+        a = np.copysign(a, diff.m[..., 1])
 
         params = dict(
             x=Q_([1, 0, 0], ""),
