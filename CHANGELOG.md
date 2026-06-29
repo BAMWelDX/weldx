@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.7.4 (unreleased)
+
+### Fixes
+
+- remove usage of deprecated `np.cross` with 2-d vectors \[{pull}`1028`\]
+
 ## 0.7.3 (02.03.2026)
 
 ### Dependencies
