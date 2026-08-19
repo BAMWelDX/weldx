@@ -340,7 +340,7 @@ def xr_interp_like(
 
     # create a new (empty) temporary dataset to use for interpolation
     # we need this if da2 is passed as an existing coordinate variable like origin.time
-    da_temp_coords = _coordinates_from_quantities(sel_coords)
+    da_temp_coords = _coordinates_from_quantities(sel_coords)  # type: ignore[arg-type]
     da_temp = xr.DataArray(dims=sel_coords.keys(), coords=da_temp_coords)
 
     # convert base array units to indexer units
@@ -607,7 +607,7 @@ def xr_3d_vector(
     coords = dict(c=["x", "y", "z"])
 
     # if data is static but time passed we discard time information
-    if time is not None and Q_(data).ndim == 1:
+    if time is not None and Q_(data).ndim == 1:  # type: ignore[type-var]
         time = None
 
     # remove duplicates and keep order

@@ -14,7 +14,7 @@ UNITS_KEY = "units"
 
 WELDX_PATH = _Path(__file__).parent.resolve()
 
-WELDX_UNIT_REGISTRY = pint.UnitRegistry(
+WELDX_UNIT_REGISTRY: pint.UnitRegistry = pint.UnitRegistry(
     preprocessors=[
         lambda string: string.replace("Δ°", "delta_deg"),  # parse Δ° for temperature
     ],

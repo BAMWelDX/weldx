@@ -34,9 +34,11 @@ def _workaround_imports_typechecking():
     """
 
     import ipywidgets  # noqa
+    import matplotlib.axes  # noqa
     import meshio  # noqa
     import pandas  # noqa
     import pint  # noqa
+    import scipy.spatial.transform  # noqa
     import sympy  # noqa
     import xarray  # noqa
 
@@ -50,6 +52,7 @@ def _prevent_sphinx_circular_imports_bug():
     import myst_nb.ext.eval  # noqa
     import myst_parser  # noqa
     import myst_parser.mdit_to_docutils.base  # noqa
+    import packaging.specifiers  # noqa
     import sphinx.builders.html  # noqa
     import sphinx.builders.latex  # noqa
     import sphinx.builders.texinfo  # noqa
@@ -68,6 +71,9 @@ except ModuleNotFoundError:  # fallback for local use
     import weldx
 
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
+
+typing.TYPE_CHECKING = False  # restore, so later imports (e.g. Sphinx extensions
+# like linkcheck, which conditionally import typeshed-only stubs) aren't affected.
 
 # -- Project information -----------------------------------------------------
 project = "weldx"
@@ -250,18 +256,22 @@ def _get_intersphinx_mapping():
     from numpy import __version__ as numpy_version
     from pandas import __version__ as pandas_version
     from pint import __version__ as pint_version
-    from scipy import __version__ as scipy_version
 
     intersphinx_mapping_ = {
         "python": ("https://docs.python.org/3/", None),
-        "numpy": (f"https://numpy.org/doc/{numpy_version[:4]}", None),
+        "numpy": (
+            f"https://numpy.org/doc/{'.'.join(numpy_version.split('.')[:2])}",
+            None,
+        ),
         "pandas": (
             f"https://pandas.pydata.org/pandas-docs/version/{pandas_version}/",
             None,
         ),
         # "xarray": (f"https://docs.xarray.dev/en/v{xarray_version}", None),
         "xarray": ("https://docs.xarray.dev/en/v2022.06.0/", None),
-        "scipy": (f"https://docs.scipy.org/doc/scipy-{scipy_version}/", None),
+        # docs.scipy.org no longer publishes per-version inventories (404s), only
+        # an unversioned "latest" one.
+        "scipy": ("https://docs.scipy.org/doc/scipy/", None),
         "matplotlib": (f"https://matplotlib.org/{matplotlib_version}", None),
         # "dask": ("https://docs.dask.org/en/latest", None),
         # "numba": ("https://numba.pydata.org/numba-doc/latest", None),

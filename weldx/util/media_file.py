@@ -34,6 +34,16 @@ types_media_input = Union[
 _AV_TIME_BASE = 1000000
 
 
+class _AttrDict(dict):
+    """Dict whose keys are also accessible as attributes (replaces pkg attrdict)."""
+
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError as e:
+            raise AttributeError(name) from e
+
+
 def _pts_to_frame(pts, time_base, frame_rate, start_time):
     return int(pts * time_base * frame_rate) - int(start_time * time_base * frame_rate)
 
@@ -196,9 +206,7 @@ class MediaFile:
     @property
     def attrs(self):
         """Video attributes."""
-        from attrdict import AttrDict
-
-        return AttrDict(self._metadata)
+        return _AttrDict(self._metadata)
 
     @property
     def resolution(self) -> tuple[int, int]:

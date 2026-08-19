@@ -2,9 +2,49 @@
 
 ## 0.7.4 (unreleased)
 
+### Dependencies
+
+- keep the minimum supported Python version at 3.9; 3.12 is the primary target,
+  3.9/3.10/3.11/3.13 are spot-checked
+- add `pyyaml`, `packaging`, `decorator` as declared runtime dependencies -- they were already
+  hard requirements (used by `weldx.config`, `weldx.asdf.util`, `weldx.util.util` respectively)
+  but only worked by accident via transitive installs
+- `media` extra: add missing `pillow` dependency
+- `docs` extra: add missing `ipywidgets` dependency
+- add a new `plot` extra (`matplotlib`, `k3d`) to make explicit the previously-undeclared,
+  lazily-imported soft dependencies used by `weldx.geometry`, `weldx.measurement`,
+  `weldx.core.time_series` and `weldx.transformations`
+- remove the `asdf<5` upper pin (tested clean against asdf 5.3.1)
+- `vis` extra: raise the `weldx-widgets` floor to `>=0.3.3`, which fixes compatibility with
+  matplotlib>=3.9 upstream; this replaces the transitional `matplotlib<3.9` pin this extra
+  would otherwise need
+- bump `sphinx-copybutton` to `0.5.2`; unpin `urllib3`
+- re-verified and kept: `pandas<3` (breaks `weldx.time.Time` list/DatetimeIndex conversion),
+  `scipy<1.17` (breaks `WXRotation.from_euler` for single-axis sequences), `pint-xarray<0.5`
+  (raises on xarray coordinate unit conversion), `setuptools<82` (drops `pkg_resources`, which
+  `fs` needs), `sphinx==7.2` / `pydata-sphinx-theme<0.15` / `sphinx-autodoc-typehints==2` (the
+  latest releases of `myst-parser`, `pydata-sphinx-theme` and `sphinx-autodoc-typehints`
+  require mutually exclusive Sphinx version ranges -- no combination of current releases
+  works together, so this needs a coordinated follow-up, not attempted here)
+
 ### Fixes
 
 - remove usage of deprecated `np.cross` with 2-d vectors \[{pull}`1028`\]
+- replace the abandoned `attrdict` dependency in `weldx.util.media_file.MediaFile.attrs` with a
+  small local dict subclass -- `attrdict` cannot be imported on Python>=3.10
+- fix the Sphinx doc build against current dependency versions: a `packaging`-internal circular
+  import newly triggered by the `TYPE_CHECKING=True` build hack in `doc/src/conf.py`, the same
+  hack breaking on scipy's and matplotlib's own `TYPE_CHECKING`-only imports, a numpy-version
+  intersphinx URL that broke for numpy>=2's `X.Y.Z` format, and scipy's docs no longer serving
+  per-version intersphinx inventories
+
+### CI
+
+- `.readthedocs.yml` now installs via `pip install .[docs,vis]` instead of a separate,
+  independently-drifting conda environment file; `doc/rtd_environment.yml` is removed
+- `.github/workflows/docs.yml` now generates its conda environment from `pyproject.toml` via
+  `pydeps2env`, matching the pattern already used by the other CI workflows
+- trim `devtools/environment.yml` to match current tooling and dependencies
 
 ## 0.7.3 (02.03.2026)
 

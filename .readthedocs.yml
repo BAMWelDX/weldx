@@ -9,7 +9,7 @@ version: 2
 build:
   os: ubuntu-24.04
   tools:
-    python: "mambaforge-4.10"
+    python: "3.12"
   jobs:
     post_checkout:
       - git fetch --unshallow
@@ -28,8 +28,14 @@ sphinx:
 ##formats:
 ##  - pdf
 
-# Optionally set the version of Python and requirements required to build your docs
-#build:
-#  image: testing
-conda:
-  environment: doc/rtd_environment.yml
+# Install weldx with the docs+vis extras directly via pip instead of a separate conda
+# environment file, so pyproject.toml stays the single source of truth for versions.
+# `vis` (weldx-widgets) is required too: the tutorial notebooks executed during the
+# build call plotting functions that need the real implementation, not its fallback stub.
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
+        - vis
