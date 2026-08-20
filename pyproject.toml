@@ -170,7 +170,7 @@ asdf = ">=2.15.1,<5"
 weldx = { path = ".", editable = true }
 
 [tool.pixi.feature.test.tasks]
-test = {cmd = "pytest", default-environment = "test"}
+test = "pytest"
 test_schemas = "pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/"
 
 [tool.pixi.feature.build.dependencies]
@@ -216,9 +216,9 @@ weldx = { path = ".", editable = true }
 weldx-widgets = "*"
 
 [tool.pixi.feature.docs.tasks]
-docs = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src ${READTHEDOCS_OUTPUT:-build}/html --keep-going -j auto -D nb_execution_mode=off"
-docs_full = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src ${READTHEDOCS_OUTPUT:-build}/html --keep-going -j auto -D nb_execution_mode=force"
-docs_clean = "rm -rf doc/build doc/src/_autosummary build"
+docs = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src doc/build/html --keep-going -j auto -D nb_execution_mode=off"
+docs_full = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src doc/build/html --keep-going -j auto -D nb_execution_mode=force"
+docs_clean = "rm -rf doc/build doc/src/_autosummary"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
@@ -237,6 +237,15 @@ vis = { features = ["vis"], solve-group = "default" }
 build = { features = ["build"], no-default-feature = true }
 
 [tool.pixi.tasks]
+ci = [
+  { task = "lint", environment = "lint" },
+  { task = "build", environment = "build" },
+  { task = "test", environment = "test-py312" },
+  { task = "test_schemas", environment = "test-asdf2" },
+  { task = "test_schemas", environment = "test-asdf3" },
+  { task = "test_schemas", environment = "test-asdf4" },
+  { task = "docs_full", environment = "docs" },
+]
 
 [tool.pixi.feature.py310.dependencies]
 python = "3.10.*"
@@ -284,4 +293,4 @@ weldx-widgets = ">=0.2.5"
 prek = "*"
 
 [tool.pixi.feature.lint.tasks]
-lint = { cmd = "prek -a", default-environment = "lint" }
+lint = "prek -a"

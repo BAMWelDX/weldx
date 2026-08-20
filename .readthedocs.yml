@@ -22,3 +22,4 @@ build:
     build:
       html:
         - pixi run -e docs docs_full
+        - mkdir -p $READTHEDOCS_OUTPUT/html && cp -r doc/build/html/* $READTHEDOCS_OUTPUT/html/

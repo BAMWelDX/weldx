@@ -277,8 +277,7 @@ class GenericSeries:
         if not isinstance(data, xr.DataArray):
             if coords is not None:
                 coords = {
-                    k: SeriesParameter(v, k).coord_tuple
-                    for k, v in coords.items()
+                    k: SeriesParameter(v, k).coord_tuple for k, v in coords.items()
                 }
             data = xr.DataArray(data=data, dims=dims, coords=coords).weldx.quantify()
         else:

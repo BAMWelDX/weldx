@@ -61,4 +61,4 @@ jobs:
           )
         with:
           name: weldx-docs
-          path: build/html
+          path: doc/build/html
