@@ -100,7 +100,7 @@ class TimeSeries(TimeDependent):
         if not isinstance(self.data, MathematicalExpression):
             if not isinstance(other.data, pint.Quantity):
                 return False
-            return self._data.identical(other.data_array)  # type: ignore
+            return self._data.identical(other.data_array)
 
         return self._data == other.data
 
@@ -227,7 +227,7 @@ class TimeSeries(TimeDependent):
         """Interpolate the time series if its data is composed of discrete values."""
         data = self._data
         if self.time is None and time.is_absolute:
-            data = data.weldx.reset_reference_time(time.reference_time)  # type: ignore
+            data = data.weldx.reset_reference_time(time.reference_time)
 
         return ut.xr_interp_like(
             data,
@@ -241,7 +241,7 @@ class TimeSeries(TimeDependent):
         """Interpolate the time series if its data is a mathematical expression."""
         time_q = time.as_quantity(unit=time_unit)
         if len(time_q.m.shape) == 0:
-            time_q = np.expand_dims(time_q, 0)  # type: ignore
+            time_q = np.expand_dims(time_q, 0)
 
         time_xr = xr.DataArray(time_q, dims=["time"])
 
@@ -338,7 +338,7 @@ class TimeSeries(TimeDependent):
     def reference_time(self) -> pd.Timestamp | None:
         """Get the reference time."""
         if self.is_discrete:
-            return self._data.weldx.time_ref  # type: ignore[union-attr]
+            return self._data.weldx.time_ref
         return self._reference_time
 
     def interp_time(
@@ -431,9 +431,9 @@ class TimeSeries(TimeDependent):
 
         time = Time(self.time, self.reference_time).as_quantity()
         if time_unit is not None:
-            time = time.to(time_unit)  # type: ignore[assignment]
+            time = time.to(time_unit)
 
-        axes.plot(time.m, self._data.data.m, **mpl_kwargs)  # type: ignore
+        axes.plot(time.m, self._data.data.m, **mpl_kwargs)
         axes.set_xlabel(f"t in {time.u:~}")
         y_unit_label = ""
         if self.units not in ["", "dimensionless"]:

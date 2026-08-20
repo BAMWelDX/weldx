@@ -90,9 +90,9 @@ class MediaFile:
         fps: float | None = None,
     ):
         if isinstance(path_or_array, get_args(types_path_like)):
-            self._init_from_path(path_or_array, reference_time)  # type: ignore
+            self._init_from_path(path_or_array, reference_time)
         elif isinstance(path_or_array, get_args(types_sequence_like)):
-            self._init_from_sequence(fps, path_or_array, reference_time)  # type: ignore
+            self._init_from_sequence(fps, path_or_array, reference_time)
         else:
             raise ValueError(f"unsupported input: {path_or_array}")
 
@@ -102,7 +102,7 @@ class MediaFile:
         from dask_image.imread import imread
         from pims import UnknownFormatError as _UnknownFormatError
 
-        path = Path(path_)  # type: ignore[arg-type]
+        path = Path(path_)
         try:
             self._handle = imread(path_)
         except _UnknownFormatError as e:
@@ -130,7 +130,7 @@ class MediaFile:
 
         first_frame = self._handle[0]
         if not hasattr(first_frame, "__array_interface__"):
-            first_frame = first_frame.data  # type: ignore
+            first_frame = first_frame.data
         image = fromarray(first_frame)
         self._metadata = dict(
             fps=fps,
@@ -224,7 +224,7 @@ class MediaFile:
             return ExternalFile(
                 buffer=buffer, filename="<in-memory-source>", asdf_save_content=True
             )
-        return ExternalFile(self._path_or_array)  # type: ignore[arg-type]
+        return ExternalFile(self._path_or_array)
 
     @property
     def data(self) -> xr.DataArray:
