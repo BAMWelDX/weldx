@@ -64,9 +64,10 @@ optional-dependencies.docs = [
   "pydata-sphinx-theme<0.15",             # parallel-write-unsafe
   "sphinx>=4.1.1,==7.2",
   "sphinx-autodoc-typehints>=1.21.8,==2",
-  "sphinx-copybutton==0.5",
+  "sphinx-copybutton==0.5.*",
   "typing-extensions",
   "urllib3<2",
+  "ipywidgets",
 ]
 optional-dependencies.media = [
   "av",
@@ -199,9 +200,47 @@ hatch-vcs = ">=0.4.0,<0.5"
 [tool.pixi.feature.build.tasks]
 build = "hatchling build"
 
+[tool.pixi.feature.docs.dependencies]
+python = "3.10.*"
+asdf = ">=2.8,<3"
+# weldx base dependencies
+numpy = ">=1.18,<2"
+pandas = ">=1.0"
+xarray = ">=0.15"
+pint = ">=0.11"
+scipy = ">=1.6.2,<1.12"
+sympy = ">=1.6"
+bottleneck = ">=1.3"
+matplotlib = "<3.8"
+# notebook execution
+myst-nb = "*"
+ipykernel = "*"
+ipywidgets = "<8"
+# weldx_widgets = ">=0.2.1"
+# documentation
+docutils = ">=0.19"
+sphinx = ">=4.1.1,<=7.2"
+urllib3 = "<2"
+# jinja2 = "3.0.*"
+sphinx-copybutton = "0.5.*"
+pydata-sphinx-theme = "<0.15" # parallel-write-unsafe
+beautifulsoup4 = "4.12.*" # circular import error in 4.13
+numpydoc = ">=0.5"
+sphinx-autodoc-typehints = ">=1.21.8,<=2.0"
+typing_extensions = "*"
+
+[tool.pixi.feature.docs.pypi-dependencies]
+myst-nb-json = "*"
+weldx = { path = ".", editable = true }
+weldx-widgets = "*"
+
+[tool.pixi.feature.docs.tasks]
+docs = "sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2 -D nb_execution_mode=off"
+docs_full = "sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2 -D nb_execution_mode=force"
+
 [tool.pixi.environments]
 default = { solve-group = "default" }
-docs = { features = ["docs"], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "docs" }
 media = { features = ["media"]}
 test = { features = ["test", "media"], solve-group = "default" }
 vis = { features = ["vis"], solve-group = "default" }
