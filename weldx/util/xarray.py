@@ -437,6 +437,16 @@ def _check_dtype(var_dtype, ref_dtype: str) -> bool:
     return True
 
 
+def _get_coord_units(coord) -> pint.Unit | str | None:
+    """Extract units from a coordinate via weldx, pint, or attrs."""
+    units = getattr(coord, "weldx", None) and coord.weldx.units
+    if units is None:
+        units = getattr(coord, "pint", None) and coord.pint.units
+    if units is None:
+        units = coord.attrs.get(UNITS_KEY, None)
+    return units
+
+
 def xr_check_coords(coords: xr.DataArray | Mapping[str, Any], ref: dict) -> bool:
     """Validate the coordinates of the DataArray against a reference dictionary.
 
@@ -539,11 +549,7 @@ def xr_check_coords(coords: xr.DataArray | Mapping[str, Any], ref: dict) -> bool
                 )
 
         if UNITS_KEY in check:
-            units = getattr(coords[key], "weldx", None) and coords[key].weldx.units
-            if units is None:
-                units = getattr(coords[key], "pint", None) and coords[key].pint.units
-            if units is None:
-                units = coords[key].attrs.get(UNITS_KEY, None)
+            units = _get_coord_units(coords[key])
             if units is None or U_(units) != U_(check[UNITS_KEY]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
@@ -551,11 +557,7 @@ def xr_check_coords(coords: xr.DataArray | Mapping[str, Any], ref: dict) -> bool
                 )
 
         if "dimensionality" in check:
-            units = getattr(coords[key], "weldx", None) and coords[key].weldx.units
-            if units is None:
-                units = getattr(coords[key], "pint", None) and coords[key].pint.units
-            if units is None:
-                units = coords[key].attrs.get(UNITS_KEY, None)
+            units = _get_coord_units(coords[key])
             dim = check["dimensionality"]
             if units is None or not U_(units).is_compatible_with(dim):
                 raise DimensionalityError(

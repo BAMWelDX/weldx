@@ -153,7 +153,7 @@ def read_buffer_context(
     buffer : io.BytesIO
         Buffer containing ASDF file contents
     open_kwargs
-        Additional keywords to pass to `asdf.AsdfFile.open`
+        Additional keywords to pass to `asdf.open`
         Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
@@ -200,7 +200,7 @@ def read_buffer(
     buffer : io.BytesIO
         Buffer containing ASDF file contents
     open_kwargs
-        Additional keywords to pass to `asdf.AsdfFile.open`
+        Additional keywords to pass to `asdf.open`
         Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
@@ -230,7 +230,7 @@ def write_read_buffer_context(
         Additional keywords to pass to `asdf.AsdfFile.write_to`
         Extensions are always set.
     open_kwargs
-        Additional keywords to pass to `asdf.AsdfFile.open`
+        Additional keywords to pass to `asdf.open`
         Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
@@ -258,7 +258,7 @@ def write_read_buffer(
         Additional keywords to pass to `asdf.AsdfFile.write_to`
         Extensions are always set.
     open_kwargs
-        Additional keywords to pass to `asdf.AsdfFile.open`
+        Additional keywords to pass to `asdf.open`
         Extensions are always set, ``memmap=False`` is set by default.
 
     Returns

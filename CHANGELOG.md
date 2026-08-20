@@ -5,12 +5,21 @@
 ### Fixes
 
 - remove usage of deprecated `np.cross` with 2-d vectors \[{pull}`1028`\]
+- fix compatibility with `scipy>=1.14` for single-axis 1d rotation angles
+- fix compatibility with `pint-xarray>=0.5` for coordinate unit handling
+- fix `GenericSeries.__repr__` formatting when coordinate data contains `pint.Quantity`
+
+### Dependencies
+
+- remove `attrdict` dependency and replace with internal `AttrDict` implementation
+- remove upper version pins for `pint`, `pint-xarray`, and `scipy`
 
 ### Maintenance
 
 - switch build backend to `hatchling` and `hatch-vcs` \[{pull}`1036`\]
 - migrate local conda recipe to `rattler-build` \[{pull}`1036`\]
 - migrate workspace management, environments, and CI workflows to `pixi` \[{pull}`1036`\]
+- align docs feature dependencies with main environment and require `asdf>=3`
 
 ## 0.7.3 (02.03.2026)
 

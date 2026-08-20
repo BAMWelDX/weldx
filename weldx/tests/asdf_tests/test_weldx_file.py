@@ -680,4 +680,3 @@ properties:
         assert wfa["nested"]["a"]["b"] == 42
         wfa.wx_meta.welder = "Myself"
         assert wfa.wx_meta.welder == "Myself"
-

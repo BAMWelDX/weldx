@@ -39,27 +39,15 @@ from weldx.util import (
     is_interactive_session,
     is_jupyterlab_session,
 )
+from weldx.util._attr_dict import AttrDict
 
 __all__ = [
     "WeldxFile",
-    "AttrDict",
     "DEFAULT_ARRAY_COMPRESSION",
     "DEFAULT_MEMORY_MAPPING",
     "DEFAULT_ARRAY_INLINE_THRESHOLD",
     "_PROTECTED_KEYS",
 ]
-
-
-class AttrDict(dict):
-    """Dictionary subclass that allows attribute access to its keys."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for key, value in self.items():
-            if isinstance(value, Mapping):
-                self.__dict__[key] = AttrDict(value)
-            else:
-                self.__dict__[key] = value
 
 _asdf_version = tuple(importlib.metadata.version("asdf").split("."))
 
@@ -134,7 +122,7 @@ class WeldxFile(_ProtectedViewDict):
         See `asdf.open` for reference.
     write_kwargs :
         Keyword arguments to pass to `asdf.AsdfFile.write_to`.
-        See `asdf.AsdfFile.open` for reference.
+        See `asdf.open` for reference.
     tree :
         An optional dictionary to write to the file.
     sync :
