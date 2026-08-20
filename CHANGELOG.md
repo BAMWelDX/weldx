@@ -8,6 +8,9 @@
 - fix compatibility with `scipy>=1.14` for single-axis 1d rotation angles
 - fix compatibility with `pint-xarray>=0.5` for coordinate unit handling
 - fix `GenericSeries.__repr__` formatting when coordinate data contains `pint.Quantity`
+- fix `pint` deprecation warning when setting default format on unit registry
+- update `XarrayDatasetConverter` to use `Dataset.sizes` instead of `Dataset.dims`
+- specify explicit `compat="no_conflicts"` in `LocalCoordinateSystem` dataset merge
 
 ### Dependencies
 
@@ -21,6 +24,7 @@
 - migrate local conda recipe to `rattler-build` \[{pull}`1036`\]
 - migrate workspace management, environments, and CI workflows to `pixi` \[{pull}`1036`\]
 - align docs feature dependencies with main environment and require `asdf>=3`
+- resolve test suite warnings and configure ignore filters for upstream library deprecations
 
 ## 0.7.3 (02.03.2026)
 

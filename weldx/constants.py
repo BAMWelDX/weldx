@@ -26,9 +26,10 @@ WELDX_UNIT_REGISTRY = pint.UnitRegistry(
 WELDX_UNIT_REGISTRY.define("percent = 0.01*count = %")
 # swap plank constant for hour definition
 WELDX_UNIT_REGISTRY.define("hour = 60*minute = h = hr")
-# set default string format to short notation
-# for more info on formatting: https://pint.readthedocs.io/en/stable/formatting.html
-WELDX_UNIT_REGISTRY.default_format = "~"
+if hasattr(WELDX_UNIT_REGISTRY, "formatter"):
+    WELDX_UNIT_REGISTRY.formatter.default_format = "~"
+else:
+    WELDX_UNIT_REGISTRY.default_format = "~"
 
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 Q_ = WELDX_QUANTITY

@@ -115,6 +115,10 @@ ini_options.filterwarnings = [
   "error::pint.UnitStrippedWarning",
   "ignore::DeprecationWarning:traittypes.*:",
   "ignore:Passing method to :FutureWarning:xarray.*:",
+  "ignore:pkg_resources is deprecated as an API:DeprecationWarning:fs.*:",
+  "ignore:Deprecated call to `pkg_resources.declare_namespace:DeprecationWarning:",
+  "ignore:The 'generic' unit for NumPy timedelta is deprecated:DeprecationWarning:",
+  "ignore:overflow encountered in scalar multiply:RuntimeWarning:meshio.*:",
   # "error::FutureWarning",  # todo: we want to enable this, as it notifies us about upcoming failures due to upstream changes.
 ]
 ini_options.asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn't we just use the entry points to resolve this?
