@@ -8517,27 +8517,26 @@ packages:
   - bidict
   - boltons
   - bottleneck>=1.3.3
+  - decorator ; python_full_version >= '3.10'
   - fs
   - ipython>=8
   - meshio
   - networkx>=2.8.2
   - numpy>=1.20
   - pandas>=1.5,<3
-  - pint>=0.21
   - pint-xarray>=0.3,<0.5
+  - pint>=0.21
   - psutil
   - scipy>=1.6.2,<1.17
-  - setuptools<82
   - sympy>=1.6
   - xarray>=2022.9
-  - decorator ; python_full_version >= '3.10'
   - docutils>=0.19 ; extra == 'docs'
   - myst-nb-json ; extra == 'docs'
   - numpydoc>=0.5 ; extra == 'docs'
   - pydata-sphinx-theme<0.15 ; extra == 'docs'
-  - sphinx>=4.1.1,==7.2 ; extra == 'docs'
   - sphinx-autodoc-typehints>=1.21.8,==2 ; extra == 'docs'
   - sphinx-copybutton==0.5 ; extra == 'docs'
+  - sphinx>=4.1.1,==7.2 ; extra == 'docs'
   - typing-extensions ; extra == 'docs'
   - urllib3<2 ; extra == 'docs'
   - av ; extra == 'media'
@@ -8545,10 +8544,10 @@ packages:
   - pims ; extra == 'media'
   - tifffile ; extra == 'media'
   - nbval ; extra == 'test'
-  - pytest>=6 ; extra == 'test'
   - pytest-asdf-plugin ; extra == 'test'
   - pytest-cov ; extra == 'test'
   - pytest-xdist ; extra == 'test'
+  - pytest>=6 ; extra == 'test'
   - weldx-widgets>=0.2.5 ; extra == 'vis'
   requires_python: '>=3.9,<3.14'
 - pypi: https://files.pythonhosted.org/packages/00/60/249e3444fcd9c833704741769981cd02fe2c7ce94126b1394e7a3b26e543/ipyfilechooser-0.6.0-py3-none-any.whl
