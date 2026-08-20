@@ -240,9 +240,9 @@ weldx = { path = ".", editable = true }
 weldx-widgets = "*"
 
 [tool.pixi.feature.docs.tasks]
-docs = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src build/html --keep-going -j auto -D nb_execution_mode=off"
-docs_full = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src build/html --keep-going -j auto -D nb_execution_mode=force"
-docs_clean = "rm -rf doc/build doc/src/_autosummary"
+docs = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src ${READTHEDOCS_OUTPUT:-build}/html --keep-going -j auto -D nb_execution_mode=off"
+docs_full = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src ${READTHEDOCS_OUTPUT:-build}/html --keep-going -j auto -D nb_execution_mode=force"
+docs_clean = "rm -rf doc/build doc/src/_autosummary build"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }

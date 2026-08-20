@@ -9,7 +9,7 @@ version: 2
 build:
   os: ubuntu-24.04
   tools:
-      python: "latest"
+    python: "latest"
   jobs:
     post_checkout:
       - git fetch --unshallow
@@ -21,4 +21,4 @@ build:
       - pixi install -e docs
     build:
       html:
-      - pixi run -e docs docs_full
+        - pixi run -e docs docs_full
