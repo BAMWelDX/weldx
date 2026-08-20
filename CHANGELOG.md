@@ -5,26 +5,26 @@
 ### Fixes
 
 - remove usage of deprecated `np.cross` with 2-d vectors \[{pull}`1028`\]
-- fix compatibility with `scipy>=1.14` for single-axis 1d rotation angles
-- fix compatibility with `pint-xarray>=0.5` for coordinate unit handling
-- fix `GenericSeries.__repr__` formatting when coordinate data contains `pint.Quantity`
-- fix `pint` deprecation warning when setting default format on unit registry
-- update `XarrayDatasetConverter` to use `Dataset.sizes` instead of `Dataset.dims`
-- specify explicit `compat="no_conflicts"` in `LocalCoordinateSystem` dataset merge
+- fix compatibility with `scipy>=1.14` for single-axis 1d rotation angles \[{pull}`1037`\]
+- fix compatibility with `pint-xarray>=0.5` for coordinate unit handling \[{pull}`1037`\]
+- fix `GenericSeries.__repr__` formatting when coordinate data contains `pint.Quantity` \[{pull}`1037`\]
+- fix `pint` deprecation warning when setting default format on unit registry \[{pull}`1037`\]
+- update `XarrayDatasetConverter` to use `Dataset.sizes` instead of `Dataset.dims` \[{pull}`1037`\]
+- specify explicit `compat="no_conflicts"` in `LocalCoordinateSystem` dataset merge \[{pull}`1037`\]
 
 ### Dependencies
 
-- remove `attrdict` dependency and replace with internal `AttrDict` implementation
-- remove upper version pins for `pint`, `pint-xarray`, and `scipy`
-- drop support for `asdf=2`, require `asdf>=3,<6`
+- remove `attrdict` dependency and replace with internal `AttrDict` implementation \[{pull}`1037`\]
+- remove upper version pins for `pint`, `pint-xarray`, and `scipy` \[{pull}`1037`\]
+- drop support for `asdf=2`, require `asdf>=3,<6` \[{pull}`1037`\]
 
 ### Maintenance
 
 - switch build backend to `hatchling` and `hatch-vcs` \[{pull}`1036`\]
 - migrate local conda recipe to `rattler-build` \[{pull}`1036`\]
 - migrate workspace management, environments, and CI workflows to `pixi` \[{pull}`1036`\]
-- align docs feature dependencies with main environment and require `asdf>=3`
-- resolve test suite warnings and configure ignore filters for upstream library deprecations
+- align docs feature dependencies with main environment and require `asdf>=3` \[{pull}`1037`\]
+- resolve test suite warnings and configure ignore filters for upstream library deprecations \[{pull}`1037`\]
 
 ## 0.7.3 (02.03.2026)
 
