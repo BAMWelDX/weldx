@@ -16,7 +16,6 @@ import datetime
 import os
 import sys
 import tempfile
-import typing
 
 from sphinx.util.logging import getLogger
 
@@ -60,7 +59,6 @@ def _prevent_sphinx_circular_imports_bug():
 _prevent_sphinx_circular_imports_bug()
 _workaround_imports_typechecking()  # needs to be called prior importing weldx.
 
-typing.TYPE_CHECKING = True
 try:
     import weldx
 except ModuleNotFoundError:  # fallback for local use
@@ -107,6 +105,13 @@ extlinks = {
 # autosummary --------------------------------------------------------------------------
 autosummary_generate = True
 # autosummary_imported_members = True
+# prevent case-insensitive collisions on macOS:
+autosummary_filename_map = {
+    "weldx.geometry": "weldx.geometry_module",
+    "weldx.time": "weldx.time_module",
+    "weldx.Geometry.profile": "weldx.Geometry.profile_attr",
+    "weldx.Geometry.trace": "weldx.Geometry.trace_attr",
+}
 
 # add __init__ docstrings to class documentation
 autoclass_content = "both"

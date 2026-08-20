@@ -29,7 +29,7 @@ repos:
           - mdformat-config
   # ----- Python formatting -----
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.12
+    rev: v0.16.3
     hooks:
     # Run ruff linter.
     - id: ruff-check
@@ -38,12 +38,12 @@ repos:
       - --fix
     # Run ruff formatter.
     - id: ruff-format
-  - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.21.1
-    hooks:
-    - id: pyproject-fmt
+  # - repo: https://github.com/tox-dev/pyproject-fmt
+  #   rev: v2.28.0
+  #   hooks:
+  #   - id: pyproject-fmt
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.25
+    rev: "0.26"
     hooks:
       - id: validate-pyproject
   # ----- Jupyter Notebooks -----
@@ -63,7 +63,7 @@ repos:
           - --remove-kernel-metadata
   # ----- spellchecking -----
   - repo: https://github.com/codespell-project/codespell/
-    rev: v2.4.2
+    rev: v2.4.3
     hooks:
       - id: codespell
         exclude: doc/src/legal-notice.md
@@ -75,7 +75,7 @@ repos:
   # specify the prettier hook twice if we want to format other things and avoid
   # a messy regex.
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.8.3
+    rev: v3.9.6
     hooks:
       - id: prettier
         files: CITATION.cff

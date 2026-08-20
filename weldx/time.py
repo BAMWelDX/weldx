@@ -304,7 +304,7 @@ class Time:
         # todo: update type hints (see: https://stackoverflow.com/q/46092104/6700329)
         # problem: ring dependency needs to be solved
         if issubclass(type(time), TimeDependent):
-            time = time.time  # type: ignore[union-attr] # mypy doesn't filter correctly
+            time = time.time  # mypy doesn't filter correctly
         if isinstance(time, Time):
             time_ref = time_ref if time_ref is not None else time._time_ref
             time = time._time
@@ -343,7 +343,7 @@ class Time:
         time_ref = None if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
-    def __eq__(self, other: types_time_like) -> bool | list[bool]:  # type: ignore
+    def __eq__(self, other: types_time_like) -> bool | list[bool]:
         """Element-wise comparisons between time object and compatible types.
 
         See Also
@@ -453,8 +453,8 @@ class Time:
         q = Q_(nanoseconds, "ns").to(unit)
         if self.is_absolute:
             # store time_ref info
-            q.time_ref = self.reference_time  # type: ignore[attr-defined]
-        return q  # type: ignore[return-value]
+            q.time_ref = self.reference_time
+        return q
 
     def as_timedelta(self) -> Timedelta | TimedeltaIndex:
         """Return the data as `pandas.TimedeltaIndex` or `pandas.Timedelta`."""
@@ -572,7 +572,7 @@ class Time:
         `Time.as_quantity`
 
         """
-        return self.as_quantity(unit="s")  # type: ignore[return-value]
+        return self.as_quantity(unit="s")
 
     @property
     def duration(self) -> Time:
@@ -663,10 +663,10 @@ class Time:
         base = "s"  # using low base unit could cause rounding errors
 
         if not np.iterable(time):  # catch zero-dim arrays
-            # The mypy error in the next line is ignored. `np.expand_dims` only expects
-            # `ndarray` types and does not know about quantities, but pint provides the
-            # necessary interfaces so that the function works as expected
-            time = np.expand_dims(time, 0)  # type: ignore[assignment]
+            # `np.expand_dims` only expects `ndarray` types and does not know about
+            # quantities, but pint provides the necessary interfaces so that the
+            # function works as expected
+            time = np.expand_dims(time, 0)
 
         delta = pd.to_timedelta(time.to(base).magnitude, base)
         if time_ref is not None:

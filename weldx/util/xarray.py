@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -14,11 +14,9 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
+import weldx.types as wxt
 from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time, types_time_like, types_timestamp_like
-
-if TYPE_CHECKING:  # pragma: no cover
-    import weldx.types as wxt
 
 __all__ = [
     "WeldxAccessor",
@@ -154,7 +152,7 @@ def xr_matmul(
 
     mul_func = np.matmul
     if len(dims_a) > len(dims_b):
-        mul_func = mat_vec_mul  # type: ignore[assignment] # irrelevant for us
+        mul_func = mat_vec_mul  # irrelevant for us
 
     if trans_a:
         dims_a = reversed(dims_a)
@@ -240,11 +238,7 @@ def _coordinates_from_quantities(
 ) -> dict[str, tuple[str, np.ndarray, dict[str, pint.Unit]]]:
     """Create a dict with unit information that can be passed as coords for xarray."""
     return {
-        k: (
-            (k, v.m, {UNITS_KEY: v.u})  # type: ignore[dict-item]
-            if isinstance(v, pint.Quantity)
-            else v
-        )
+        k: ((k, v.m, {UNITS_KEY: v.u}) if isinstance(v, pint.Quantity) else v)
         for k, v in q_dict.items()
     }
 
@@ -616,7 +610,7 @@ def xr_3d_vector(
     if time is not None:
         if "time" not in dims:  # prepend to beginning if not already set
             dims = ["time"] + dims
-        coords["time"] = time  # type: ignore[assignment]
+        coords["time"] = time
 
     if "time" in coords:
         coords["time"] = Time(coords["time"]).as_data_array()

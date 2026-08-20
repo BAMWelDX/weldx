@@ -277,8 +277,7 @@ class GenericSeries:
         if not isinstance(data, xr.DataArray):
             if coords is not None:
                 coords = {
-                    k: SeriesParameter(v, k).coord_tuple  # type: ignore[misc]
-                    for k, v in coords.items()
+                    k: SeriesParameter(v, k).coord_tuple for k, v in coords.items()
                 }
             data = xr.DataArray(data=data, dims=dims, coords=coords).weldx.quantify()
         else:
@@ -499,7 +498,7 @@ class GenericSeries:
     def _evaluate_preprocessor(self, **kwargs) -> list[SeriesParameter]:
         """Preprocess the passed parameters into coordinates for evaluation."""
         kwargs = ut.apply_func_by_mapping(
-            self.__class__._evaluation_preprocessor,  # type: ignore # skipcq: PYL-W0212
+            self.__class__._evaluation_preprocessor,  # skipcq: PYL-W0212
             kwargs,
         )
 
@@ -856,7 +855,7 @@ class SeriesParameter:
     def units(self) -> pint.Unit:
         """Get the units information of the parameter."""
         if isinstance(self.values, pint.Quantity):
-            return self.values.units  # type: ignore[return-value]
+            return self.values.units
         return self.values.weldx.units
 
     @property
@@ -868,7 +867,7 @@ class SeriesParameter:
         values = self.values
         if not values.shape:
             values = np.expand_dims(values, 0)
-        return _quantity_to_xarray(values, self.dim)  # type: ignore[arg-type]
+        return _quantity_to_xarray(values, self.dim)
 
     @property
     def quantity(self) -> pint.Quantity:
@@ -889,7 +888,7 @@ class SeriesParameter:
 def _quantity_to_coord_tuple(
     v: pint.Quantity, dim
 ) -> tuple[str, np.ndarray, dict[str, pint.Unit]]:
-    return dim, v.m, {UNITS_KEY: v.u}  # type: ignore[dict-item]
+    return dim, v.m, {UNITS_KEY: v.u}
 
 
 def _quantity_to_xarray(v: pint.Quantity, dim: str = None) -> xr.DataArray:

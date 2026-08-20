@@ -207,7 +207,7 @@ class _EqCompareNested:
             return False
 
         for types, func in _EqCompareNested.compare_funcs.items():
-            if isinstance(x, types):  # type: ignore[arg-type]
+            if isinstance(x, types):
                 return func(x, y)
 
         return x == y
@@ -350,7 +350,7 @@ def dataclass_nested_eq(original_class):
 def is_interactive_session() -> bool:
     """Check whether this Python session is interactive, e.g. Jupyter/IPython."""
     try:
-        get_ipython = sys.modules["IPython"].get_ipython  # type: ignore[attr-defined]
+        get_ipython = sys.modules["IPython"].get_ipython
         if not get_ipython():
             return False
         if "IPKernelApp" not in get_ipython().config:  # pragma: no cover

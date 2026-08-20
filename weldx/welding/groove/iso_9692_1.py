@@ -1948,7 +1948,7 @@ def get_groove(
     if _loc["code_number"] is not None:
         args["code_number"] = _loc["code_number"]
 
-    return groove_cls(**args)  # type: ignore # ABCs confuse mypy
+    return groove_cls(**args)  # ABCs confuse mypy
 
 
 def _create_test_grooves():

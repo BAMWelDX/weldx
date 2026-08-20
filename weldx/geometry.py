@@ -1456,7 +1456,7 @@ class Profile:
         if isinstance(color, str):  # single color
             color = [color] * len(raster_data)
 
-        for segment, c in zip(raster_data, color):
+        for segment, c in zip(raster_data, color, strict=False):
             ax.plot(segment[0], segment[1], line_style, label=label, color=c)
 
     @property

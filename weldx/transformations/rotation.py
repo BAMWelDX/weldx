@@ -69,9 +69,9 @@ class WXRotation(_Rotation):
         """
         if isinstance(angles, pint.Quantity):
             if angles.u == U_(""):
-                angles = angles.to("rad")  # type: ignore[assignment]
+                angles = angles.to("rad")
             degrees = "rad" not in str(angles.u)
-            angles = angles.to("degree") if degrees else angles.to("rad")  # type: ignore[assignment]
+            angles = angles.to("degree") if degrees else angles.to("rad")
             angles = angles.m
 
         rot = super().from_euler(seq=seq, angles=angles, degrees=degrees)

@@ -1,10 +1,6 @@
 [build-system]
-build-backend = "setuptools.build_meta"
-requires = [
-  "setuptools>=64",
-  "setuptools-scm[toml]>=8",
-  "wheel",
-]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "weldx"
@@ -22,7 +18,7 @@ authors = [
   { name = "Michael Winkler", email = "michael.winkler@bam.de" },
   { name = "Volker Hirthammer", email = "volker.hirthammer@bam.de" },
 ]
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.10,<3.14"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Education",
@@ -32,7 +28,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -47,6 +42,7 @@ dependencies = [
   "bidict",
   "boltons",
   "bottleneck>=1.3.3",
+  "decorator",
   "fs",
   "ipython>=8",
   "meshio",
@@ -68,15 +64,19 @@ optional-dependencies.docs = [
   "pydata-sphinx-theme<0.15",             # parallel-write-unsafe
   "sphinx>=4.1.1,==7.2",
   "sphinx-autodoc-typehints>=1.21.8,==2",
-  "sphinx-copybutton==0.5",
+  "sphinx-copybutton==0.5.*",
   "typing-extensions",
   "urllib3<2",
+  "ipywidgets",
 ]
 optional-dependencies.media = [
-  "av",
+  "av<19,>=10.0; python_version == '3.10'",
+  "av<19,>=10.0; python_version == '3.11'",
+  "av<19,>=11.0; python_version == '3.12'",
+  "av<19,>=14.0; python_version >= '3.13'",
   "dask-image",
   "pims",
-  "tifffile",   # required by dask-image, but not listed in their requirements
+  "tifffile", # required by dask-image, but not listed in their requirements
 ]
 optional-dependencies.test = [
   "nbval",
@@ -96,12 +96,14 @@ scripts.welding_schema = "weldx.asdf.cli.welding_schema:main"
 entry-points."asdf.extensions".weldx = "weldx.asdf.extension:get_extensions"
 entry-points."asdf.resource_mappings".weldx_schemas = "weldx.asdf.extension:get_resource_mappings"
 
-[tool.setuptools]
-packages.find.where = [
-  ".",
-]
+[tool.hatch.version]
+source = "vcs"
 
-[tool.setuptools_scm]
+[tool.hatch.build.hooks.vcs]
+version-file = "weldx/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["weldx"]
 
 [tool.nbqa]
 # enable setuptools-scm versioning
@@ -109,62 +111,33 @@ addopts.ruff = [
   "--extend-ignore=B018",
 ]
 
-[tool.mypy]
-python_version = "3.9"
-files = "weldx"
-ignore_missing_imports = true  # TODO: this is bad!
-strict_optional = false
-pretty = true
-allow_redefinition = true
-show_error_context = true
-show_error_codes = true
-show_column_numbers = true
-sqlite_cache = true
-
-# MyPy per-module options:
-[[tool.mypy.overrides]]
-module = [
-  "weldx.asdf.*",
-  "weldx.tags.*",
-  "weldx.tests.*",
-  "weldx.welding.groove.*",
-  "weldx.geometry.*",
-]
-ignore_errors = true
-
-# this is a workaround for an xarray related mypy bug
-# see https://github.com/python/mypy/pull/9495
-# and https://github.com/space-physics/msise00/commit/8b59a9383dd6fcc54b7dac74eb95a350308d7b62
-# TODO: is this still mandatory?
-[[tool.mypy.overrides]]
-module = "xarray"
-follow_imports = "skip"
-ignore_errors = true
-
 [tool.pytest]
-ini_options.addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules"
 # addopts = --tb=short --color=yes -rs -p no:cov
 ini_options.testpaths = "weldx"
-# custom test markers, see https://docs.pytest.org/en/latest/example/markers.html#mark-examples
-ini_options.markers = "slow: marks tests as slow to run (skipped by default, enable with --runslow option)"
-ini_options.asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn't we just use the entry points to resolve this?
-# asdf_schema_tests_enabled = true
 # asdf_schema_skip_tests =
 #    weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml
 ini_options.norecursedirs = [
-  "doc",
   ".ipynb_checkpoints",
+  "doc",
 ]
+ini_options.addopts = "--tb=short --color=yes -rsw --cov=weldx --cov-report=term-missing:skip-covered --doctest-modules -n auto"
+# custom test markers, see https://docs.pytest.org/en/latest/example/markers.html#mark-examples
+ini_options.markers = "slow: marks tests as slow to run (skipped by default, enable with --runslow option)"
 ini_options.filterwarnings = [
+  "error::pint.UnitStrippedWarning",
   "ignore::DeprecationWarning:traittypes.*:",
   "ignore:Passing method to :FutureWarning:xarray.*:",
-  "error::pint.UnitStrippedWarning",
   # "error::FutureWarning",  # todo: we want to enable this, as it notifies us about upcoming failures due to upstream changes.
 ]
+ini_options.asdf_schema_root = "weldx/schemas/weldx.bam.de/weldx"  # TODO: couldn't we just use the entry points to resolve this?
+# asdf_schema_tests_enabled = true
 
 [tool.coverage]
 run.source = [
   "weldx",
+]
+report.omit = [
+  "weldx/tests/*",
 ]
 report.exclude_lines = [
   # ignore class __repr__-like functions:
@@ -174,6 +147,184 @@ report.exclude_lines = [
   # Have to re-enable the standard pragma
   "pragma: no cover",
 ]
-report.omit = [
-  "weldx/tests/*",
+
+[tool.codespell]
+skip = "*.lock"
+ignore-words-list = "ro"
+
+# -----
+# Pixi
+# -----
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "win-64", "linux-64"]
+
+[tool.pixi.dependencies]
+setuptools = "<70"
+scipy = ">=1.6.2,<1.17"
+pandas = ">=1.5,<3"
+pint-xarray = ">=0.3,<0.5"
+asdf = ">=2.15.1,<5"
+
+[tool.pixi.pypi-dependencies]
+weldx = { path = ".", editable = true }
+
+[tool.pixi.feature.test.tasks]
+test = "pytest"
+test_schemas = "pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/"
+test_tutorials = "pytest -n 2 --dist loadfile --nbval --current-env --cov-append ./doc/src/tutorials/"
+test_weldx_file = "pytest -n 2 --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests"
+test_quality_standards = "pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py"
+test_installable_quality_standard = """
+  cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template -f \
+  && pip install -e ./quality_standard_demo --no-deps \
+  && pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py \
+  && pip uninstall -y quality_standard_demo \
+  && rm -rf ./quality_standard_demo
+"""
+coverage_xml = "coverage xml"
+coverage_report = "coverage report"
+coverage_html = "coverage html"
+
+[tool.pixi.feature.build.dependencies]
+hatchling = ">=1.27.0,<2"
+hatch-vcs = ">=0.4.0,<0.5"
+rattler-build = "*"
+conda-recipe-manager = "*"
+twine = "*"
+
+[tool.pixi.feature.build.tasks]
+build = "hatchling build"
+build_conda = "rattler-build build --recipe recipe/recipe.yaml"
+
+[tool.pixi.feature.docs.dependencies]
+python = "3.10.*"
+asdf = ">=2.8,<3"
+# weldx base dependencies
+numpy = ">=1.18,<2"
+pandas = ">=1.0"
+xarray = ">=0.15"
+pint = ">=0.11"
+scipy = ">=1.6.2,<1.12"
+sympy = ">=1.6"
+bottleneck = ">=1.3"
+matplotlib = "<3.8"
+# notebook execution
+myst-nb = "*"
+ipykernel = "*"
+ipywidgets = "<8"
+# weldx_widgets = ">=0.2.1"
+# documentation
+docutils = ">=0.19"
+sphinx = ">=4.1.1,<=7.2"
+urllib3 = "<2"
+# jinja2 = "3.0.*"
+sphinx-copybutton = "0.5.*"
+pydata-sphinx-theme = "<0.15" # parallel-write-unsafe
+beautifulsoup4 = "4.12.*" # circular import error in 4.13
+numpydoc = ">=0.5"
+sphinx-autodoc-typehints = ">=1.21.8,<=2.0"
+typing_extensions = "*"
+setuptools = "<70"
+
+[tool.pixi.feature.docs.pypi-dependencies]
+myst-nb-json = "*"
+weldx = { path = ".", editable = true }
+weldx-widgets = "*"
+
+[tool.pixi.feature.docs.tasks]
+docs = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src doc/build/html --keep-going -j auto -D nb_execution_mode=off"
+docs_full = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src doc/build/html --keep-going -j auto -D nb_execution_mode=force"
+docs_clean = "rm -rf doc/build doc/src/_autosummary"
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+docs = { features = ["docs"], solve-group = "docs" }
+media = { features = ["media"]}
+test = { features = ["test", "media", "vis"], solve-group = "default" }
+test-py310 = ["test", "media", "vis", "py310"]
+test-py311 = ["test", "media", "vis", "py311"]
+test-py312 = ["test", "media", "vis", "py312"]
+test-py313 = ["test", "media", "vis", "py313"]
+test-asdf2 = ["test", "py310", "asdf2"]
+test-asdf3 = ["test", "py310", "asdf3"]
+test-asdf4 = ["test", "py310", "asdf4"]
+lint = { features = ["lint"], no-default-feature = true }
+vis = { features = ["vis"], solve-group = "default" }
+build = { features = ["build"], no-default-feature = true }
+
+[tool.pixi.tasks]
+ci = [
+  { task = "lint", environment = "lint" },
+  { task = "build", environment = "build" },
+  { task = "build_conda", environment = "build" },
+  { task = "test", environment = "test-py312" },
+  { task = "test_schemas", environment = "test-asdf2" },
+  { task = "test_schemas", environment = "test-asdf3" },
+  { task = "test_schemas", environment = "test-asdf4" },
+  { task = "docs_full", environment = "docs" },
 ]
+test_extra = [
+  { task = "test_tutorials", environment = "test-py310" },
+  { task = "test_weldx_file", environment = "test-py310" },
+  { task = "test_quality_standards", environment = "test-py310" },
+  { task = "test_installable_quality_standard", environment = "test-py310" },
+]
+test_coverage = [
+  { task = "test", environment = "test-py310" },
+  { task = "test_extra", environment = "test-py310" },
+  { task = "coverage_xml", environment = "test-py310" },
+  { task = "coverage_report", environment = "test-py310" },
+]
+
+[tool.pixi.feature.py310.dependencies]
+python = "3.10.*"
+av = ">=10.0,<19"
+
+[tool.pixi.feature.py311.dependencies]
+python = "3.11.*"
+av = ">=10.0,<19"
+
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
+av = ">=11.0,<19"
+
+[tool.pixi.feature.py313.dependencies]
+python = "3.13.*"
+av = ">=14.0,<19"
+
+[tool.pixi.feature.asdf2.dependencies]
+asdf = "2.*"
+pytest = "<8"
+
+[tool.pixi.feature.asdf3.dependencies]
+asdf = "3.*"
+
+[tool.pixi.feature.asdf4.dependencies]
+asdf = "4.*"
+
+[tool.pixi.feature.media.dependencies]
+av = ">=10.0,<19"
+dask-image = "*"
+pims = "*"
+tifffile = "*"
+
+[tool.pixi.feature.test.dependencies]
+nbval = "*"
+pytest = ">=6"
+pytest-asdf-plugin = "*"
+pytest-cov = "*"
+pytest-xdist = "*"
+cookiecutter = "*"
+matplotlib = "*"
+pip = "*"
+setuptools_scm = "*"
+
+[tool.pixi.feature.vis.pypi-dependencies]
+weldx-widgets = ">=0.2.5"
+
+[tool.pixi.feature.lint.dependencies]
+prek = "*"
+
+[tool.pixi.feature.lint.tasks]
+lint = "prek -a"
