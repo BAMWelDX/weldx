@@ -18,7 +18,7 @@ authors = [
   { name = "Michael Winkler", email = "michael.winkler@bam.de" },
   { name = "Volker Hirthammer", email = "volker.hirthammer@bam.de" },
 ]
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.10,<3.14"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Education",
@@ -28,7 +28,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -54,6 +53,7 @@ dependencies = [
   "pint-xarray>=0.3,<0.5",
   "psutil",
   "scipy>=1.6.2,<1.17",
+  "setuptools<70",
   "sympy>=1.6",
   "xarray>=2022.9",
 ]
@@ -70,10 +70,13 @@ optional-dependencies.docs = [
   "ipywidgets",
 ]
 optional-dependencies.media = [
-  "av",
+  "av<19,>=10.0; python_version == '3.10'",
+  "av<19,>=10.0; python_version == '3.11'",
+  "av<19,>=11.0; python_version == '3.12'",
+  "av<19,>=14.0; python_version >= '3.13'",
   "dask-image",
   "pims",
-  "tifffile",   # required by dask-image, but not listed in their requirements
+  "tifffile", # required by dask-image, but not listed in their requirements
 ]
 optional-dependencies.test = [
   "nbval",
@@ -194,9 +197,6 @@ weldx = { path = ".", editable = true }
 [tool.pixi.feature.test.tasks]
 test = {cmd = "pytest", default-environment = "test"}
 
-[tool.pixi.feature.media.dependencies]
-av = ">=18.1.0,<19"
-
 [tool.pixi.feature.build.dependencies]
 hatchling = ">=1.27.0,<2"
 hatch-vcs = ">=0.4.0,<0.5"
@@ -249,11 +249,31 @@ default = { solve-group = "default" }
 docs = { features = ["docs"], solve-group = "docs" }
 media = { features = ["media"]}
 test = { features = ["test", "media"], solve-group = "default" }
+test-py310 = ["test", "media", "py310"]
+test-py311 = ["test", "media", "py311"]
+test-py312 = ["test", "media", "py312"]
+test-py313 = ["test", "media", "py313"]
 lint = { features = ["lint"], no-default-feature = true }
 vis = { features = ["vis"], solve-group = "default" }
 build = { features = ["build"], no-default-feature = true }
 
 [tool.pixi.tasks]
+
+[tool.pixi.feature.py310.dependencies]
+python = "3.10.*"
+av = ">=10.0,<19"
+
+[tool.pixi.feature.py311.dependencies]
+python = "3.11.*"
+av = ">=10.0,<19"
+
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
+av = ">=11.0,<19"
+
+[tool.pixi.feature.py313.dependencies]
+python = "3.13.*"
+av = ">=14.0,<19"
 
 [tool.pixi.feature.lint.dependencies]
 prek = "*"
