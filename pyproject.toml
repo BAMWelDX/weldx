@@ -196,6 +196,7 @@ weldx = { path = ".", editable = true }
 
 [tool.pixi.feature.test.tasks]
 test = {cmd = "pytest", default-environment = "test"}
+test_schemas = "pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/"
 
 [tool.pixi.feature.build.dependencies]
 hatchling = ">=1.27.0,<2"
@@ -253,7 +254,11 @@ test-py310 = ["test", "media", "py310"]
 test-py311 = ["test", "media", "py311"]
 test-py312 = ["test", "media", "py312"]
 test-py313 = ["test", "media", "py313"]
+test-asdf2 = ["test", "py310", "asdf2"]
+test-asdf3 = ["test", "py310", "asdf3"]
+test-asdf4 = ["test", "py310", "asdf4"]
 lint = { features = ["lint"], no-default-feature = true }
+mypy = { features = ["mypy"], solve-group = "default" }
 vis = { features = ["vis"], solve-group = "default" }
 build = { features = ["build"], no-default-feature = true }
 
@@ -275,8 +280,25 @@ av = ">=11.0,<19"
 python = "3.13.*"
 av = ">=14.0,<19"
 
+[tool.pixi.feature.asdf2.dependencies]
+asdf = "2.*"
+
+[tool.pixi.feature.asdf3.dependencies]
+asdf = "3.*"
+
+[tool.pixi.feature.asdf4.dependencies]
+asdf = "4.*"
+
 [tool.pixi.feature.lint.dependencies]
 prek = "*"
 
 [tool.pixi.feature.lint.tasks]
 lint = { cmd = "prek -a", default-environment = "lint" }
+
+[tool.pixi.feature.mypy.dependencies]
+mypy = ">=1.0"
+types-setuptools = "*"
+types-PyYAML = "*"
+
+[tool.pixi.feature.mypy.tasks]
+typecheck = "mypy weldx"

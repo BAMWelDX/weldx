@@ -25,11 +25,6 @@ on:
         required: false
         default: false
 
-# execute commands with conda aware shell by default:
-defaults:
-  run:
-    shell: bash -el {0}
-
 jobs:
   build:
     if: |
@@ -39,41 +34,22 @@ jobs:
     name: sphinx build
     runs-on: ubuntu-latest
     env:
-      nb_execution_mode: 'force'
+      DOCS_TASK: ${{ github.event.inputs.nb_execution_mode == 'off' && 'docs' || 'docs_full' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # Fetch all history for all tags and branches
+          fetch-depth: 0
 
-      - name: Setup Conda Environment
-        uses: mamba-org/setup-micromamba@v2.0.7
+      - uses: prefix-dev/setup-pixi@v0.10.1
         with:
-          environment-file: ./doc/rtd_environment.yml
-          environment-name: rtd
-          init-shell: >-
-            bash
-            powershell
-          cache-environment: false
-
-      - name: activate build env
-        run: micromamba activate rtd
-
-      - name: conda info
-        run: conda info
-
-      - name: conda list
-        run: conda list
-
-      - name: install weldx kernel
-        run: ipython kernel install --user --name=weldx
-
-      - name: set notebook execution
-        if: (github.event_name == 'workflow_dispatch')
-        run: echo "nb_execution_mode=${{ github.event.inputs.nb_execution_mode }}" >> $GITHUB_ENV
+          pixi-version: v0.77.0
+          environments: docs
+          log-level: vvv
+          locked: true
 
       - name: Build docs
-        run: sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2 -D nb_execution_mode=${{ env.nb_execution_mode }}
+        run: pixi run -e docs ${{ env.DOCS_TASK }}
 
       - uses: actions/upload-artifact@v7
         if: |
