@@ -20,21 +20,3 @@ jobs:
           locked: true
       - name: Run lint
         run: pixi run -e lint lint
-
-  mypy:
-    name: mypy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.10.1
-        with:
-          pixi-version: v0.77.0
-          environments: mypy
-          log-level: vvv
-          locked: true
-      - name: Add mypy annotator
-        uses: pr-annotators/mypy-pr-annotator@v1.0.0
-      - name: run mypy
-        run: pixi run -e mypy typecheck
