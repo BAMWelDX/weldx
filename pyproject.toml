@@ -176,9 +176,12 @@ test_schemas = "pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas
 [tool.pixi.feature.build.dependencies]
 hatchling = ">=1.27.0,<2"
 hatch-vcs = ">=0.4.0,<0.5"
+rattler-build = "*"
+conda-recipe-manager = "*"
 
 [tool.pixi.feature.build.tasks]
 build = "hatchling build"
+build_conda = "rattler-build build --recipe recipe/recipe.yaml"
 
 [tool.pixi.feature.docs.dependencies]
 python = "3.10.*"
@@ -240,6 +243,7 @@ build = { features = ["build"], no-default-feature = true }
 ci = [
   { task = "lint", environment = "lint" },
   { task = "build", environment = "build" },
+  { task = "build_conda", environment = "build" },
   { task = "test", environment = "test-py312" },
   { task = "test_schemas", environment = "test-asdf2" },
   { task = "test_schemas", environment = "test-asdf3" },

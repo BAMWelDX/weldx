@@ -40,5 +40,5 @@ A short primer in the steps needed to release a new version of the `weldx` packa
 
 - pypi release should get picked up by the conda-forge bot and create the new
   pull-request [here](https://github.com/conda-forge/weldx-feedstock/pulls)
-- [ ] carefully check the `meta.yaml` in the pull request, manually update all changes in the build and run dependencies
+- [ ] carefully check the `recipe.yaml` in the pull request, manually update all changes in the build and run dependencies
 - [ ] merge with 2 or more approved reviews
