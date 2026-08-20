@@ -177,6 +177,10 @@ report.exclude_lines = [
   "pragma: no cover",
 ]
 
+[tool.codespell]
+skip = "*.lock"
+ignore-words-list = "ro"
+
 # -----
 # Pixi
 # -----
