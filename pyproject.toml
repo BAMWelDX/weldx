@@ -249,7 +249,14 @@ default = { solve-group = "default" }
 docs = { features = ["docs"], solve-group = "docs" }
 media = { features = ["media"]}
 test = { features = ["test", "media"], solve-group = "default" }
+lint = { features = ["lint"], no-default-feature = true }
 vis = { features = ["vis"], solve-group = "default" }
 build = { features = ["build"], no-default-feature = true }
 
 [tool.pixi.tasks]
+
+[tool.pixi.feature.lint.dependencies]
+prek = "*"
+
+[tool.pixi.feature.lint.tasks]
+lint = { cmd = "prek -a", default-environment = "lint" }

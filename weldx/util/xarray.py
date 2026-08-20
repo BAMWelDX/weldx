@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -14,9 +14,9 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
+import weldx.types as wxt
 from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time, types_time_like, types_timestamp_like
-import weldx.types as wxt
 
 __all__ = [
     "WeldxAccessor",
