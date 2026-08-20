@@ -6,6 +6,12 @@
 
 - remove usage of deprecated `np.cross` with 2-d vectors \[{pull}`1028`\]
 
+### Maintenance
+
+- switch build backend to `hatchling` and `hatch-vcs` \[{pull}`1036`\]
+- migrate local conda recipe to `rattler-build` \[{pull}`1036`\]
+- migrate workspace management, environments, and CI workflows to `pixi` \[{pull}`1036`\]
+
 ## 0.7.3 (02.03.2026)
 
 ### Dependencies
