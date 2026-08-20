@@ -172,6 +172,19 @@ weldx = { path = ".", editable = true }
 [tool.pixi.feature.test.tasks]
 test = "pytest"
 test_schemas = "pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/"
+test_tutorials = "pytest -n 2 --dist loadfile --nbval --current-env --cov-append ./doc/src/tutorials/"
+test_weldx_file = "pytest -n 2 --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests"
+test_quality_standards = "pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py"
+test_installable_quality_standard = """
+  cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template -f \
+  && pip install -e ./quality_standard_demo --no-deps \
+  && pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py \
+  && pip uninstall -y quality_standard_demo \
+  && rm -rf ./quality_standard_demo
+"""
+coverage_xml = "coverage xml"
+coverage_report = "coverage report"
+coverage_html = "coverage html"
 
 [tool.pixi.feature.build.dependencies]
 hatchling = ">=1.27.0,<2"
@@ -228,11 +241,11 @@ docs_clean = "rm -rf doc/build doc/src/_autosummary"
 default = { solve-group = "default" }
 docs = { features = ["docs"], solve-group = "docs" }
 media = { features = ["media"]}
-test = { features = ["test", "media"], solve-group = "default" }
-test-py310 = ["test", "media", "py310"]
-test-py311 = ["test", "media", "py311"]
-test-py312 = ["test", "media", "py312"]
-test-py313 = ["test", "media", "py313"]
+test = { features = ["test", "media", "vis"], solve-group = "default" }
+test-py310 = ["test", "media", "vis", "py310"]
+test-py311 = ["test", "media", "vis", "py311"]
+test-py312 = ["test", "media", "vis", "py312"]
+test-py313 = ["test", "media", "vis", "py313"]
 test-asdf2 = ["test", "py310", "asdf2"]
 test-asdf3 = ["test", "py310", "asdf3"]
 test-asdf4 = ["test", "py310", "asdf4"]
@@ -250,6 +263,18 @@ ci = [
   { task = "test_schemas", environment = "test-asdf3" },
   { task = "test_schemas", environment = "test-asdf4" },
   { task = "docs_full", environment = "docs" },
+]
+test_extra = [
+  { task = "test_tutorials", environment = "test-py310" },
+  { task = "test_weldx_file", environment = "test-py310" },
+  { task = "test_quality_standards", environment = "test-py310" },
+  { task = "test_installable_quality_standard", environment = "test-py310" },
+]
+test_coverage = [
+  { task = "test", environment = "test-py310" },
+  { task = "test_extra", environment = "test-py310" },
+  { task = "coverage_xml", environment = "test-py310" },
+  { task = "coverage_report", environment = "test-py310" },
 ]
 
 [tool.pixi.feature.py310.dependencies]
@@ -290,6 +315,10 @@ pytest = ">=6"
 pytest-asdf-plugin = "*"
 pytest-cov = "*"
 pytest-xdist = "*"
+cookiecutter = "*"
+matplotlib = "*"
+pip = "*"
+setuptools_scm = "*"
 
 [tool.pixi.feature.vis.pypi-dependencies]
 weldx-widgets = ">=0.2.5"

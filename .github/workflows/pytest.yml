@@ -67,37 +67,13 @@ jobs:
           name: Unit Test Results
           path: pytest.xml
 
-      - name: install cookiecutter
-        if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.environment }} pip install cookiecutter
-
-      - name: create installable quality standard from repo
-        if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.environment }} cookiecutter --no-input https://github.com/BAMWeldx/quality-standard-template
-
-      - name: install quality standard
-        if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.environment }} pip install -e ./quality_standard_demo
-
-      - name: run pytest on notebooks (append coverage)
-        if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.environment }} pytest -n 2 --dist loadfile --nbval --current-env --cov-append ./doc/src/tutorials/
-
-      - name: test with WeldxFile
-        if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.environment }} pytest -n 2 --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
-
-      - name: test quality standard
-        if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.environment }} pytest --cov-append ./weldx/tests/asdf_tests/quality_standards_check.py
-
       - name: test installable quality standard from template repository
         if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.environment }} pytest --cov-append ./weldx/tests/asdf_tests/installable_quality_standard_check.py
+        run: pixi run -e ${{ matrix.environment }} test_extra
 
       - name: coverage xml (combination is performed by pytest-cov)
         if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.environment }} coverage xml
+        run: pixi run -e ${{ matrix.environment }} coverage_xml
 
       - name: codecov.io
         if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
