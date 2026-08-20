@@ -228,6 +228,7 @@ beautifulsoup4 = "4.12.*" # circular import error in 4.13
 numpydoc = ">=0.5"
 sphinx-autodoc-typehints = ">=1.21.8,<=2.0"
 typing_extensions = "*"
+setuptools = "<70"
 
 [tool.pixi.feature.docs.pypi-dependencies]
 myst-nb-json = "*"
@@ -235,8 +236,9 @@ weldx = { path = ".", editable = true }
 weldx-widgets = "*"
 
 [tool.pixi.feature.docs.tasks]
-docs = "sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2 -D nb_execution_mode=off"
-docs_full = "sphinx-build -W -n -b html -d build/doctrees doc/src build/html --keep-going -j 2 -D nb_execution_mode=force"
+docs = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src build/html --keep-going -j auto -D nb_execution_mode=off"
+docs_full = "sphinx-build -W -n -b html -d doc/build/doctrees doc/src build/html --keep-going -j auto -D nb_execution_mode=force"
+docs_clean = "rm -rf doc/build doc/src/_autosummary"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
