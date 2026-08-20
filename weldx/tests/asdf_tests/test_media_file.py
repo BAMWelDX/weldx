@@ -76,6 +76,10 @@ def test_media_file_external(external, tmp_path, create_video):
     assert restored.duration.u == U_("s")
 
     assert mf.resolution == restored.resolution == (width, height)
+    assert mf.attrs.fps == fps
+    assert mf.attrs.nframes == n_frames
+    assert mf.attrs.resolution == (width, height)
+    assert mf.attrs["fps"] == fps
 
     if external:
         assert str(mf.file().path) == data

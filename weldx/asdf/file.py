@@ -42,11 +42,24 @@ from weldx.util import (
 
 __all__ = [
     "WeldxFile",
+    "AttrDict",
     "DEFAULT_ARRAY_COMPRESSION",
     "DEFAULT_MEMORY_MAPPING",
     "DEFAULT_ARRAY_INLINE_THRESHOLD",
     "_PROTECTED_KEYS",
 ]
+
+
+class AttrDict(dict):
+    """Dictionary subclass that allows attribute access to its keys."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for key, value in self.items():
+            if isinstance(value, Mapping):
+                self.__dict__[key] = AttrDict(value)
+            else:
+                self.__dict__[key] = value
 
 _asdf_version = tuple(importlib.metadata.version("asdf").split("."))
 
@@ -845,15 +858,6 @@ class WeldxFile(_ProtectedViewDict):
         >>> wfa.wx_meta.welder
         'Myself'
         """
-
-        class AttrDict(dict):
-            def __init__(self, iterable, **kwargs):
-                super().__init__(iterable, **kwargs)
-                for key, value in self.items():
-                    if isinstance(value, Mapping):
-                        self.__dict__[key] = AttrDict(value)
-                    else:
-                        self.__dict__[key] = value
 
         return AttrDict(self)
 

@@ -194,9 +194,9 @@ class MediaFile:
         return self._reference_time
 
     @property
-    def attrs(self):
+    def attrs(self) -> AttrDict:
         """Video attributes."""
-        from attrdict import AttrDict
+        from weldx.asdf.file import AttrDict
 
         return AttrDict(self._metadata)
 
