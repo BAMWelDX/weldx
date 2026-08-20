@@ -2,12 +2,7 @@
 
 from uuid import UUID
 
-import asdf
-
-if asdf.__version__ >= "3.0.0":
-    from asdf.extension import SerializationContext
-else:
-    from asdf.asdf import SerializationContext
+from asdf.extension import SerializationContext
 
 from weldx.asdf.types import WeldxConverter
 

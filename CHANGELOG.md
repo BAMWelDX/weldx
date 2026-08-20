@@ -13,6 +13,7 @@
 
 - remove `attrdict` dependency and replace with internal `AttrDict` implementation
 - remove upper version pins for `pint`, `pint-xarray`, and `scipy`
+- drop support for `asdf=2`, require `asdf>=3,<6`
 
 ### Maintenance
 

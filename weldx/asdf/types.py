@@ -3,13 +3,7 @@ from __future__ import annotations
 import functools
 import re
 
-import asdf
-
-if asdf.__version__ >= "3.0.0":
-    from asdf.extension import SerializationContext
-else:
-    from asdf.asdf import SerializationContext
-from asdf.extension import Converter
+from asdf.extension import Converter, SerializationContext
 from boltons.iterutils import remap
 
 from weldx.constants import META_ATTR, USER_ATTR
