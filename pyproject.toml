@@ -178,6 +178,7 @@ hatchling = ">=1.27.0,<2"
 hatch-vcs = ">=0.4.0,<0.5"
 rattler-build = "*"
 conda-recipe-manager = "*"
+twine = "*"
 
 [tool.pixi.feature.build.tasks]
 build = "hatchling build"
