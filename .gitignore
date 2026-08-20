@@ -1,5 +1,7 @@
-# distribution versioning
-_version.py
+# weldx
+output.wx
+output2.wx
+single_pass_weld-0.1.0.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -28,6 +30,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+_version.py
 
 # PyInstaller
 #   Usually these files are written by a python script from a template
