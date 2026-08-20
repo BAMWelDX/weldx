@@ -50,9 +50,9 @@ dependencies = [
   "numpy>=1.20",
   "pandas>=1.5,<3",
   "pint>=0.21",
-  "pint-xarray>=0.3,<0.5",
+  "pint-xarray>=0.3",
   "psutil",
-  "scipy>=1.6.2,<1.17",
+  "scipy>=1.6.2",
   "setuptools<82",
   "sympy>=1.6",
   "xarray>=2022.9",
@@ -161,9 +161,9 @@ platforms = ["osx-arm64", "win-64", "linux-64"]
 
 [tool.pixi.dependencies]
 setuptools = "<70"
-scipy = ">=1.6.2,<1.17"
+scipy = ">=1.6.2"
 pandas = ">=1.5,<3"
-pint-xarray = ">=0.3,<0.5"
+pint-xarray = ">=0.3"
 asdf = ">=2.15.1,<5"
 
 [tool.pixi.pypi-dependencies]

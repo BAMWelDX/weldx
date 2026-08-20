@@ -7,6 +7,9 @@ import xarray as xr
 from weldx import Q_, U_, WeldxFile
 from weldx.util.media_file import MediaFile, UnknownFormatError
 
+pytest.importorskip("dask_image")
+pytest.importorskip("av")
+
 
 def write_rgb_rotate(output, width, height, n_frames, fps):
     import PIL.Image as Image
