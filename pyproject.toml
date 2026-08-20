@@ -47,19 +47,19 @@ dependencies = [
   "bidict",
   "boltons",
   "bottleneck>=1.3.3",
-  "decorator",              # used by weldx.util.util
+  "decorator",
   "fs",
   "ipython>=8",
   "meshio",
   "networkx>=2.8.2",
   "numpy>=1.20",
-  "packaging",              # used by weldx.asdf.util
+  "packaging",
   "pandas>=1.5,<3",         # pandas>=3 breaks weldx.time.Time list/DatetimeIndex conversion
   "pint>=0.21",
   "pint-xarray>=0.3,<0.5",  # pint-xarray>=0.5 raises ValueError("cannot convert
                             # non-quantified index") in weldx.util.xarray.xr_interp_like
   "psutil",
-  "pyyaml",                 # used by weldx.config
+  "pyyaml",
   "scipy>=1.6.2,<1.17",     # scipy>=1.17 tightened Rotation.from_euler validation for
                             # single-axis sequences (e.g. seq="x"), breaking WXRotation
                             # call sites throughout weldx.transformations and its tests
@@ -94,12 +94,6 @@ optional-dependencies.media = [
   "pims",
   "tifffile",   # required by dask-image, but not listed in their requirements
 ]
-# matplotlib and k3d are optional, soft dependencies used directly by core modules
-# (weldx.geometry, weldx.measurement, weldx.core.time_series,
-# weldx.transformations.cs_manager/local_cs). They are always imported lazily and
-# guarded by check_matplotlib_available/k3d-availability checks, which warn instead
-# of raising if the plotting backend is missing -- install this extra to silence
-# those warnings and get plotting support.
 optional-dependencies.plot = [
   "k3d",
   "matplotlib",
@@ -139,9 +133,6 @@ addopts.ruff = [
 ]
 
 [tool.mypy]
-# numpy's bundled .pyi stubs use PEP 695 `type` statements, which mypy refuses to parse
-# below python_version 3.12 -- set to 3.12 (also the project's primary target) rather
-# than the 3.9 floor, which is instead enforced via requires-python and CI's test matrix.
 python_version = "3.12"
 files = "weldx"
 ignore_missing_imports = true  # TODO: this is bad!
