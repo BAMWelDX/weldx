@@ -10,15 +10,15 @@
 - fix `GenericSeries.__repr__` formatting when coordinate data contains `pint.Quantity` \[{pull}`1037`\]
 - fix `pint` deprecation warning when setting default format on unit registry \[{pull}`1037`\]
 - update `XarrayDatasetConverter` to use `Dataset.sizes` instead of `Dataset.dims` \[{pull}`1037`\]
-- specify explicit `compat="no_conflicts"` in `LocalCoordinateSystem` dataset merge \[{pull}`1037`\]
+- specify explicit `compat="no_conflicts"` in `LocalCoordinateSystem` dataset merge \[{pull}`1039`\]
 
 ### Dependencies
 
 - remove `attrdict` dependency and replace with internal `AttrDict` implementation \[{pull}`1037`\]
 - remove upper version pins for `pint`, `pint-xarray`, and `scipy` \[{pull}`1037`\]
 - drop support for `asdf=2`, require `asdf>=3,<6` \[{pull}`1037`\]
-- update minimum required versions for `numpy>=1.22`, `scipy>=1.7`, `sympy>=1.9`, and `xarray>=2022.09.0` \[{pull}`1037`\]
-- add `pytest-skip-slow` to test dependencies \[{pull}`1037`\]
+- update minimum required versions for `numpy>=1.22`, `scipy>=1.7`, `sympy>=1.9`, and `xarray>=2022.09.0` \[{pull}`1039`\]
+- add `pytest-skip-slow` to test dependencies \[{pull}`1039`\]
 
 ### Maintenance
 
@@ -27,8 +27,8 @@
 - migrate workspace management, environments, and CI workflows to `pixi` \[{pull}`1036`\]
 - align docs feature dependencies with main environment and require `asdf>=3` \[{pull}`1037`\]
 - resolve test suite warnings and configure ignore filters for upstream library deprecations \[{pull}`1037`\]
-- add `test-min-deps` environment and CI testing against minimum pinned dependencies \[{pull}`1037`\]
-- replace manual `--runslow` test skipping with `pytest-skip-slow` plugin \[{pull}`1037`\]
+- add `test-min-deps` environment and CI testing against minimum pinned dependencies \[{pull}`1039`\]
+- replace manual `--runslow` test skipping with `pytest-skip-slow` plugin \[{pull}`1039`\]
 
 ## 0.7.3 (02.03.2026)
 
