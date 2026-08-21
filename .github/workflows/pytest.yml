@@ -24,6 +24,9 @@ jobs:
   pytest:
     name: pytest (${{ matrix.os }}, ${{ matrix.environment }})
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -33,6 +36,8 @@ jobs:
           - test-py311
           - test-py312
           - test-py313
+          - test-py314
+          - test-min-deps
         include:
           - os: macos-latest
             environment: test-py312
@@ -58,7 +63,7 @@ jobs:
         shell: cmd
 
       - name: run pytest
-        run: pixi run -e ${{ matrix.environment }} pytest --runslow --junit-xml pytest.xml
+        run: pixi run -e ${{ matrix.environment }} pytest --slow --junit-xml pytest.xml
 
       - name: Upload Test Results
         if: always() && matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
@@ -78,3 +83,7 @@ jobs:
       - name: codecov.io
         if: matrix.environment == 'test-py310' && matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v6.0.1
+        with:
+          use_oidc: true
+          files: ./coverage.xml
+          fail_ci_if_error: false
