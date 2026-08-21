@@ -1,6 +1,18 @@
 # Release Notes
 
-## 0.7.4 (unreleased)
+## 0.8.0 (21.08.2026)
+
+Release `0.8.0` is a maintenance and compatibility release improve the developer workflows and support never dependency versions.
+
+Newly supported version include:
+
+- `python=3.14`
+- `asdf=5`
+- `numpy>=1.17`
+- `pint-xarray>=0.5`
+
+The minimum required Python version is now `python>=3.10`.
+The next release will increase the minimum required versions for all core dependencies.
 
 ### Fixes
 

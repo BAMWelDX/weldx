@@ -22,8 +22,7 @@ A short primer in the steps needed to release a new version of the `weldx` packa
 
 - [ ] tag and release the current master version on GitHub using the **Releases** feature
   - [ ] name the release **git tag** according to the version released (e.g. **v0.3.3**)
-  - [ ] name the GitHub release accordingly, omitting the **v** prefix (this can be change later so don't worry, in
-    doubt use **vX.Y.Z** everywhere)
+  - [ ] name the GitHub release accordingly
   - [ ] copy the changes/release notes of the current version into the description and change the GitHub PR links to GitHub markdown
 - [ ] wait for all Github Actions to finish
 
