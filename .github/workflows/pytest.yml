@@ -33,6 +33,7 @@ jobs:
           - test-py311
           - test-py312
           - test-py313
+          - test-py314
           - test-min-deps
         include:
           - os: macos-latest

@@ -19,6 +19,7 @@
 - drop support for `asdf=2`, require `asdf>=3,<6` \[{pull}`1037`\]
 - update minimum required versions for `numpy>=1.22`, `scipy>=1.7`, `sympy>=1.9`, and `xarray>=2022.09.0` \[{pull}`1039`\]
 - add `pytest-skip-slow` to test dependencies \[{pull}`1039`\]
+- update Python support for Python 3.14 (require `python>=3.10,<3.15`) \[{pull}`1039`\]
 
 ### Maintenance
 
@@ -29,6 +30,7 @@
 - resolve test suite warnings and configure ignore filters for upstream library deprecations \[{pull}`1037`\]
 - add `test-min-deps` environment and CI testing against minimum pinned dependencies \[{pull}`1039`\]
 - replace manual `--runslow` test skipping with `pytest-skip-slow` plugin \[{pull}`1039`\]
+- add `test-py314` environment and CI matrix entry for Python 3.14 testing \[{pull}`1039`\]
 
 ## 0.7.3 (02.03.2026)
 

@@ -18,7 +18,7 @@ authors = [
   { name = "Michael Winkler", email = "michael.winkler@bam.de" },
   { name = "Volker Hirthammer", email = "volker.hirthammer@bam.de" },
 ]
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10,<3.15"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Education",
@@ -32,6 +32,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Physics",  # TODO: add more topics here!
 ]
 dynamic = [
@@ -227,6 +228,7 @@ test-py310 = ["test", "media", "vis", "py310"]
 test-py311 = ["test", "media", "vis", "py311"]
 test-py312 = ["test", "media", "vis", "py312"]
 test-py313 = ["test", "media", "vis", "py313"]
+test-py314 = ["test", "media", "vis", "py314"]
 test-min-deps = ["test", "media", "vis", "py310", "min-deps"]
 test-asdf3 = ["test", "py310", "asdf3"]
 test-asdf4 = ["test", "py310", "asdf4"]
@@ -274,6 +276,10 @@ av = ">=11.0,<19"
 
 [tool.pixi.feature.py313.dependencies]
 python = "3.13.*"
+av = ">=14.0,<19"
+
+[tool.pixi.feature.py314.dependencies]
+python = "3.14.*"
 av = ">=14.0,<19"
 
 [tool.pixi.feature.min-deps.dependencies]
