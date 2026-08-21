@@ -79,7 +79,7 @@ optional-dependencies.vis = [
   "weldx-widgets>=0.2.5",
 ]
 urls.bug_tracker = "https://github.com/BAMweldx/weldx/issues"
-urls.changelog = "https://github.com/BAMweldx/weldx/blob/master/CHANGELOG.md"
+urls.changelog = "https://github.com/BAMweldx/weldx/blob/main/CHANGELOG.md"
 urls.documentation = "https://weldx.readthedocs.io"
 urls.repository = "https://github.com/BAMweldx/weldx"
 scripts.welding_schema = "weldx.asdf.cli.welding_schema:main"

@@ -9,8 +9,8 @@
 [![builds](https://github.com/BAMWelDX/weldx/actions/workflows/build.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/build.yml)
 [![documentation builds](https://github.com/BAMWelDX/weldx/actions/workflows/docs.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/docs.yml)
 [![pytest](https://github.com/BAMWelDX/weldx/actions/workflows/pytest.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/pytest.yml)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/BAMWelDX/weldx/master.svg)](https://results.pre-commit.ci/latest/github/BAMWelDX/weldx/master)
-[![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/BAMWelDX/weldx/main.svg)](https://results.pre-commit.ci/latest/github/BAMWelDX/weldx/main)
+[![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/main/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
 
 ## Overview
 

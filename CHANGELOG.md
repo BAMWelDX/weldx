@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.8.1 (21.08.2026)
+
+The default branch on GitHub has been renamed to `main`.
+
 ## 0.8.0 (21.08.2026)
 
 Release `0.8.0` is a maintenance and compatibility release improve the developer workflows and support never dependency versions.

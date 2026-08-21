@@ -235,7 +235,7 @@ html_theme_options = {
 html_context = {
     "github_user": "BAMWelDX",
     "github_repo": "weldx",
-    "github_version": "master",
+    "github_version": "main",
     "doc_path": "doc",
 }
 

@@ -2,7 +2,7 @@
 
 ## License
 
-The WelDX project is hosted on [GitHub](https://github.com/BAMWelDX/weldx) under a [BSD 3-Clause-License](https://github.com/BAMWelDX/weldx/blob/master/LICENSE).
+The WelDX project is hosted on [GitHub](https://github.com/BAMWelDX/weldx) under a [BSD 3-Clause-License](https://github.com/BAMWelDX/weldx/blob/main/LICENSE).
 
 ## Publisher
 
@@ -24,7 +24,7 @@ WelDX - Welding Data Exchange Format
 
 <https://www.bam.de/weldx>
 
-Cagtay Fabry
+Dr. Çağtay Fabry
 
 Email:
 

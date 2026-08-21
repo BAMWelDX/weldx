@@ -3,7 +3,7 @@
 cff-version: 1.2.0
 title: "weldx: The welding data exchange format"
 type: software
-version: v0.8.0
+version: v0.8.1
 date-released: 2026-08-21
 license: BSD-3-Clause
 authors:
