@@ -664,3 +664,19 @@ properties:
             array_inline_threshold=len(x) + 1
         )
         assert b"BLOCK" not in buff.read()
+
+    @staticmethod
+    def test_as_attr():
+        """Test as_attr method and AttrDict functionality."""
+        tree = dict(
+            wx_meta={"welder": "Nikolai Nikolajewitsch Benardos"},
+            nested={"a": {"b": 42}},
+        )
+        wf = WeldxFile(tree=tree, mode="rw")
+        wfa = wf.as_attr()
+        assert wfa.wx_meta.welder == "Nikolai Nikolajewitsch Benardos"
+        assert wfa["wx_meta"]["welder"] == "Nikolai Nikolajewitsch Benardos"
+        assert wfa.nested.a.b == 42
+        assert wfa["nested"]["a"]["b"] == 42
+        wfa.wx_meta.welder = "Myself"
+        assert wfa.wx_meta.welder == "Myself"

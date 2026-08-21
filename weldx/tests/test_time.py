@@ -621,7 +621,7 @@ class TestTime:
             # timedeltas
             (pd.to_timedelta([42], unit="ns"), pd.to_timedelta([42], unit="ns")),
             (pd.timedelta_range("0s", "20s", 10), pd.timedelta_range("0s", "20s", 10)),
-            (np.timedelta64(42), pd.to_timedelta([42], unit="ns")),
+            (np.timedelta64(42, "ns"), pd.to_timedelta([42], unit="ns")),
             (
                 np.array([-10, 0, 20]).astype("timedelta64[ns]"),
                 pd.to_timedelta([-10, 0, 20], "ns"),

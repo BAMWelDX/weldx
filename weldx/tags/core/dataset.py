@@ -17,7 +17,7 @@ class XarrayDatasetConverter(WeldxConverter):
             ct.Variable(name, da.dims, da.data, da.attrs)
             for name, da in obj.coords.items()
         ]
-        dimensions = [ct.Dimension(name, length) for name, length in obj.dims.items()]
+        dimensions = [ct.Dimension(name, length) for name, length in obj.sizes.items()]
         variables = [
             ct.Variable(name, da.dims, da.data, da.attrs)
             for name, da in obj.data_vars.items()

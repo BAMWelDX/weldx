@@ -245,25 +245,38 @@ def _coordinates_from_quantities(
 
 def _add_coord_edges(da1: xr.DataArray, da2: xr.DataArray, assume_sorted: bool):
     """Add the minimum and maximum coordinates from da1 to coordinates of da2."""
-    if assume_sorted:
-        # if all coordinates are sorted,we can use integer indexing for speedups
-        edge_dict = {
-            d: ([0, -1] if len(val) > 1 else [0])
-            for d, val in da1.coords.items()
-            if d in da2.indexes
-        }
-        if len(edge_dict) > 0:
-            da2 = da2.combine_first(da1.isel(edge_dict))
-    else:
-        # select, combine with min/max values if coordinates not guaranteed to be sorted
-        edge_dict = {
-            d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min().data])
-            for d, val in da1.coords.items()
-            if d in da2.indexes
-        }
-        if len(edge_dict) > 0:
-            da2 = da2.combine_first(da1.pint.sel(edge_dict))
-    return da2
+    new_coords = {}
+    for d, coord2 in da2.coords.items():
+        if d in da1.coords:
+            coord1 = da1.coords[d]
+            val1 = coord1.data
+            val2 = coord2.data
+
+            u1 = getattr(val1, "units", None) or coord1.attrs.get(UNITS_KEY)
+            u2 = getattr(val2, "units", None) or coord2.attrs.get(UNITS_KEY)
+
+            m1 = val1.m if isinstance(val1, pint.Quantity) else val1
+            m2 = val2.m if isinstance(val2, pint.Quantity) else val2
+
+            if u1 and u2 and u1 != u2:
+                m1 = Q_(m1, u1).to(u2).m
+
+            if assume_sorted and len(m1) > 1:
+                edges = [m1[0], m1[-1]]
+            elif len(m1) > 1:
+                edges = [np.min(m1), np.max(m1)]
+            else:
+                edges = [np.min(m1)]
+
+            combined_m = np.unique(np.hstack([m2, edges]))
+            if u2:
+                new_coords[d] = (d, combined_m, {UNITS_KEY: u2})
+            else:
+                new_coords[d] = (d, combined_m)
+        else:
+            new_coords[d] = coord2
+
+    return xr.DataArray(dims=da2.dims, coords=new_coords)
 
 
 def xr_interp_like(
@@ -340,9 +353,9 @@ def xr_interp_like(
     # convert base array units to indexer units
     # (needed for the indexing later and it will happen during interpolation anyway)
     base_units = {
-        c: da_temp[c].attrs.get(UNITS_KEY)
+        c: U_(da_temp[c].attrs.get(UNITS_KEY))
         for c in da1.coords.keys() & da_temp.coords.keys()
-        if UNITS_KEY in da1[c].attrs
+        if UNITS_KEY in da1[c].attrs and da_temp[c].attrs.get(UNITS_KEY) is not None
     }
     da1 = da1.pint.to(**base_units)
 
@@ -351,7 +364,7 @@ def xr_interp_like(
 
     # handle singular dimensions in da1
     # TODO: should we handle coordinates or indexes(=dimensions)?
-    singular_dims = [d for d in da1.coords if len(da1[d]) == 1 or d not in da1.indexes]
+    singular_dims = [d for d in da1.coords if len(da1[d]) == 1 or d not in da1.xindexes]
     for dim in singular_dims:
         if dim in da_temp.coords:
             if len(da_temp.coords[dim]) > 1:
@@ -361,23 +374,29 @@ def xr_interp_like(
                     )
                 exclude_dims = [d for d in da_temp.coords if d != dim]
                 # TODO: this always fills the dimension (inconsistent with fillna=False)
-                da1 = xr_fill_all(da1.broadcast_like(da_temp, exclude=exclude_dims))
+                da1 = xr_fill_all(
+                    da1.pint.dequantify()
+                    .broadcast_like(da_temp, exclude=exclude_dims)
+                    .pint.quantify()
+                )
             else:
                 del da_temp.coords[dim]
 
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     if method == "step":
         fill_method = "ffill" if fillna else None
-        da = da1.pint.reindex_like(da_temp, method=fill_method)
+        da = da1.pint.reindex_like(da_temp.pint.quantify(), method=fill_method)
     else:
-        da = da1.pint.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
+        da = da1.pint.interp_like(
+            da_temp.pint.quantify(), method=method, assume_sorted=assume_sorted
+        )
 
     # fill out of range nan values for all dimensions
     if fillna:
         da = xr_fill_all(da)
 
     if broadcast_missing:
-        da = da.broadcast_like(da_temp)
+        da = da.pint.dequantify().broadcast_like(da_temp).pint.quantify()
     else:  # careful not to select coordinates that are only in da_temp
         sel_coords = {d: v for d, v in sel_coords.items() if d in da1.coords}
 
@@ -416,6 +435,16 @@ def _check_dtype(var_dtype, ref_dtype: str) -> bool:
             return False
 
     return True
+
+
+def _get_coord_units(coord) -> pint.Unit | str | None:
+    """Extract units from a coordinate via weldx, pint, or attrs."""
+    units = getattr(coord, "weldx", None) and coord.weldx.units
+    if units is None:
+        units = getattr(coord, "pint", None) and coord.pint.units
+    if units is None:
+        units = coord.attrs.get(UNITS_KEY, None)
+    return units
 
 
 def xr_check_coords(coords: xr.DataArray | Mapping[str, Any], ref: dict) -> bool:
@@ -493,12 +522,19 @@ def xr_check_coords(coords: xr.DataArray | Mapping[str, Any], ref: dict) -> bool
             raise KeyError(f"Could not find required coordinate '{key}'.")
 
         # only if the key "values" is given do the validation
-        if "values" in check and not np.all(coords[key].values == check["values"]):
-            raise ValueError(
-                f"Value mismatch in DataArray and ref['{key}']"
-                f"\n{coords[key].values}"
-                f"\n{check['values']}"
-            )
+        if "values" in check:
+            actual_vals = coords[key].data
+            expected_vals = check["values"]
+            if isinstance(actual_vals, pint.Quantity) and not isinstance(
+                expected_vals, pint.Quantity
+            ):
+                actual_vals = actual_vals.m
+            if not np.all(actual_vals == expected_vals):
+                raise ValueError(
+                    f"Value mismatch in DataArray and ref['{key}']"
+                    f"\n{coords[key].data}"
+                    f"\n{check['values']}"
+                )
 
         # only if the key "dtype" is given do the validation
         if "dtype" in check:
@@ -513,15 +549,15 @@ def xr_check_coords(coords: xr.DataArray | Mapping[str, Any], ref: dict) -> bool
                 )
 
         if UNITS_KEY in check:
-            units = coords[key].attrs.get(UNITS_KEY, None)
-            if not units or U_(units) != U_(check[UNITS_KEY]):
+            units = _get_coord_units(coords[key])
+            if units is None or U_(units) != U_(check[UNITS_KEY]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{units}', expected '{check['units']}'"
                 )
 
         if "dimensionality" in check:
-            units = coords[key].attrs.get(UNITS_KEY, None)
+            units = _get_coord_units(coords[key])
             dim = check["dimensionality"]
             if units is None or not U_(units).is_compatible_with(dim):
                 raise DimensionalityError(
@@ -851,8 +887,12 @@ class WeldxAccessor:
         """Convert indexes of an xarray object to a quantity dictionary."""
         da = self._obj
         return {
-            k: (Q_(v.data, unit) if (unit := v.attrs.get(UNITS_KEY, None)) else v.data)
-            for k, v in da.indexes.items()
+            k: (
+                Q_(da.coords[k].data, unit)
+                if (unit := da.coords[k].attrs.get(UNITS_KEY, None))
+                else da.coords[k].data
+            )
+            for k in da.xindexes
         }
 
     def quantify(self):
@@ -864,11 +904,7 @@ class WeldxAccessor:
         This function does only conversion, to attach units use pint-xarray.
         See ``DataArray.pint.quantify`` for details.
         """
-        da = self._obj.copy()
-        if not isinstance(da.data, pint.Quantity):
-            return da.pint.quantify()
-        # make sure coordinates attributes are formatted as pint.Unit
-        return da.weldx.quantify_coords()
+        return self._obj.pint.quantify()
 
     def quantify_coords(self):
         """Format coordinates 'units' attribute as `pint.Unit`."""

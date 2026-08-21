@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Union, get_args
 
@@ -12,6 +13,7 @@ import xarray as xr
 
 from weldx import Q_
 from weldx.types import types_path_like
+from weldx.util._attr_dict import AttrDict
 from weldx.util.external_file import ExternalFile
 
 __all__ = ["types_media_input", "MediaFile", "UnknownFormatError"]
@@ -194,10 +196,8 @@ class MediaFile:
         return self._reference_time
 
     @property
-    def attrs(self):
+    def attrs(self) -> MutableMapping:
         """Video attributes."""
-        from attrdict import AttrDict
-
         return AttrDict(self._metadata)
 
     @property

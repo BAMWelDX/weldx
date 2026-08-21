@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import numpy as np
 import pint
 from scipy.spatial.transform import Rotation as _Rotation
 
@@ -73,6 +74,10 @@ class WXRotation(_Rotation):
             degrees = "rad" not in str(angles.u)
             angles = angles.to("degree") if degrees else angles.to("rad")
             angles = angles.m
+
+        angles = np.asarray(angles)
+        if len(seq) == 1 and angles.ndim == 1 and angles.shape[-1] != 1:
+            angles = angles[:, None]
 
         rot = super().from_euler(seq=seq, angles=angles, degrees=degrees)
         setattr(

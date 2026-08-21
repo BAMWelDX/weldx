@@ -14,9 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-          - test-asdf2
           - test-asdf3
           - test-asdf4
+          - test-asdf5
     steps:
       - uses: actions/checkout@v6
         with:

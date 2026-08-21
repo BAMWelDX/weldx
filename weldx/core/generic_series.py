@@ -442,10 +442,19 @@ class GenericSeries:
             rep += f"Dimensions:\n\t{self.dims}\n"
             rep += "Coordinates:\n"
             for coord, val in self.coordinates.items():
-                c_d = np.array2string(val.data, threshold=3, precision=4)
+                m = getattr(val.data, "magnitude", val.data)
+                c_d = np.array2string(m, threshold=3, precision=4)
                 rep += f"\t{coord}".ljust(7)
                 rep += f" = {c_d}"
-                rep += f" {val.attrs.get(UNITS_KEY)}\n"
+                unit = (
+                    getattr(val.data, "units", None)
+                    or getattr(val, "weldx", None)
+                    and val.weldx.units
+                    or val.attrs.get(UNITS_KEY)
+                )
+                if unit:
+                    rep += f" {unit}"
+                rep += "\n"
         else:
             rep += self.data.__repr__().replace("<MathematicalExpression>\n", "")
             rep += "Free Dimensions:\n"

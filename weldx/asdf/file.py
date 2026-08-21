@@ -39,6 +39,7 @@ from weldx.util import (
     is_interactive_session,
     is_jupyterlab_session,
 )
+from weldx.util._attr_dict import AttrDict
 
 __all__ = [
     "WeldxFile",
@@ -121,7 +122,7 @@ class WeldxFile(_ProtectedViewDict):
         See `asdf.open` for reference.
     write_kwargs :
         Keyword arguments to pass to `asdf.AsdfFile.write_to`.
-        See `asdf.AsdfFile.open` for reference.
+        See `asdf.open` for reference.
     tree :
         An optional dictionary to write to the file.
     sync :
@@ -845,15 +846,6 @@ class WeldxFile(_ProtectedViewDict):
         >>> wfa.wx_meta.welder
         'Myself'
         """
-
-        class AttrDict(dict):
-            def __init__(self, iterable, **kwargs):
-                super().__init__(iterable, **kwargs)
-                for key, value in self.items():
-                    if isinstance(value, Mapping):
-                        self.__dict__[key] = AttrDict(value)
-                    else:
-                        self.__dict__[key] = value
 
         return AttrDict(self)
 

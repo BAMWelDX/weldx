@@ -2847,5 +2847,5 @@ def test_coordinate_system_manager_transform_data():
         csm.transform_data(data_xr, "lcs_3", "not present")
 
     # data is not compatible
-    with pytest.raises(np.core._exceptions._UFuncNoLoopError):
+    with pytest.raises(TypeError):
         csm.transform_data("wrong", "lcs_3", "lcs_1")

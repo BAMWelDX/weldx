@@ -202,16 +202,16 @@ class TestXarrayInterpolation:
         da2 = ut.xr_interp_like(da, da_interp, broadcast_missing=broadcast_missing)
 
         if broadcast_missing:
-            assert da2.b.attrs.get(UNITS_KEY, None) == b_interp.units
+            assert da2.b.weldx.units == b_interp.units
             da2 = da2.isel(b=0)
 
         for n in range(len(da.a)):
-            assert np.all(da2.sel(a=n) == result[n, :])
+            assert np.all(np.isclose(da2.isel(a=n).data, result[n, :]))
         assert da2.pint.units == data_units
         assert da2.attrs[META_ATTR] == "meta"
 
-        assert da2.t.attrs.get(UNITS_KEY, None) == t_interp.units
-        assert da2.a.attrs.get(UNITS_KEY, None) == a.units
+        assert da2.t.weldx.units == t_interp.units
+        assert da2.a.weldx.units == a.units
 
     @staticmethod
     def test_xr_interp_like_old():

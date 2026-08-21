@@ -112,7 +112,7 @@ class LocalCoordinateSystem(TimeDependent):
             coordinates.name = "coordinates"
             dataset_items.append(coordinates)
 
-        self._dataset = xr.merge(dataset_items, join="exact")
+        self._dataset = xr.merge(dataset_items, join="exact", compat="no_conflicts")
 
         self._time_ref = time_cls.reference_time if isinstance(time_cls, Time) else None
         if "time" in self._dataset and self._time_ref is not None:

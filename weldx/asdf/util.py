@@ -12,13 +12,8 @@ from warnings import warn
 
 import asdf
 import pint
-
-if asdf.__version__ >= "3.0.0":
-    from asdf.extension import SerializationContext
-else:
-    from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
-from asdf.extension import Extension
+from asdf.extension import Extension, SerializationContext
 from asdf.tagged import TaggedDict, TaggedList, TaggedString
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
@@ -153,7 +148,7 @@ def read_buffer_context(
     buffer : io.BytesIO
         Buffer containing ASDF file contents
     open_kwargs
-        Additional keywords to pass to `asdf.AsdfFile.open`
+        Additional keywords to pass to `asdf.open`
         Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
@@ -200,7 +195,7 @@ def read_buffer(
     buffer : io.BytesIO
         Buffer containing ASDF file contents
     open_kwargs
-        Additional keywords to pass to `asdf.AsdfFile.open`
+        Additional keywords to pass to `asdf.open`
         Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
@@ -230,7 +225,7 @@ def write_read_buffer_context(
         Additional keywords to pass to `asdf.AsdfFile.write_to`
         Extensions are always set.
     open_kwargs
-        Additional keywords to pass to `asdf.AsdfFile.open`
+        Additional keywords to pass to `asdf.open`
         Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
@@ -258,7 +253,7 @@ def write_read_buffer(
         Additional keywords to pass to `asdf.AsdfFile.write_to`
         Extensions are always set.
     open_kwargs
-        Additional keywords to pass to `asdf.AsdfFile.open`
+        Additional keywords to pass to `asdf.open`
         Extensions are always set, ``memmap=False`` is set by default.
 
     Returns
