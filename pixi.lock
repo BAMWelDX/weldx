@@ -5756,7 +5756,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/readline-8.3-hd6e31c0_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-0.30.0-py310hd8f68c5_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/s2n-1.6.0-h8399546_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.7.3-py310hdfbd76f_1.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.7.3-py310hea5193d_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/sdl2-2.32.56-h54a6638_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/sdl3-3.4.14-hdeec2a5_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/shaderc-2025.5-h718be3e_1.conda
@@ -6243,7 +6243,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/re2-2025.11.05-h64b956e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/readline-8.3-h8b90a29_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/rpds-py-0.30.0-py310hf3301a5_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.7.3-py310ha0d8a01_1.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.7.3-py310h6ecf4ae_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/sdl2-2.32.56-h784d473_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/sdl3-3.4.14-h6fa9c73_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/shaderc-2025.5-hf31e910_1.conda
@@ -6558,7 +6558,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/rav1e-0.8.1-h007690e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/re2-2025.11.05-ha104f34_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/rpds-py-0.30.0-py310h034784e_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.7.3-py310h578b7cb_1.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.7.3-py310h33db832_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/sdl2-2.32.56-h5112557_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/sdl3-3.4.14-h5112557_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/shaderc-2026.2-h8fa7867_0.conda
@@ -20984,19 +20984,18 @@ packages:
   run_exports: {}
   size: 17260022
   timestamp: 1781912924009
-- conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.7.3-py310hdfbd76f_1.tar.bz2
-  sha256: b4212b7d8638e72c923985662de1f8ba8ada660056f89f1798d88d3ed54132e6
-  md5: 63b7ee68b9a6cb6945fa726399f0ecc4
+- conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.7.3-py310hea5193d_0.tar.bz2
+  sha256: 3080d7616dc67f926d07fb5a1732b4bf9c1e035e82a8c27eb84425858b338dc4
+  md5: 9cbdb267370260306b57a63449f05ecf
   depends:
-  - libblas >=3.9.0,<4.0a0
-  - libcblas >=3.9.0,<4.0a0
-  - libgcc-ng >=12
+  - libblas >=3.8.0,<4.0a0
+  - libcblas >=3.8.0,<4.0a0
+  - libgcc-ng >=9.4.0
   - libgfortran-ng
-  - libgfortran5 >=10.4.0
-  - liblapack >=3.9.0,<4.0a0
-  - libstdcxx-ng >=12
-  - numpy >=1.21.6,<1.23
-  - numpy >=1.21.6,<2.0a0
+  - libgfortran5 >=9.4.0
+  - liblapack >=3.8.0,<4.0a0
+  - libstdcxx-ng >=9.4.0
+  - numpy >=1.21.4,<2.0a0
   - python >=3.10,<3.11.0a0
   - python_abi 3.10.* *_cp310
   constrains:
@@ -21006,8 +21005,8 @@ packages:
   purls:
   - pkg:pypi/scipy?source=hash-mapping
   run_exports: {}
-  size: 24169985
-  timestamp: 1667961533601
+  size: 82392817
+  timestamp: 1637807927449
 - conda: https://conda.anaconda.org/conda-forge/linux-64/sdl2-2.32.56-h54a6638_0.conda
   sha256: 987ad072939fdd51c92ea8d3544b286bb240aefda329f9b03a51d9b7e777f9de
   md5: cdd138897d94dc07d99afe7113a07bec
@@ -33942,18 +33941,17 @@ packages:
   run_exports: {}
   size: 14122215
   timestamp: 1781912992503
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.7.3-py310ha0d8a01_1.tar.bz2
-  sha256: 6a12ac4bdbc9c259a07ef20f7e995a1092b7bb98ac444a5d398585e0f011d21b
-  md5: 0caa41ec83eeed757c02f0473d38d5c9
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.7.3-py310h6ecf4ae_0.tar.bz2
+  sha256: d7dd20e4cebf0fdc7cafa7925d1e7b1d09852306346fbdf64f246eecb77b0fda
+  md5: 02a063a20ab8d2a0b80d559ffe7105db
   depends:
   - libblas >=3.9.0,<4.0a0
   - libcblas >=3.9.0,<4.0a0
-  - libcxx >=14.0.4
+  - libcxx >=11.1.0
   - libgfortran >=5
-  - libgfortran5 >=11.3.0
+  - libgfortran5 >=11.0.1.dev0
   - liblapack >=3.9.0,<4.0a0
-  - numpy >=1.21.6,<1.23
-  - numpy >=1.21.6,<2.0a0
+  - numpy >=1.21.4,<2.0a0
   - python >=3.10,<3.11.0a0
   - python >=3.10,<3.11.0a0 *_cpython
   - python_abi 3.10.* *_cp310
@@ -33964,8 +33962,8 @@ packages:
   purls:
   - pkg:pypi/scipy?source=hash-mapping
   run_exports: {}
-  size: 19982129
-  timestamp: 1667962773768
+  size: 21034934
+  timestamp: 1637808668140
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/sdl2-2.32.56-h784d473_0.conda
   sha256: 595db3f62eec1b86aad03ad8c7e4943e78a18e112228c91adf3f3ada4e959a5c
   md5: 81a4c982e9ac52e620eb810f463de9ad
@@ -41813,21 +41811,19 @@ packages:
   run_exports: {}
   size: 15353018
   timestamp: 1781914001107
-- conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.7.3-py310h578b7cb_1.tar.bz2
-  sha256: 5fdcd334debd226c48b71e4ed0ec2c3d56b7ebf31476683c7365073048ba363b
-  md5: fb4296c2e3236ad9f683a91cb41f2357
+- conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.7.3-py310h33db832_0.tar.bz2
+  sha256: 5cec2e449ab5756038417ac8cb70d4966f9ed01977c828b51fd5bceadddc35cd
+  md5: ebf83a246b208fb8706afd96705653f4
   depends:
-  - libblas >=3.9.0,<4.0a0
-  - libcblas >=3.9.0,<4.0a0
-  - liblapack >=3.9.0,<4.0a0
+  - libblas >=3.8.0,<4.0a0
+  - libcblas >=3.8.0,<4.0a0
+  - liblapack >=3.8.0,<4.0a0
   - m2w64-gcc-libs
-  - numpy >=1.21.6,<1.23
-  - numpy >=1.21.6,<2.0a0
+  - numpy >=1.21.4,<2.0a0
   - python >=3.10,<3.11.0a0
   - python_abi 3.10.* *_cp310
-  - ucrt >=10.0.20348.0
-  - vc >=14.2,<15
-  - vs2015_runtime >=14.29.30139
+  - vc >=14.1,<15.0a0
+  - vs2015_runtime >=14.16.27012
   constrains:
   - libopenblas <0.3.26
   license: BSD-3-Clause
@@ -41835,8 +41831,8 @@ packages:
   purls:
   - pkg:pypi/scipy?source=hash-mapping
   run_exports: {}
-  size: 25266979
-  timestamp: 1667962529833
+  size: 25839824
+  timestamp: 1637808596678
 - conda: https://conda.anaconda.org/conda-forge/win-64/sdl2-2.32.56-h5112557_0.conda
   sha256: d17da21386bdbf32bce5daba5142916feb95eed63ef92b285808c765705bbfd2
   md5: 4cffbfebb6614a1bff3fc666527c25c7
