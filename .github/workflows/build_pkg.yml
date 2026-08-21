@@ -1,19 +1,8 @@
 name: package builds
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 on:
   push:
-    branches:
-      - master
-    tags:
-      - '*'
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - 'CHANGELOG.md'
-      - 'doc/**'
-      - '!.github/workflows/build_pkg.yml'
   release:
     types:
       - published
@@ -22,77 +11,68 @@ on:
   workflow_dispatch:
 
 jobs:
-  conda:
-    if: |
-      (github.event.pull_request.draft == false) ||
-      (github.event_name == 'workflow_dispatch') ||
-      (github.ref == 'refs/heads/master') ||
-      startsWith(github.ref, 'refs/tags/') ||
-      (github.event_name == 'release')
-    name: conda build
+  build_conda:
+    name: Build conda package
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - uses: prefix-dev/setup-pixi@v0.10.1
         with:
           pixi-version: v0.77.0
           environments: build
           locked: true
-
       - name: Build conda package
         run: pixi run -e build build_conda
-
       - name: Upload conda artifact
         uses: actions/upload-artifact@v7
         with:
           name: conda-pkg
           path: output/
 
-  pypi:
-    if: |
-      (github.event.pull_request.draft == false) ||
-      (github.event_name == 'workflow_dispatch') ||
-      startsWith(github.ref, 'refs/tags/') ||
-      (github.event_name == 'release')
-    name: pypi build
+  build:
+    name: Build Python distribution
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+    - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: prefix-dev/setup-pixi@v0.10.1
+      with:
+        pixi-version: v0.77.0
+        environments: build
+        log-level: v
+        locked: true
+    - name: Build a binary wheel and a source tarball
+      run: pixi run -e build build
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v5
+      with:
+        name: python-package-distributions
+        path: dist/
 
-      - uses: prefix-dev/setup-pixi@v0.10.1
-        with:
-          pixi-version: v0.77.0
-          environments: build
-          locked: true
+  publish-to-pypi:
+    name: >-
+      Publish distribution to PyPI
+    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
+    needs:
+    - build
+    - build_conda
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/weldx-widgets
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
 
-      - name: Build package (sdist & wheel)
-        run: pixi run -e build build
-
-      - name: Upload dist artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: dist
-          path: dist/
-
-      - name: Set PyPI test repo defaults
-        run: |
-          echo "pypi_repo=testpypi" >> $GITHUB_ENV
-          echo "pypi_token=${{ secrets.TESTPYPI_UPLOAD }}" >> $GITHUB_ENV
-
-      - name: Set PyPI main repo for release
-        if: github.event_name == 'release'
-        run: |
-          echo "pypi_repo=pypi" >> $GITHUB_ENV
-          echo "pypi_token=${{ secrets.PYPI_UPLOAD }}" >> $GITHUB_ENV
-
-      - name: Publish to PyPI
-        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'release')
-        run: |
-          pixi run -e build twine upload --repository $pypi_repo dist/* -u __token__ -p $pypi_token
+    steps:
+    - name: Download distribution artifacts
+      uses: actions/download-artifact@v6
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
