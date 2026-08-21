@@ -2,18 +2,15 @@
 
 <hl/>
 
-[![CF](https://anaconda.org/conda-forge/weldx/badges/version.svg)](https://anaconda.org/conda-forge/weldx)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5e7ede6d978249a781e5c580ed1c813f)](https://www.codacy.com/gh/BAMWelDX/weldx)
-[![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/BAMWelDX/weldx/?ref=repository-badge)
-[![Documentation](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest)
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.5565185.svg)](https://doi.org/10.5281/zenodo.5565185)
-[![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
-[![package builds](https://github.com/BAMWelDX/weldx/actions/workflows/build_pkg.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/build_pkg.yml)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![CF](https://anaconda.org/conda-forge/weldx/badges/version.svg)](https://anaconda.org/conda-forge/weldx)
+[![Documentation](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest)
+[![builds](https://github.com/BAMWelDX/weldx/actions/workflows/build.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/build.yml)
 [![documentation builds](https://github.com/BAMWelDX/weldx/actions/workflows/docs.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/docs.yml)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/BAMWelDX/weldx/master.svg)](https://results.pre-commit.ci/latest/github/BAMWelDX/weldx/master)
 [![pytest](https://github.com/BAMWelDX/weldx/actions/workflows/pytest.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/pytest.yml)
-[![static analysis](https://github.com/BAMWelDX/weldx/actions/workflows/static_analysis.yml/badge.svg)](https://github.com/BAMWelDX/weldx/actions/workflows/static_analysis.yml)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/BAMWelDX/weldx/master.svg)](https://results.pre-commit.ci/latest/github/BAMWelDX/weldx/master)
+[![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
 
 ## Overview
 
