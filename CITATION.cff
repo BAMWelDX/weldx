@@ -3,8 +3,8 @@
 cff-version: 1.2.0
 title: "weldx: The welding data exchange format"
 type: software
-version: v0.8.1
-date-released: 2026-08-21
+version: v0.8.2
+date-released: 2026-10-09
 license: BSD-3-Clause
 authors:
   - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
