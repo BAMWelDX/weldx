@@ -721,7 +721,7 @@ def xr_interp_orientation_in_time(
         raise ValueError("Invalid time format for interpolation.")
 
     # extract intersecting times and add time range boundaries of the data set
-    times_ds_limits = pd.Index([time_da.min(), time_da.max()])
+    times_ds_limits = time_da[[0, -1]]
     times_union = time.union(times_ds_limits)
     times_intersect = times_union[
         (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])
@@ -729,8 +729,14 @@ def xr_interp_orientation_in_time(
 
     # interpolate rotations in the intersecting time range
     rotations_key = Rot.from_matrix(da.transpose(..., "time", "c", "v").data)
-    times_key = time_da.view(np.int64)
-    rotations_interp = Slerp(times_key, rotations_key)(times_intersect.view(np.int64))
+    # Use a common unit and origin before SciPy converts the times to floats.
+    # Raw integer views can have different units after pandas index operations.
+    time_origin = time_da[0]
+    times_key = (time_da - time_origin).to_numpy(dtype="timedelta64[ns]").view(np.int64)
+    times_interp = (
+        (times_intersect - time_origin).to_numpy(dtype="timedelta64[ns]").view(np.int64)
+    )
+    rotations_interp = Slerp(times_key, rotations_key)(times_interp)
     da = xr_3d_matrix(rotations_interp.as_matrix(), times_intersect)
 
     # use interp_like to select original time values and correctly fill time dimension
@@ -771,6 +777,10 @@ def xr_interp_coordinates_in_time(
     times = Time(times).as_pandas_index()
     time_ref = da.weldx.time_ref
     da = da.weldx.time_ref_unset()
+    # xarray interpolation requires matching units for source and target indexes.
+    time_dtype = np.result_type(da.time.dtype, times.dtype)
+    da = da.assign_coords(time=da.time.astype(time_dtype))
+    times = times.astype(time_dtype)
     da = xr_interp_like(
         da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
     )

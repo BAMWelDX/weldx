@@ -1,5 +1,12 @@
 # Release Notes
 
+## 0.8.2 (09.10.2026)
+
+### Fixes
+
+- fix `LocalCoordinateSystem.interp_time` range errors and incorrect position values when source and query timestamps use different resolutions \[{pull}`1048`\]
+- preserve nanosecond precision when interpolating orientations at absolute timestamps \[{pull}`1048`\]
+
 ## 0.8.1 (21.08.2026)
 
 The default branch on GitHub has been renamed to `main`.
