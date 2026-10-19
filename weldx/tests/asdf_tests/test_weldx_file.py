@@ -1,11 +1,12 @@
 """Tests for the WeldxFile class."""
 
+import contextlib
 import itertools
 import os
 import pathlib
 import shutil
 import tempfile
-from io import BytesIO
+from io import BytesIO, IOBase
 
 import asdf
 import numpy as np
@@ -23,62 +24,20 @@ from weldx.util import compare_nested
 SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 
 
-class _ReadOnlyFile:
-    """Simulate a read-only file."""
-
-    def __init__(self, tmpdir):
-        fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
-        with open(fn, "wb") as fh:
-            asdf.AsdfFile(tree=dict(hi="there")).write_to(fh)
-        self.mode = "rb"
-        self.file_read_only = open(fn, mode=self.mode)  # noqa: SIM115
-
-    def read(self, *args, **kwargs):
-        return self.file_read_only.read(*args, **kwargs)
-
-    def readline(self, limit=-1):
-        return self.file_read_only.readline(limit)
-
-    @staticmethod
-    def readable():
-        return True
-
-
-class _WritableFile:
-    """Example of a class implementing SupportsFileReadWrite."""
-
-    def __init__(self):
-        self.to_wrap = BytesIO()
-
-    def read(self, *args, **kwargs):
-        return self.to_wrap.read(*args, **kwargs)
-
-    def readline(self, *args, **kwargs):
-        return self.to_wrap.readline(*args, **kwargs)
-
-    def write(self, *args, **kwargs):
-        return self.to_wrap.write(*args, **kwargs)
-
-    def tell(self):
-        return self.to_wrap.tell()
-
-    def seek(self, *args, **kwargs):
-        return self.to_wrap.seek(*args, **kwargs)
-
-    def flush(self):
-        """Simulate flush by rewinding to the beginning of the buffer."""
-        self.seek(0)
+@contextlib.contextmanager
+def file_object(tmpdir, mode):
+    fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+    # create a simple test asdf file
+    asdf.AsdfFile({"hi": "there"}).write_to(fn)
+    with open(fn, mode=mode) as f:
+        yield f
 
 
 def test_protocol_check(tmpdir):
     """Instance checks."""
-    assert isinstance(_WritableFile(), SupportsFileReadWrite)
+    with file_object(tmpdir, "wb") as f:
+        assert isinstance(f, SupportsFileReadWrite)
     assert isinstance(BytesIO(), SupportsFileReadWrite)
-
-    # real file:
-    f = tempfile.mktemp(dir=tmpdir)
-    with open(f, "w") as fh:
-        assert isinstance(fh, SupportsFileReadWrite)
 
 
 @pytest.fixture(scope="class")
@@ -176,24 +135,23 @@ class TestWeldXFile:
             assert fh["another"] == "entry"
 
     @staticmethod
-    def test_create_writable_protocol():
+    def test_create_writable_protocol(tmpdir):
         """Interface test for writable files."""
-        f = _WritableFile()
-        WeldxFile(f, tree=dict(test="yes"), mode="rw")
-        new_file = TestWeldXFile.make_copy(f.to_wrap)
-        assert WeldxFile(new_file)["test"] == "yes"
+        with file_object(tmpdir, "rb+") as f:
+            WeldxFile(f, tree=dict(test="yes"), mode="rw")
+            new_file = TestWeldXFile.make_copy(f)
+            assert WeldxFile(new_file)["test"] == "yes"
 
     @staticmethod
     def test_create_readonly_protocol(tmpdir):
         """A read-only file should be supported by ASDF."""
-        f = _ReadOnlyFile(tmpdir)
-        WeldxFile(f)
+        with file_object(tmpdir, "rb") as f:
+            WeldxFile(f)
 
     @staticmethod
     def test_read_only_raise_on_write(tmpdir):
         """Read-only files cannot be written to."""
-        f = _ReadOnlyFile(tmpdir)
-        with pytest.raises(ValueError):
+        with file_object(tmpdir, "rb") as f, pytest.raises(ValueError):
             WeldxFile(f, mode="rw")
 
     @staticmethod
@@ -221,7 +179,7 @@ class TestWeldXFile:
         buff = BytesIO()
         if isinstance(fh, WeldxFile):
             fh.write_to(buff)
-        elif isinstance(fh, BytesIO):
+        elif isinstance(fh, IOBase):
             fh.seek(0)
             buff.write(fh.read())
         buff.seek(0)
